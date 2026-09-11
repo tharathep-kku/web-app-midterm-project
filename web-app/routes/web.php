@@ -12,3 +12,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/search', [ItemController::class, 'index'])->name('search.index');
 
 require __DIR__.'/settings.php';
+require __DIR__.'/agency_admin.php';
