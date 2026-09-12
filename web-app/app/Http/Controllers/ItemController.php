@@ -9,6 +9,57 @@ use App\Models\FinderUser;
 
 class ItemController extends Controller
 {
+    public function home(Request $request)
+    {
+        $from = $request->input('from') ?? '';
+        $to = $request->input('to') ?? '';
+
+        $query = Item::query();
+
+        $sixMonthsAgo = date('Y-m-d', strtotime('-6 months'));
+
+        $query->where(function ($q) use ($sixMonthsAgo) {
+            $q->where('status', '!=', 'ได้รับคืนแล้ว')
+                ->orWhereNull('returned_date')
+                ->orWhere('returned_date', '>', $sixMonthsAgo);
+        });
+
+        if ($from !== '') {
+            $query->where('event_date', '>=', $from);
+        }
+
+        if ($to !== '') {
+            $query->where('event_date', '<=', $to);
+        }
+
+        $items = $query->orderBy('event_date', 'desc')->get();
+
+        foreach ($items as $item) {
+            $itemCategory = Category::find($item->category_id);
+            $item->category_name = $itemCategory ? $itemCategory->name : 'อื่นๆ';
+        }
+
+        return view('home', compact('items', 'from', 'to'));
+    }
+
+    public function archive()
+    {
+        $sixMonthsAgo = date('Y-m-d', strtotime('-6 months'));
+
+        $items = Item::where('status', 'ได้รับคืนแล้ว')
+            ->whereNotNull('returned_date')
+            ->where('returned_date', '<=', $sixMonthsAgo)
+            ->orderBy('returned_date', 'desc')
+            ->get();
+
+        foreach ($items as $item) {
+            $itemCategory = Category::find($item->category_id);
+            $item->category_name = $itemCategory ? $itemCategory->name : 'อื่นๆ';
+        }
+
+        return view('archive', compact('items'));
+    }
+
     public function index(Request $request)
     {
         // ถ้าฟอร์มยังไม่ถูก submit จะไม่มี key "searched" ติดมากับ query string เลย

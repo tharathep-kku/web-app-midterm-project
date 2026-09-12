@@ -15,11 +15,7 @@
     <ul>
         <li>มีหลักฐานยืนยันการส่งมอบทุกครั้ง</li>
     </ul>
-    <a href="index.html">Home</a> /
-    <a href="login.html">Login</a> /
-    <a href="create.html">Report a lost item</a> /
-    <a href="{{ route('search.index') }}">Search</a> /
-    <a href="profile.html">Profile</a>
+    @include('partials.menu')
     <br><br>
     <hr>
 
