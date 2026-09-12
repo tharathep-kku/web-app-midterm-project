@@ -79,4 +79,11 @@ class ItemController extends Controller
             'end_date'
         ));
     }
+    public function show(Item $item)
+    {
+        $item->category_name = optional(Category::find($item->category_id))->name ?? 'อื่นๆ';
+        $item->reporter_name = optional(FinderUser::find($item->user_id))->fullname ?? 'ไม่ทราบชื่อ';
+    
+        return view('item', compact('item'));
+    }
 }
