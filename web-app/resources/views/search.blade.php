@@ -15,11 +15,11 @@
     <ul>
         <li>มีหลักฐานยืนยันการส่งมอบทุกครั้ง</li>
     </ul>
-    <a href="index.html">Home</a> /
-    <a href="login.html">Login</a> /
-    <a href="create.html">Report a lost item</a> /
+    <a href="{{ route('home') }}">Home</a> /
+    <a href="{{ route('login') }}">Login</a> /
+    <a href="{{ route('create.item') }}">Report a lost item</a> /
     <a href="{{ route('search.index') }}">Search</a> /
-    <a href="profile.html">Profile</a>
+    <a href="{{ route('profile.edit') }}">Profile</a>
     <br><br>
     <hr>
 
@@ -104,7 +104,7 @@
                         <td>{{ $item->event_date }}</td>
                         <td>{{ $item->status }}</td>
                         <td style="text-align: center;">
-                            <a href="/items/{{ $item->id }}"><button type="button">More</button></a>
+                            <a href="{{ route('item.show', $item->id) }}"><button type="button">More</button></a>
                         </td>
                     </tr>
                 @empty
