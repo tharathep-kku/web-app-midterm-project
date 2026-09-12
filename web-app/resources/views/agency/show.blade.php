@@ -9,13 +9,8 @@
 
 <body>
     <h1><strong>KKU Return: lost and found</strong></h1>
+    @include('partials.menu')
     <p>รายละเอียดโพสต์ของ <strong>{{ $agency->fullname }}</strong></p>
-
-    <a href="index.html">Home</a> /
-    <a href="{{ route('search.index') }}">Search</a> /
-    <a href="{{ route('agency.index') }}">หน่วยงาน</a> /
-    <a href="{{ route('admin.index') }}">แอดมิน</a>
-    <br><br>
     <hr>
 
     @if (session('success'))

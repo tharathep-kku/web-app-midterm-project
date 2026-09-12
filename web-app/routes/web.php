@@ -13,5 +13,9 @@ Route::get('/search', [ItemController::class, 'index'])->name('search.index');
 
 Route::get('/archive', [ItemController::class, 'archive'])->name('archive.index');
 
+Route::get('/posts/create', [ItemController::class, 'create'])->name('posts.create');
+
+Route::post('/posts', [ItemController::class, 'store'])->name('posts.store');
+
 require __DIR__.'/settings.php';
 require __DIR__.'/agency_admin.php';

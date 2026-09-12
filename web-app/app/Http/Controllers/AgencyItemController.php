@@ -84,77 +84,59 @@ class AgencyItemController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $agency = $this->currentAgency();
+{
+    $agency = $this->currentAgency();
 
-        if ($agency === null) {
-            return redirect()->route('agency.index')->with('error', 'กรุณาเลือกบัญชีหน่วยงานก่อนโพสต์');
-        }
-
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'category_id' => ['required', 'integer'],
-            'type' => ['required', 'string'],
-            'description' => ['nullable', 'string'],
-            'location' => ['required', 'string', 'max:255'],
-            'place_point' => ['required', 'string', 'max:255'],
-            'event_date' => ['required', 'date'],
-            'image_url' => ['nullable', 'string', 'max:255'],
-            'evidence_url' => ['required', 'string', 'max:255'],
-            'evidence_note' => ['required', 'string'],
-        ]);
-
-        // หมวดหมู่ต้องมีอยู่จริงในตาราง categories
-        if (Category::find($validated['category_id']) === null) {
-            return redirect()->back()->withInput()->with('error', 'ไม่พบหมวดหมู่ที่เลือก');
-        }
-
-        if ($validated['type'] !== 'found' && $validated['type'] !== 'lost') {
-            return redirect()->back()->withInput()->with('error', 'ประเภทของประกาศไม่ถูกต้อง');
-        }
-
-        $item = new Item;
-        $item->user_id = $agency->id;
-        $item->category_id = $validated['category_id'];
-        $item->type = $validated['type'];
-        $item->title = $validated['title'];
-        $item->description = $validated['description'];
-        $item->location = $validated['location'];
-        $item->place_point = $validated['place_point'];
-        $item->event_date = $validated['event_date'];
-        $item->image_url = $validated['image_url'];
-        $item->evidence_url = $validated['evidence_url'];
-        $item->evidence_note = $validated['evidence_note'];
-        $item->status = 'ยังไม่พบเจ้าของ';
-        // โพสต์ของหน่วยงานต้องรอแอดมินอนุมัติก่อนถึงจะขึ้นหน้าเว็บ
-        $item->approval_status = 'รออนุมัติ';
-        $item->save();
-
-        return redirect()->route('agency.show', $item->id)->with('success', 'ส่งโพสต์ให้แอดมินตรวจสอบแล้ว');
+    if ($agency === null) {
+        return redirect()->route('agency.index')->with('error', 'กรุณาเลือกบัญชีหน่วยงานก่อนโพสต์');
     }
 
-    // รายละเอียดโพสต์ พร้อมหลักฐานยืนยันและจุดสถานที่
-    public function show(int $id)
-    {
-        $agency = $this->currentAgency();
+    $validated = $request->validate([
+        'title' => ['required', 'string', 'max:255'],
+        'category_id' => ['required', 'integer'],
+        'type' => ['required', 'string'],
+        'description' => ['nullable', 'string'],
+        'location' => ['required', 'string', 'max:255'],
+        'place_point' => ['required', 'string', 'max:255'],
+        'event_date' => ['required', 'date'],
+        'image_url' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+        'evidence_url' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+        'evidence_note' => ['required', 'string'],
+    ]);
 
-        if ($agency === null) {
-            return redirect()->route('agency.index')->with('error', 'กรุณาเลือกบัญชีหน่วยงานก่อน');
-        }
-
-        $item = Item::findOrFail($id);
-
-        // หน่วยงานดูได้เฉพาะโพสต์ของตัวเองเท่านั้น
-        if ($item->user_id !== $agency->id) {
-            return redirect()->route('agency.index')->with('error', 'ไม่สามารถดูโพสต์ของหน่วยงานอื่นได้');
-        }
-
-        $itemCategory = Category::find($item->category_id);
-        $item->category_name = $itemCategory ? $itemCategory->name : 'อื่นๆ';
-
-        $approver = $item->approved_by ? FinderUser::find($item->approved_by) : null;
-        $approver_name = $approver ? $approver->fullname : '-';
-
-        return view('agency.show', compact('agency', 'item', 'approver_name'));
+    // หมวดหมู่ต้องมีอยู่จริงในตาราง categories
+    if (Category::find($validated['category_id']) === null) {
+        return redirect()->back()->withInput()->with('error', 'ไม่พบหมวดหมู่ที่เลือก');
     }
+
+    if ($validated['type'] !== 'found' && $validated['type'] !== 'lost') {
+        return redirect()->back()->withInput()->with('error', 'ประเภทของประกาศไม่ถูกต้อง');
+    }
+
+    $imagePath = null;
+    if ($request->hasFile('image_url')) {
+        $imagePath = 'storage/' . $request->file('image_url')->store('items', 'public');
+    }
+
+    $evidencePath = 'storage/' . $request->file('evidence_url')->store('evidence', 'public');
+
+    $item = new Item;
+    $item->user_id = $agency->id;
+    $item->category_id = $validated['category_id'];
+    $item->type = $validated['type'];
+    $item->title = $validated['title'];
+    $item->description = $validated['description'];
+    $item->location = $validated['location'];
+    $item->place_point = $validated['place_point'];
+    $item->event_date = $validated['event_date'];
+    $item->image_url = $imagePath;
+    $item->evidence_url = $evidencePath;
+    $item->evidence_note = $validated['evidence_note'];
+    $item->status = 'ยังไม่พบเจ้าของ';
+    // โพสต์ของหน่วยงานต้องรอแอดมินอนุมัติก่อนถึงจะขึ้นหน้าเว็บ
+    $item->approval_status = 'รออนุมัติ';
+    $item->save();
+
+    return redirect()->route('agency.show', $item->id)->with('success', 'ส่งโพสต์ให้แอดมินตรวจสอบแล้ว');
+}
 }

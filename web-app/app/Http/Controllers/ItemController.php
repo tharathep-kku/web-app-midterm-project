@@ -62,9 +62,6 @@ class ItemController extends Controller
 
     public function index(Request $request)
     {
-        // ถ้าฟอร์มยังไม่ถูก submit จะไม่มี key "searched" ติดมากับ query string เลย
-        // (ใช้ hidden input ค่าคงที่ "1" แทนการเช็ค item_name เพราะถ้าค้นหาแบบเว้นทุกช่องว่าง
-        // ค่าว่างจะถูกแปลงเป็น null แล้วหายไปจากลิงก์เปลี่ยนหน้า ทำให้ผลค้นหาหายไปตอนกด Next)
         $searched = $request->has('searched');
 
         $item_name = trim($request->input('item_name') ?? '');
@@ -129,5 +126,51 @@ class ItemController extends Controller
             'start_date',
             'end_date'
         ));
+    }
+
+    // เปิดหน้าฟอร์มแจ้งของหาย/พบของ
+    public function create()
+    {
+        $categories = Category::all();
+        $locations = Item::select('location')->distinct()->orderBy('location')->pluck('location');
+
+        return view('create', compact('categories', 'locations'));
+    }
+
+    // บันทึกข้อมูลโพสต์ลงฐานข้อมูล
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'postType'     => 'required|in:found,lost',
+            'itemName'     => 'required|string|max:255',
+            'category'     => 'required|exists:categories,id',
+            'location'     => 'required|string|max:255',
+            'date'         => 'required|date',
+            'description'  => 'nullable|string',
+            'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'reporterName' => 'nullable|string|max:255',
+            'phone'        => 'nullable|string|max:20',
+        ]);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = 'storage/' . $request->file('image')->store('items', 'public');
+        }
+
+        Item::create([
+            'user_id'        => null, // โพสต์จากบุคคลทั่วไป ไม่ผูกกับหน่วยงาน
+            'category_id'    => $validated['category'],
+            'type'           => $validated['postType'],
+            'title'          => $validated['itemName'],
+            'description'    => $validated['description'] ?? null,
+            'location'       => $validated['location'],
+            'event_date'     => $validated['date'],
+            'image_url'      => $imagePath,
+            'status'         => $validated['postType'] === 'found' ? 'พบแล้ว' : 'หาย',
+            'reporter_name'  => $validated['reporterName'] ?? null,
+            'reporter_phone' => $validated['phone'] ?? null,
+        ]);
+
+        return redirect()->route('posts.create')->with('success', 'บันทึกข้อมูลการแจ้งสำเร็จเรียบร้อยแล้ว');
     }
 }

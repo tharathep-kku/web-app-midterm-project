@@ -9,15 +9,8 @@
 
 <body>
     <h1><strong>KKU Return: lost and found</strong></h1>
+    @include('partials.menu')
     <p>ส่วนของหน่วยงาน สำหรับโพสต์ของที่เก็บได้ พร้อมหลักฐานยืนยันและจุดสถานที่</p>
-
-    <a href="index.html">Home</a> /
-    <a href="login.html">Login</a> /
-    <a href="create.html">Report a lost item</a> /
-    <a href="{{ route('search.index') }}">Search</a> /
-    <a href="{{ route('agency.index') }}">หน่วยงาน</a> /
-    <a href="{{ route('admin.index') }}">แอดมิน</a>
-    <br><br>
     <hr>
 
     @if (session('success'))
