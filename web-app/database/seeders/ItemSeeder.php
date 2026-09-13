@@ -9,7 +9,7 @@ class ItemSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('items')->insert([
+        $items = [
             [
                 'user_id' => 1,
                 'category_id' => 1,
@@ -164,6 +164,17 @@ class ItemSeeder extends Seeder
                 'image_url' => 'images/items/wallet_red.png',
                 'status' => 'รอแอดมินยืนยัน',
             ],
-        ]);
+        ];
+
+        $returnUnitCount = DB::table('return_units')->count();
+
+        foreach ($items as $index => &$item) {
+            $item['return_unit_id'] = $returnUnitCount > 0
+                ? ($index % $returnUnitCount) + 1
+                : null;
+        }
+        unset($item);
+
+        DB::table('items')->insert($items);
     }
 }

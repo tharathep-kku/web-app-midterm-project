@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use App\Models\Item;
 use App\Models\Category;
-use App\Models\FinderUser;
 
 class ItemController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         // ถ้าฟอร์มยังไม่ถูก submit จะไม่มี key "searched" ติดมากับ query string เลย
         // (ใช้ hidden input ค่าคงที่ "1" แทนการเช็ค item_name เพราะถ้าค้นหาแบบเว้นทุกช่องว่าง
@@ -52,15 +52,10 @@ class ItemController extends Controller
                 $query->where('event_date', '<=', $end_date);
             }
 
-            $items = $query->orderBy('event_date', 'desc')->paginate(5)->withQueryString();
-
-            foreach ($items as $item) {
-                $itemCategory = Category::find($item->category_id);
-                $item->category_name = $itemCategory ? $itemCategory->name : 'อื่นๆ';
-
-                $reporter = FinderUser::find($item->user_id);
-                $item->reporter_name = $reporter ? $reporter->fullname : 'ไม่ทราบชื่อ';
-            }
+            $items = $query->with(['category', 'reporter'])
+                ->orderBy('event_date', 'desc')
+                ->paginate(5)
+                ->withQueryString();
         }
 
         $categories = Category::all();
@@ -79,11 +74,10 @@ class ItemController extends Controller
             'end_date'
         ));
     }
-    public function show(Item $item)
+    public function show(Item $item): View
     {
-        $item->category_name = optional(Category::find($item->category_id))->name ?? 'อื่นๆ';
-        $item->reporter_name = optional(FinderUser::find($item->user_id))->fullname ?? 'ไม่ทราบชื่อ';
-    
+        $item->load(['category', 'reporter', 'returnUnit']);
+
         return view('item', compact('item'));
     }
 }

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search - KKU Return</title>
+</head>
+
+<body>
+    <h1><strong>KKU Return: lost and found</strong></h1>
+    <p>Welcome to KKU Return ที่จะช่วยคุณตามหาของสำคัญ หรือเจ้าของที่พัดพรากไปเอง</p>
+    <p>ศูนย์รวมแจ้งของหายและแจ้งพบของภายในมหาวิทยาลัยขอนแก่น ปลอดภัย ตรวจสอบได้ ลดความเสี่ยงจากการแอบอ้าง</p>
+
+    <ul>
+        <li>มีหลักฐานยืนยันการส่งมอบทุกครั้ง</li>
+    </ul>
+    <a href="index.html">Home</a> /
+    <a href="login.html">Login</a> /
+    <a href="create.html">Report a lost item</a> /
+    <a href="search.html">Search</a> /
+    <a href="profile.html">Profile</a>
+    <br><br>
+    <hr>
+
+    <h2><strong>Search</strong></h2>
+
+    <form id="searchForm">
+
+
+        <label for="item_name">ชื่อสิ่งของ: </label><br>
+        <input type="text" id="item_name" name="item_name" placeholder="เช่น กระเป๋าตังค์สีน้ำตาล"><br><br>
+
+        <label for="category">หมวดหมู่:</label>
+        <select id="category" required>
+            <option disabled selected>-- เลือกหมวดหมู่ --</option>
+            <option>กุญแจ</option>
+            <option>กระเป๋าตังค์</option>
+            <option>เครื่องประดับ</option>
+            <option>เอกสาร</option>
+            <option>อุปกรณ์อิเล็กทรอนิกส์</option>
+            <option>อื่นๆ</option>
+        </select>
+        <br><br>
+
+        <label for="location">สถานที่หาย:</label>
+        <br>
+        <input type="text" id="location" placeholder="เช่น อาคารวิทยวิภาส">
+        <br><br>
+
+        <label for="description">รายละเอียดเพิ่มเติม:</label>
+        <br>
+        <textarea id="description" placeholder="อธิบายลักษณะของสิ่งของ..."></textarea>
+        <br><br>
+
+        <label>ช่วงวันที่พบ/วันที่หาย: </label><br>
+        ตั้งแต่ <input type="date" name="start_date" id="start_date">
+        ถึง <input type="date" name="end_date" id="end_date"><br><br>
+
+        <button type="submit" class="btn">ค้นหา</button>
+    </form>
+
+    <br>
+
+    <!-- ส่วนแสดงผลการค้นหา (ซ่อนไว้ก่อน จะแสดงเมื่อกดค้นหา) -->
+    <div id="resultsContainer" style="display: none;">
+        <h3><strong>ผลการค้นหา:</strong></h3>
+
+        <!-- รูปแบบตารางเหมือนหน้า home.html -->
+        <table border="1" cellspacing="2" cellpadding="0">
+            <thead>
+                <tr>
+                    <th>สิ่งของ</th>
+                    <th>ภาพของหาย</th>
+                    <th>หมวดหมู่</th>
+                    <th>สถานที่พบ</th>
+                    <th>ชื่อผู้ใช้</th>
+                    <th>วันที่พบ</th>
+                    <th>สถานะ</th>
+                    <th>ติดต่อ</th>
+                </tr>
+            </thead>
+            <tbody id="searchResultsBody" align="center">
+                <!-- ข้อมูลจะถูกนำมาใส่ตรงนี้ด้วย JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <br>
+    <hr>
+    <footer>
+        <p>*หมายเหตุ: แพลตฟอร์มนี้เป็นเพียงพื้นที่สาธารณะสำหรับเชื่อมโยงข้อมูลฟรี
+            ไม่มีส่วนเกี่ยวข้องหรือรับประกันความถูกต้องของข้อมูล การส่งมอบสิ่งของ หรือการธุรกรรมใดๆ ระหว่างผู้ใช้งาน</p>
+
+        <strong>ช่องทางติดต่อ</strong>
+        <p>หากคุณมีข้อสงสัยหรือคำถามเกี่ยวกับเว็บไซต์ KKU Return โปรดติดต่อเราผ่านช่องทางดังต่อไปนี้:</p>
+        <ul>
+            <li>อีเมล: kkureturn01@kku.ac.th</li>
+            <li>โทรศัพท์: 012-345-6789</li>
+            <li>Facebook: KKU Return</li>
+        </ul>
+    </footer>
+
+    <!-- สคริปต์จำลองระบบค้นหาและสร้างตาราง -->
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function (e) {
+            e.preventDefault(); // ป้องกันการรีเฟรชหน้า
+
+            const searchName = document.getElementById('item_name').value.toLowerCase();
+            const searchCategory = document.getElementById('category').value;
+
+            // 1. ข้อมูลจำลองที่มีอยู่เดิม (เพื่อให้ตรงกับ item.html)
+            const staticItems = [
+                { id: 'static_0', name: 'กุญแจรถเก๋งสีดำ', image: '<img src="carkey.png" alt="carkey" width="100">', category: 'กุญแจรถ', location: 'อาคารวิทยวิภาส / อาคารที่ 9', reporter: 'สหรัฐ งามเริ่ด', date: '20/08/2026', status: 'ยังไม่พบเจ้าของ' },
+                { id: 'static_1', name: 'กระเป๋าตังค์สีน้ำตาล', image: '<img src="money.png" alt="money" width="100">', category: 'กระเป๋าตังค์', location: 'อาคารพจน์ สารสิน', reporter: 'สหรัฐ งามเริ่ด', date: '03/08/2026', status: 'ได้รับคืนแล้ว' },
+                { id: 'static_2', name: 'กำไลข้อมือ', image: '<img src="ring.png" alt="ring" width="100">', category: 'เครื่องประดับ', location: 'ศูนย์ประชุมอเนกประสงค์กาญจนาภิเษก', reporter: 'สหรัฐ งามเริ่ด', date: '19/08/2026', status: 'ได้รับคืนแล้ว' }
+            ];
+
+            // 2. ดึงข้อมูลที่อาจถูกสร้างขึ้นมาใหม่จากหน้า create.html
+            const localData = JSON.parse(localStorage.getItem('kkuItems')) || [];
+            const localItems = localData.map((item, index) => {
+                return {
+                    id: index.toString(), // ID สำหรับของที่เพิ่งสร้างใหม่
+                    name: item.name,
+                    image: item.image,
+                    category: item.category,
+                    location: item.location,
+                    reporter: item.reporter,
+                    date: item.date,
+                    status: item.status
+                };
+            });
+
+            // รวมข้อมูลทั้งสองแหล่งเข้าด้วยกัน
+            const allItems = [...staticItems, ...localItems];
+
+            // 3. กรองข้อมูล (Filter)
+            const filteredItems = allItems.filter(item => {
+                let match = true;
+
+                // กรองจากชื่อ (ถ้าพิมพ์คำค้นหา)
+                if (searchName && !item.name.toLowerCase().includes(searchName)) {
+                    match = false;
+                }
+
+                // กรองจากหมวดหมู่ (ถ้าเลือก)
+                if (searchCategory && item.category !== searchCategory) {
+                    match = false;
+                }
+
+                return match;
+            });
+
+            // 4. แสดงผลลัพธ์ลงในตาราง
+            const tbody = document.getElementById('searchResultsBody');
+            tbody.innerHTML = ''; // ล้างข้อมูลเก่าออกก่อน
+
+            if (filteredItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">ไม่พบสิ่งของที่ตรงกับเงื่อนไขการค้นหา</td></tr>';
+            } else {
+                filteredItems.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${item.name}</td>
+                        <td style="text-align: center;">${item.image}</td>
+                        <td>${item.category}</td>
+                        <td>${item.location}</td>
+                        <td>${item.reporter}</td>
+                        <td>${item.date}</td>
+                        <td>${item.status}</td>
+                        <td style="text-align: center;">
+                            <a href="item.html?id=${item.id}"><button type="button">More</button></a>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            // แสดงส่วนของผลลัพธ์
+            document.getElementById('resultsContainer').style.display = 'block';
+        });
+    </script>
+</body>
+
+</html>

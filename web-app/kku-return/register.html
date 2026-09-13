@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - KKU Lost &amp; Found</title>
+</head>
+
+<body>
+    <h1><strong>KKU Return: lost and found</strong></h1>
+    <p>Welcome to KKU Return ที่จะช่วยคุณตามหาของสำคัญ หรือเจ้าของที่พัดพรากไปเอง</p>
+    <p>ศูนย์รวมแจ้งของหายและแจ้งพบของภายในมหาวิทยาลัยขอนแก่น ปลอดภัย ตรวจสอบได้ ลดความเสี่ยงจากการแอบอ้าง</p>
+
+    <ul>
+        <li>มีหลักฐานยืนยันการส่งมอบทุกครั้ง</li>
+    </ul>
+    <a href="index.html">Home</a> /
+    <a href="login.html">Login</a> /
+    <a href="create.html">Report a lost item</a> /
+    <a href="search.html">Search</a> /
+    <a href="profile.html">Profile</a>
+    <br><br>
+    <hr>
+
+    <main>
+        <h2>Register</h2>
+        <h3>สร้างบัญชีใหม่</h3>
+        <p>กรอกข้อมูลของคุณเพื่อเริ่มใช้งานระบบตามหาของหาย มข.</p>
+
+        <form id="registerForm" action="#" method="post">
+            <p>
+                <label for="mail">อีเมล: </label><br>
+                <input type="email" id="mail" name="mail" placeholder="name@kku.ac.th"
+                    pattern="[a-zA-Z0-9._%+-]+@kku\.ac\.th" title="กรุณาใช้อีเมลของมหาวิทยาลัย (@kku.ac.th) เท่านั้น"
+                    required><br>
+            </p>
+
+            <p>
+                <label for="name">ชื่อผู้ใช้: </label><br>
+                <input type="text" id="name" name="name" placeholder="ชื่อผู้ใช้งาน" required><br>
+
+            </p>
+
+            <p>
+                <label for="name">ชื่อ-นามสกุล: </label><br>
+                <input type="text" id="name" name="name" placeholder="ชื่อ-นามสกุล" required><br>
+            </p>
+
+            <p>
+                <label for="password">รหัสผ่าน: </label><br>
+                <input type="password" id="password" name="password" placeholder="••••••••" minlength="8"
+                    title="รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร" required><br>
+                <small style="color: #666;">* ต้องมีความยาวอย่างน้อย 8 ตัวอักษร
+                    (ประกอบด้วยตัวอักษรและตัวเลขรวมกันได้)</small>
+            </p>
+
+            <p>
+                <label for="password2">ยืนยันรหัสผ่าน: </label><br>
+                <input type="password" id="password2" name="password2" placeholder="••••••••" minlength="8"
+                    required><br>
+                <small style="color: #666;">* กรุณากรอกรหัสผ่านให้ตรงกับช่องด้านบน</small>
+            </p>
+
+            <p>
+                <label for="tel">เบอร์โทรศัพท์: </label><br>
+                <input type="tel" id="tel" name="tel" placeholder="0XX-XXX-XXXX" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+                    title="กรุณากรอกในรูปแบบ 0XX-XXX-XXXX (เช่น 081-234-5678)" required><br>
+                <small style="color: #666;">* ต้องมีขีดกลาง เช่น 081-234-5678</small>
+            </p>
+
+            <p>
+                <button type="submit">ยืนยัน</button>
+            </p>
+        </form>
+
+        <p>มีบัญชีอยู่แล้ว? <a href="login.html">เข้าสู่ระบบ</a></p>
+    </main>
+
+    <hr>
+    <footer>
+        <p>*หมายเหตุ: แพลตฟอร์มนี้เป็นเพียงพื้นที่สาธารณะสำหรับเชื่อมโยงข้อมูลฟรี
+            ไม่มีส่วนเกี่ยวข้องหรือรับประกันความถูกต้องของข้อมูล การส่งมอบสิ่งของ หรือการธุรกรรมใดๆ ระหว่างผู้ใช้งาน</p>
+
+        <strong>ช่องทางติดต่อ</strong>
+        <p>หากคุณมีข้อสงสัยหรือคำถามเกี่ยวกับเว็บไซต์ KKU Return โปรดติดต่อเราผ่านช่องทางดังต่อไปนี้:</p>
+        <ul>
+            <li>อีเมล: kkureturn01@kku.ac.th</li>
+            <li>โทรศัพท์: 012-345-6789</li>
+            <li>Facebook: KKU Return</li>
+        </ul>
+    </footer>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const pass = document.getElementById('password').value;
+            const pass2 = document.getElementById('password2').value;
+
+            // ตรวจสอบว่ารหัสผ่าน 2 ช่องตรงกันหรือไม่
+            if (pass !== pass2) {
+                alert('รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน กรุณาลองใหม่');
+                return;
+            }
+
+            // บันทึกข้อมูลผู้ใช้
+            const userData = {
+                mail: document.getElementById('mail').value,
+                name: document.getElementById('name').value,
+                password: pass,
+                tel: document.getElementById('tel').value
+            };
+
+            localStorage.setItem('kkuUser', JSON.stringify(userData));
+            alert('ลงทะเบียนสำเร็จ! เข้าสู่ระบบเพื่อใช้งาน');
+            window.location.href = 'profile.html'; // จำลองการเข้าสู่ระบบแล้วไปหน้า profile
+        });
+    </script>
+</body>
+
+</html>

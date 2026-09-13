@@ -17,8 +17,9 @@
     </ul>
     <a href="{{ route('home') }}">Home</a> /
     <a href="{{ route('login') }}">Login</a> /
-    <a href="{{ route('create.item') }}">Report a lost item</a> /
+    <a href="#">Report a lost item</a> /
     <a href="{{ route('search.index') }}">Search</a> /
+    <a href="{{ route('dashboard') }}">Dashboard</a> /
     <a href="{{ route('profile.edit') }}">Profile</a>
     <br><br>
     <hr>
@@ -98,9 +99,9 @@
                                 -
                             @endif
                         </td>
-                        <td>{{ $item->category_name }}</td>
+                        <td>{{ $item->category?->name ?? 'อื่นๆ' }}</td>
                         <td>{{ $item->location }}</td>
-                        <td>{{ $item->reporter_name }}</td>
+                        <td>{{ $item->reporter?->fullname ?? 'ไม่ทราบชื่อ' }}</td>
                         <td>{{ $item->event_date }}</td>
                         <td>{{ $item->status }}</td>
                         <td style="text-align: center;">

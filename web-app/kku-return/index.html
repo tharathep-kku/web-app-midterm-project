@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="นายพีรพงษ์ ทองฤทธิ์">
+    <title>Home Page - KKU Lost &amp; Found</title>
+    <!--673380526-6-->
+</head>
+
+<body>
+    <h1><strong>KKU Return: lost and found</strong></h1>
+    <p>Welcome to KKU Return ที่จะช่วยคุณตามหาของสำคัญ หรือเจ้าของที่พัดพรากไปเอง</p>
+    <p>ศูนย์รวมแจ้งของหายและแจ้งพบของภายในมหาวิทยาลัยขอนแก่น ปลอดภัย ตรวจสอบได้ ลดความเสี่ยงจากการแอบอ้าง</p>
+
+    <ul>
+        <li>มีหลักฐานยืนยันการส่งมอบทุกครั้ง</li>
+    </ul>
+    <a href="index.html">Home</a> /
+    <a href="login.html">Login</a>  /
+    <a href="create.html">Report a lost item</a> /
+    <a href="search.html">Search</a> /
+    <a href="profile.html">Profile</a>
+    <br><br>
+    <hr>
+
+    <h2>Home Page</h2>
+
+    <br>
+    <table border="1" cellpadding="0" cellspacing="2">
+        <thead>
+            <tr align="center">
+                <th>สิ่งของ</th>
+                <th>ภาพของหาย</th>
+                <th>หมวดหมู่</th>
+                <th>สถานที่พบ</th>
+                <th>ชื่อผู้ใช้</th>
+                <th>วันที่พบ</th>
+                <th>สถานะ</th>
+                <th>ติดต่อ</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody" align="center">
+            <!-- ข้อมูลจำลองดั้งเดิม (ส่ง ID เป็น static_0, static_1, static_2) -->
+            <tr>
+                <td>กุญแจรถเก๋งสีดำ</td>
+                <td style="text-align: center;"><img src="carkey.png" alt="carkey" width="100"></td>
+                <td>กุญแจรถ</td>
+                <td>อาคารวิทยวิภาส / อาคารที่ 9</td>
+                <td>Kopiko</td>
+                <td>20/08/2026</td>
+                <td>ยังไม่พบเจ้าของ</td>
+                <td style="text-align: center;"><a href="detail.html?id=static_0"><button>More</button></a></td>
+            </tr>
+            <tr>
+                <td>กระเป๋าตังค์สีน้ำตาล</td>
+                <td style="text-align: center;"><img src="money.png" alt="money" width="100"></td>
+                <td>กระเป๋าตังค์</td>
+                <td>อาคารพจน์ สารสิน</td>
+                <td>Arifeen</td>
+                <td>03/08/2026</td>
+                <td>ได้รับคืนแล้ว</td>
+                <td style="text-align: center;"><a href="detail.html?id=static_1"><button>More</button></a></td>
+            </tr>
+            <tr>
+                <td>กำไลข้อมือ</td>
+                <td style="text-align: center;"><img src="ring.png" alt="ring" width="100"></td>
+                <td>เครื่องประดับ</td>
+                <td>ศูนย์ประชุมอเนกประสงค์กาญจนาภิเษก</td>
+                <td>BokBaek</td>
+                <td>19/08/2026</td>
+                <td>ได้รับคืนแล้ว</td>
+                <td style="text-align: center;"><a href="detail.html?id=static_2"><button>More</button></a></td>
+            </tr>
+        </tbody>
+    </table><br>
+
+    <!-- สคริปต์ดึงข้อมูลที่ถูกเพิ่มใหม่จาก create.html มาต่อท้าย (อัปเดตเพิ่มปุ่ม) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tableBody = document.getElementById('tableBody');
+
+            let items = JSON.parse(localStorage.getItem('kkuItems')) || [];
+
+            items.forEach(function (item, index) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                        <td>${item.name}</td>
+                        <td style="text-align:center;">${item.image}</td>
+                        <td>${item.category}</td>
+                        <td>${item.location}</td>
+                        <td>${item.reporter}</td>
+                        <td>${item.date}</td>
+                        <td>${item.status}</td>
+                        <td style="text-align:center;">
+                            <!-- ส่ง ID ของ localStorage ไป -->
+                            <a href="detail.html?id=${index}"><button>More</button></a>
+                        </td>
+                    `;
+                tableBody.appendChild(tr);
+            });
+        });
+    </script>
+    <hr>
+    <footer>
+        <p>*หมายเหตุ: แพลตฟอร์มนี้เป็นเพียงพื้นที่สาธารณะสำหรับเชื่อมโยงข้อมูลฟรี
+            ไม่มีส่วนเกี่ยวข้องหรือรับประกันความถูกต้องของข้อมูล การส่งมอบสิ่งของ หรือการธุรกรรมใดๆ ระหว่างผู้ใช้งาน</p>
+
+        <strong>ช่องทางติดต่อ</strong>
+        <p>หากคุณมีข้อสงสัยหรือคำถามเกี่ยวกับเว็บไซต์ KKU Return โปรดติดต่อเราผ่านช่องทางดังต่อไปนี้:</p>
+        <ul>
+            <li>อีเมล: kkureturn01@kku.ac.th</li>
+            <li>โทรศัพท์: 012-345-6789</li>
+            <li>Facebook: KKU Return</li>
+        </ul>
+    </footer>
+
+</body>
+
+</html>
