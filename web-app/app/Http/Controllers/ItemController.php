@@ -9,11 +9,59 @@ use App\Models\FinderUser;
 
 class ItemController extends Controller
 {
+    public function home(Request $request)
+    {
+        $from = $request->input('from') ?? '';
+        $to = $request->input('to') ?? '';
+
+        $query = Item::query();
+
+        $sixMonthsAgo = date('Y-m-d', strtotime('-6 months'));
+
+        $query->where(function ($q) use ($sixMonthsAgo) {
+            $q->where('status', '!=', 'ได้รับคืนแล้ว')
+                ->orWhereNull('returned_date')
+                ->orWhere('returned_date', '>', $sixMonthsAgo);
+        });
+
+        if ($from !== '') {
+            $query->where('event_date', '>=', $from);
+        }
+
+        if ($to !== '') {
+            $query->where('event_date', '<=', $to);
+        }
+
+        $items = $query->orderBy('event_date', 'desc')->get();
+
+        foreach ($items as $item) {
+            $itemCategory = Category::find($item->category_id);
+            $item->category_name = $itemCategory ? $itemCategory->name : 'อื่นๆ';
+        }
+
+        return view('home', compact('items', 'from', 'to'));
+    }
+
+    public function archive()
+    {
+        $sixMonthsAgo = date('Y-m-d', strtotime('-6 months'));
+
+        $items = Item::where('status', 'ได้รับคืนแล้ว')
+            ->whereNotNull('returned_date')
+            ->where('returned_date', '<=', $sixMonthsAgo)
+            ->orderBy('returned_date', 'desc')
+            ->get();
+
+        foreach ($items as $item) {
+            $itemCategory = Category::find($item->category_id);
+            $item->category_name = $itemCategory ? $itemCategory->name : 'อื่นๆ';
+        }
+
+        return view('archive', compact('items'));
+    }
+
     public function index(Request $request)
     {
-        // ถ้าฟอร์มยังไม่ถูก submit จะไม่มี key "searched" ติดมากับ query string เลย
-        // (ใช้ hidden input ค่าคงที่ "1" แทนการเช็ค item_name เพราะถ้าค้นหาแบบเว้นทุกช่องว่าง
-        // ค่าว่างจะถูกแปลงเป็น null แล้วหายไปจากลิงก์เปลี่ยนหน้า ทำให้ผลค้นหาหายไปตอนกด Next)
         $searched = $request->has('searched');
 
         $item_name = trim($request->input('item_name') ?? '');
@@ -79,11 +127,50 @@ class ItemController extends Controller
             'end_date'
         ));
     }
-    public function show(Item $item)
+
+    // เปิดหน้าฟอร์มแจ้งของหาย/พบของ
+    public function create()
     {
-        $item->category_name = optional(Category::find($item->category_id))->name ?? 'อื่นๆ';
-        $item->reporter_name = optional(FinderUser::find($item->user_id))->fullname ?? 'ไม่ทราบชื่อ';
-    
-        return view('item', compact('item'));
+        $categories = Category::all();
+        $locations = Item::select('location')->distinct()->orderBy('location')->pluck('location');
+
+        return view('create', compact('categories', 'locations'));
+    }
+
+    // บันทึกข้อมูลโพสต์ลงฐานข้อมูล
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'postType'     => 'required|in:found,lost',
+            'itemName'     => 'required|string|max:255',
+            'category'     => 'required|exists:categories,id',
+            'location'     => 'required|string|max:255',
+            'date'         => 'required|date',
+            'description'  => 'nullable|string',
+            'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'reporterName' => 'nullable|string|max:255',
+            'phone'        => 'nullable|string|max:20',
+        ]);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = 'storage/' . $request->file('image')->store('items', 'public');
+        }
+
+        Item::create([
+            'user_id'        => null, // โพสต์จากบุคคลทั่วไป ไม่ผูกกับหน่วยงาน
+            'category_id'    => $validated['category'],
+            'type'           => $validated['postType'],
+            'title'          => $validated['itemName'],
+            'description'    => $validated['description'] ?? null,
+            'location'       => $validated['location'],
+            'event_date'     => $validated['date'],
+            'image_url'      => $imagePath,
+            'status'         => $validated['postType'] === 'found' ? 'พบแล้ว' : 'หาย',
+            'reporter_name'  => $validated['reporterName'] ?? null,
+            'reporter_phone' => $validated['phone'] ?? null,
+        ]);
+
+        return redirect()->route('posts.create')->with('success', 'บันทึกข้อมูลการแจ้งสำเร็จเรียบร้อยแล้ว');
     }
 }

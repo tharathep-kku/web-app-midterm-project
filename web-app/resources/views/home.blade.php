@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หน้าแรก - KKU Return</title>
+</head>
+
+<body>
+    <h1><strong>KKU Return: lost and found</strong></h1>
+    @include('partials.menu')
+
+    <hr>
+
+    <p>เก็บของได้ลงประกาศไว้ ของหายค้นหาก่อนแจ้ง เพื่อให้ของกลับไปหาเจ้าของเร็วที่สุด</p>
+
+
+    <form method="GET" action="{{ route('home') }}">
+        <label for="from">เมื่อวันที่</label>
+        <input type="date" id="from" name="from" value="{{ $from }}">
+
+        <label for="to">ถึง</label>
+        <input type="date" id="to" name="to" value="{{ $to }}">
+
+        <button type="submit">กรอง</button>
+        <a href="{{ route('home') }}">ล้างตัวกรอง</a>
+    </form>
+
+    <!-- ปุ่มลัดช่วงเวลา -->
+    <p>
+        <a href="{{ route('home', ['from' => date('Y-m-d', strtotime('-7 days')), 'to' => date('Y-m-d')]) }}">7 วันล่าสุด</a> ·
+        <a href="{{ route('home', ['from' => date('Y-m-d', strtotime('-30 days')), 'to' => date('Y-m-d')]) }}">30 วันล่าสุด</a> ·
+        <a href="{{ route('home', ['from' => date('Y-m-d', strtotime('-3 months')), 'to' => date('Y-m-d')]) }}">3 เดือนล่าสุด</a> ·
+        <a href="{{ route('home') }}">ทั้งหมด</a>
+    </p>
+
+    <!-- ---------- จำนวนผลลัพธ์ ---------- -->
+    <p aria-live="polite">
+        พบ {{ $items->count() }} รายการ
+        @if ($from !== '' || $to !== '')
+            ระหว่าง
+            {{ $from !== '' ? date('d/m/Y', strtotime($from)) : 'เริ่มต้น' }}
+            ถึง
+            {{ $to !== '' ? date('d/m/Y', strtotime($to)) : 'ปัจจุบัน' }}
+        @endif
+    </p>
+
+    <!-- ---------- ตาราง ---------- -->
+    <table border="1" cellspacing="2" cellpadding="0">
+        <thead>
+            <tr>
+                <th>ชื่อสิ่งของ</th>
+                <th>รูป</th>
+                <th>หมวดหมู่</th>
+                <th>สถานที่</th>
+                <th>วันที่พบ</th>
+                <th>สถานะ</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody align="center">
+            @forelse ($items as $item)
+                @php $isReturned = ($item->status === 'ได้รับคืนแล้ว'); @endphp
+                <tr>
+
+                    <td>{{ $item->title }}</td>
+
+                    <td>
+                        @if (!empty($item->image_url))
+                            <img src="{{ asset($item->image_url) }}"
+                                 alt="{{ $item->title }}"
+                                 width="80" height="80"
+                                 onerror="this.replaceWith('ไม่มีรูป')">
+                        @else
+                            ไม่มีรูป
+                        @endif
+                    </td>
+
+                    <td>{{ $item->category_name }}</td>
+                    <td>{{ $item->location }}</td>
+
+                    <td title="{{ $item->event_date }}">
+                        {{ date('d/m/Y', strtotime($item->event_date)) }}
+                    </td>
+
+                    <td>
+                        @if ($isReturned)
+                            <strong>{{ $item->status }}</strong>
+                        @else
+                            {{ $item->status }}
+                        @endif
+                    </td>
+
+                    <td><a href="/items/{{ $item->id }}">ดูรายละเอียด</a></td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="7">
+                        ไม่มีประกาศในช่วงวันที่ที่เลือก —
+                        <a href="{{ route('home', ['from' => date('Y-m-d', strtotime('-30 days')), 'to' => date('Y-m-d')]) }}">ลองขยายเป็น 30 วันล่าสุด</a>
+                        หรือ <a href="{{ route('agency.create') }}">ลงประกาศตามหาของ</a>
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+
+    <p><a href="{{ route('archive.index') }}">ดูรายการที่เก็บเข้าคลังแล้ว</a></p>
+
+    <hr>
+
+    <!-- ---------- ท้ายหน้า ---------- -->
+    <footer>
+        <p>*หมายเหตุ: แพลตฟอร์มนี้เป็นเพียงพื้นที่สาธารณะสำหรับเชื่อมโยงข้อมูลฟรี
+            ไม่มีส่วนเกี่ยวข้องหรือรับประกันความถูกต้องของข้อมูล การส่งมอบสิ่งของ
+            หรือการธุรกรรมใดๆ ระหว่างผู้ใช้งาน</p>
+
+        <strong>ช่องทางติดต่อ</strong>
+        <ul>
+            <li>อีเมล: kkureturn01@kku.ac.th</li>
+            <li>โทรศัพท์: 012-345-6789</li>
+            <li>Facebook: KKU Return</li>
+        </ul>
+    </footer>
+
+</body>
+
+</html>

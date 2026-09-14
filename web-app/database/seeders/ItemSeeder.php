@@ -9,7 +9,7 @@ class ItemSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('items')->insert([
+        $items = [
             [
                 'user_id' => 1,
                 'category_id' => 1,
@@ -31,6 +31,7 @@ class ItemSeeder extends Seeder
                 'event_date' => '2026-08-03',
                 'image_url' => 'images/items/money.png',
                 'status' => 'ได้รับคืนแล้ว',
+                'returned_date' => '2026-02-10',
             ],
             [
                 'user_id' => 1,
@@ -42,6 +43,7 @@ class ItemSeeder extends Seeder
                 'event_date' => '2026-08-19',
                 'image_url' => 'images/items/ring.png',
                 'status' => 'ได้รับคืนแล้ว',
+                'returned_date' => '2026-08-25',
             ],
             [
                 'user_id' => 2,
@@ -141,6 +143,7 @@ class ItemSeeder extends Seeder
                 'event_date' => '2026-08-07',
                 'image_url' => 'images/items/sunglasses_black.png',
                 'status' => 'ได้รับคืนแล้ว',
+                'returned_date' => '2026-03-20',
             ],
             [
                 'user_id' => 9,
@@ -164,6 +167,14 @@ class ItemSeeder extends Seeder
                 'image_url' => 'images/items/wallet_red.png',
                 'status' => 'รอแอดมินยืนยัน',
             ],
-        ]);
+        ];
+
+        foreach ($items as $i => $item) {
+            if (!isset($item['returned_date'])) {
+                $items[$i]['returned_date'] = null;
+            }
+        }
+
+        DB::table('items')->insert($items);
     }
 }
