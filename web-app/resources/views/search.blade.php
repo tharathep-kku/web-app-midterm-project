@@ -100,7 +100,7 @@
                         <td>{{ $item->event_date }}</td>
                         <td>{{ $item->status }}</td>
                         <td style="text-align: center;">
-                            <a href="/items/{{ $item->id }}"><button type="button">More</button></a>
+                            <a href="{{ route('item.show', $item->id) }}"><button type="button">More</button></a>
                         </td>
                     </tr>
                 @empty
