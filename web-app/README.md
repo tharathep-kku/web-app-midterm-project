@@ -422,3 +422,90 @@ php artisan migrate:fresh --seed
 - ยังไม่มีโค้ดบันทึก `returned_date` ตอนเปลี่ยนสถานะเป็น "ได้รับคืนแล้ว" (ตอนนี้มีแค่ใน seeder)
 - ลิงก์ "ดูรายละเอียด" ชี้ไป `/items/{id}` ซึ่งยังไม่มี route
 - หน้าแรกยังไม่กรองตาม `approval_status` (แสดงทั้งที่อนุมัติแล้วและรออนุมัติ)
+
+---
+
+# Folk แก้
+
+งานที่ Folk รับผิดชอบ: **ข้อ 6 User หน่วยงาน** (โพสต์ หลักฐานยืนยัน จุดสถานที่), **ข้อ 7 User แอดมิน** (อนุมัติ ดูข้อมูลหลังบ้าน สถิติ),
+ระบบ **login แยกตาม role** และหน้า **แจ้งของหาย** ของ user ทั่วไป
+
+## 1. หน่วยงาน (agency) — ข้อ 6
+
+- เพิ่มคอลัมน์ในตาราง `items` ด้วย migration `2026_09_12_100001_add_report_columns_to_items_table.php`
+  - `place_point` จุดสถานที่แบบละเอียด เช่น "ชั้น 3 โซนอ่านเงียบ โต๊ะ B12"
+  - `evidence_url`, `evidence_note` รูปและคำอธิบายหลักฐานยืนยัน
+- `AgencyUserSeeder.php` บัญชีหน่วยงาน 3 บัญชีในตาราง `finder_users` (role `agency`)
+- `AgencyItemController.php` รายการโพสต์ของหน่วยงานตัวเอง / ฟอร์มโพสต์ / บันทึกโพสต์
+  (โพสต์ใหม่มีสถานะ `รออนุมัติ` เสมอ)
+- หน้า `resources/views/agency/` → `index`, `create`, `show`
+
+## 2. แอดมิน (admin) — ข้อ 7
+
+- เพิ่มคอลัมน์ `approval_status`, `reject_reason`, `approved_by`, `approved_at` ในตาราง `items` (migration เดียวกับข้อ 6)
+- `AdminController.php`
+  - หน้าข้อมูลหลังบ้าน กรองตามสถานะอนุมัติ / ประเภท / ชื่อสิ่งของ
+  - อนุมัติ และไม่อนุมัติ (ต้องกรอกเหตุผล) บันทึกว่าแอดมินคนไหนตรวจ ตรวจเมื่อไหร่
+  - หน้าสถิติ: ภาพรวม, สถานะอนุมัติ, แยกตามหมวดหมู่ / สถานที่ / หน่วยงาน, จำนวนผู้ใช้แต่ละ role
+- หน้า `resources/views/admin/` → `index`, `stats`
+- route ของหน่วยงานและแอดมินแยกไว้ใน `routes/agency_admin.php` แล้ว `require` ต่อท้าย `routes/web.php`
+
+## 3. Login แยกตาม role
+
+login หน้าเดียวสำหรับทุกบัญชี แต่ละบัญชีจะเห็นเฉพาะเมนูและหน้าของ role ตัวเอง
+
+| บัญชี | เมนู | เข้าหน้าของ role อื่น |
+|---|---|---|
+| ยังไม่ล็อกอิน | หน้าแรก / ค้นหา / เข้าสู่ระบบ | `/agency`, `/admin` → ไปหน้า login |
+| user | หน้าแรก / ค้นหา / แจ้งของหาย / โปรไฟล์ / ออกจากระบบ | ถูกส่งกลับหน้าแรก |
+| agency | หน้าแรก / ค้นหา / หน่วยงาน / โปรไฟล์ / ออกจากระบบ | ถูกส่งกลับหน้าแรก |
+| admin | หน้าแรก / ค้นหา / แอดมิน / สถิติ / โปรไฟล์ / ออกจากระบบ | ถูกส่งกลับหน้าแรก |
+
+**ไฟล์ใหม่**
+- `database/migrations/2026_09_16_100001_add_role_to_users_table.php` เพิ่ม `role` (user / agency / admin) และ `finder_user_id`
+  ในตาราง `users` ของ Laravel เพื่อผูกบัญชี login เข้ากับข้อมูลคนใน `finder_users`
+- `database/seeders/LoginUserSeeder.php` สร้างบัญชี login ให้ทุกคนใน `finder_users` ใช้อีเมลเดียวกัน
+- `app/Http/Middleware/EnsureUserIsAgency.php`, `EnsureUserIsAdmin.php` กันไม่ให้ role อื่นเข้าหน้า (ตามตัวอย่าง middleware ใน Laravel Part 03)
+- `resources/views/login.blade.php` หน้า login หน้าตาแบบเว็บ KKU Return
+
+**ไฟล์ที่แก้**
+- `bootstrap/app.php` ลงทะเบียน alias middleware `agency`, `admin` และให้คนที่ล็อกอินแล้วเปิด `/login` ซ้ำไปหน้าแรก
+- `routes/agency_admin.php` ครอบ route ด้วย `middleware(['auth', 'agency'])` และ `middleware(['auth', 'admin'])`
+- `AgencyItemController.php`, `AdminController.php` เลิกใช้กล่องเลือกบัญชีแบบ session เปลี่ยนมาใช้ `Auth::user()->finder_user_id`
+- หน้า `agency/index`, `admin/index`, `admin/stats` ลบกล่องเลือกบัญชีออก และใช้เมนูกลาง
+- `resources/views/partials/menu.blade.php` แสดงเมนูตาม role ด้วย `@guest` / `@auth` และเพิ่มปุ่มออกจากระบบ
+- `app/Providers/FortifyServiceProvider.php` ใช้หน้า `login` ของเราแทนหน้า login ของ Laravel
+- `config/fortify.php` login เสร็จไปที่ `/` แทน `/dashboard`
+
+## 4. หน้าแจ้งของหาย (user ทั่วไป)
+
+- `resources/views/create.blade.php` ฟอร์มแจ้งของหาย / แจ้งพบของ ที่ `ItemController@create` เรียกใช้แต่ยังไม่มีไฟล์
+- ชื่อช่องในฟอร์มตรงกับที่ `ItemController@store` ตรวจ: `postType`, `itemName`, `category`, `location`, `date`,
+  `description`, `image`, `reporterName`, `phone`
+- ไม่ได้แก้ `ItemController`
+
+ถ้าจะให้รูปที่อัปโหลดแสดงบนเว็บ ต้องรันคำสั่งนี้ครั้งเดียวในเครื่องตัวเอง
+```bash
+php artisan storage:link
+```
+
+**บัญชีทดสอบ** รหัสผ่าน `password` ทุกบัญชี
+
+| role | อีเมล |
+|---|---|
+| admin | `pimchanok.r@kku.ac.th` |
+| agency | `security@kku.ac.th`, `library@kku.ac.th`, `studentaffairs@kku.ac.th` |
+| user | `sarath.n@kku.ac.th`, `piyada.p@kkumail.com` และ user อื่นใน `finder_users` |
+
+**ทดสอบแล้ว:** แต่ละ role ล็อกอินแล้วเห็นเมนูถูกต้อง, เข้าหน้าของ role อื่นไม่ได้, ออกจากระบบแล้วกลับเป็นเมนู guest,
+user แจ้งของหายสำเร็จและบันทึกลงตาราง `items`, ส่งฟอร์มไม่ครบขึ้นข้อความ error และคงค่าที่กรอกไว้
+
+## 5. สิ่งที่ยังไม่ทำ
+
+- `AgencyItemController` ไม่มีเมธอด `show()` ถ้าหน่วยงานโพสต์เสร็จ หรือกด "รายละเอียด" จะ error
+- `LoginUserSeeder` ยังไม่ได้ใส่ใน `DatabaseSeeder` ถ้ามีคนรัน `migrate:fresh --seed` บัญชี login จะหาย
+  ต้องรัน `php artisan db:seed --class=LoginUserSeeder` เพิ่มเอง
+- `ItemController@store` บันทึก `user_id` เป็น `null` ทำให้ไม่รู้ว่าโพสต์แจ้งของหายเป็นของบัญชีไหน
+- route `/posts/create` ยังไม่บังคับ login (ซ่อนไว้แค่ในเมนู)
+- หน้าแรกไม่แสดงข้อความ error ตอนถูกส่งกลับเพราะเข้าหน้าของ role อื่น
+- หน้าโปรไฟล์ / สมัครสมาชิก ยังเป็นหน้าของ Laravel ต้อง `npm run build` ก่อนถึงจะเปิดได้
