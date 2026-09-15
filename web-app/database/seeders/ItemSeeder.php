@@ -28,7 +28,7 @@ class ItemSeeder extends Seeder
                 'title' => 'กระเป๋าตังค์สีน้ำตาล',
                 'description' => 'มีบัตรนักศึกษาอยู่ข้างใน',
                 'location' => 'อาคารพจน์ สารสิน',
-                'event_date' => '2026-08-03',
+                'event_date' => '2026-01-28',
                 'image_url' => 'images/items/money.png',
                 'status' => 'ได้รับคืนแล้ว',
                 'returned_date' => '2026-02-10',
@@ -143,7 +143,7 @@ class ItemSeeder extends Seeder
                 'event_date' => '2026-08-07',
                 'image_url' => 'images/items/sunglasses_black.png',
                 'status' => 'ได้รับคืนแล้ว',
-                'returned_date' => '2026-03-20',
+                'returned_date' => '2026-08-12',
             ],
             [
                 'user_id' => 9,
