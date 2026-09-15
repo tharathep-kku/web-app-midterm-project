@@ -9,14 +9,8 @@
 
 <body>
     <h1><strong>KKU Return: lost and found</strong></h1>
+    @include('partials.menu')
     <p>ส่วนของแอดมิน สำหรับอนุมัติโพสต์และดูข้อมูลหลังบ้านทั้งหมด</p>
-
-    <a href="index.html">Home</a> /
-    <a href="{{ route('search.index') }}">Search</a> /
-    <a href="{{ route('agency.index') }}">หน่วยงาน</a> /
-    <a href="{{ route('admin.index') }}">แอดมิน</a> /
-    <a href="{{ route('admin.stats') }}">สถิติ</a>
-    <br><br>
     <hr>
 
     @if (session('success'))
@@ -36,27 +30,12 @@
         </ul>
     @endif
 
-    <h2><strong>เข้าใช้งานในนามแอดมิน</strong></h2>
-
     @if ($admin)
-        <p>กำลังใช้งานในนาม: <strong>{{ $admin->fullname }}</strong> ({{ $admin->email }})</p>
+        <p>เข้าสู่ระบบในนาม: <strong>{{ $admin->fullname }}</strong> ({{ $admin->email }})</p>
     @else
-        <p>ยังไม่ได้เข้าใช้งานในนามแอดมิน กรุณาเลือกบัญชีแอดมินก่อน</p>
+        <p>บัญชีนี้ยังไม่ได้ผูกกับข้อมูลแอดมิน</p>
     @endif
 
-    <form method="POST" action="{{ route('admin.switch') }}">
-        @csrf
-        <label for="finder_user_id">แอดมิน:</label>
-        <select id="finder_user_id" name="finder_user_id" required>
-            <option value="">-- เลือกแอดมิน --</option>
-            @foreach ($admins as $ad)
-                <option value="{{ $ad->id }}" {{ $admin && $admin->id === $ad->id ? 'selected' : '' }}>{{ $ad->fullname }}</option>
-            @endforeach
-        </select>
-        <button type="submit">เข้าใช้งาน</button>
-    </form>
-
-    <br>
     <hr>
 
     @if ($admin)
