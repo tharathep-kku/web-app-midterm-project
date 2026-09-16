@@ -18,7 +18,7 @@
     <a href="{{ route('home') }}">Home</a> /
     <a href="{{ route('login') }}">Login</a> /
     <a href="#">Report a lost item</a> /
-    <a href="{{ route('search.index') }}">Search</a> /
+    <a href="{{ route('search.home') }}">Search</a> /
     <a href="{{ route('dashboard') }}">Dashboard</a> /
     <a href="{{ route('profile.edit') }}">Profile</a>
     <br><br>
@@ -71,7 +71,7 @@
     @endif
 
     <br>
-    <a href="{{ route('search.index') }}"><button type="button">กลับไปหน้าค้นหา</button></a>
+    <a href="{{ route('search.home') }}"><button type="button">กลับไปหน้าค้นหา</button></a>
 
     <br>
     <hr>

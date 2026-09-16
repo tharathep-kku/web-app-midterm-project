@@ -18,7 +18,7 @@
     <a href="{{ route('home') }}">Home</a> /
     <a href="{{ route('login') }}">Login</a> /
     <a href="#">Report a lost item</a> /
-    <a href="{{ route('search.index') }}">Search</a> /
+    <a href="{{ route('search.home') }}">Search</a> /
     <a href="{{ route('dashboard') }}">Dashboard</a> /
     <a href="{{ route('profile.edit') }}">Profile</a>
     <br><br>
@@ -26,7 +26,7 @@
 
     <h2><strong>Search</strong></h2>
 
-    <form id="searchForm" method="GET" action="{{ route('search.index') }}" onsubmit="document.getElementById('loadingMessage').style.display='block'; document.getElementById('searchBtn').disabled=true;">
+    <form id="searchForm" method="GET" action="{{ route('search.home') }}" onsubmit="document.getElementById('loadingMessage').style.display='block'; document.getElementById('searchBtn').disabled=true;">
 
         <input type="hidden" name="searched" value="1">
 

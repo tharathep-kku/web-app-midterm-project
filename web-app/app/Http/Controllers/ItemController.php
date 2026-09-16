@@ -9,7 +9,7 @@ use App\Models\Category;
 
 class ItemController extends Controller
 {
-    public function index(Request $request): View
+    public function home(Request $request): View
     {
         $searched = $request->has('searched');
 
@@ -76,7 +76,7 @@ class ItemController extends Controller
         $item->load(['category', 'reporter', 'returnUnit']);
 
         return view('item', compact('item'));
-
+    }
     // เปิดหน้าฟอร์มแจ้งของหาย/พบของ
     public function create()
     {

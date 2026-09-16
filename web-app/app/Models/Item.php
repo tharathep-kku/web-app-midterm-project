@@ -30,7 +30,7 @@ class Item extends Model
     {
         return $this->belongsTo(ReturnUnit::class);
     }
-}
+
     protected $fillable = [
         'user_id',
         'category_id',
