@@ -32,11 +32,18 @@ class ItemController extends Controller
             $query->where('event_date', '<=', $to);
         }
 
-        $items = $query->orderBy('event_date', 'desc')->get();
+        $items = $query->orderBy('event_date', 'desc')->paginate(5)->withQueryString();
 
         foreach ($items as $item) {
             $itemCategory = Category::find($item->category_id);
             $item->category_name = $itemCategory ? $itemCategory->name : 'อื่นๆ';
+
+            $reporter = FinderUser::find($item->user_id);
+            if ($reporter) {
+                $item->reporter_name = $reporter->fullname;
+            } elseif (empty($item->reporter_name)) {
+                $item->reporter_name = 'ไม่ทราบชื่อ';
+            }
         }
 
         return view('home', compact('items', 'from', 'to'));
@@ -50,11 +57,18 @@ class ItemController extends Controller
             ->whereNotNull('returned_date')
             ->where('returned_date', '<=', $sixMonthsAgo)
             ->orderBy('returned_date', 'desc')
-            ->get();
+            ->paginate(5);
 
         foreach ($items as $item) {
             $itemCategory = Category::find($item->category_id);
             $item->category_name = $itemCategory ? $itemCategory->name : 'อื่นๆ';
+
+            $reporter = FinderUser::find($item->user_id);
+            if ($reporter) {
+                $item->reporter_name = $reporter->fullname;
+            } elseif (empty($item->reporter_name)) {
+                $item->reporter_name = 'ไม่ทราบชื่อ';
+            }
         }
 
         return view('archive', compact('items'));

@@ -9,8 +9,14 @@
 
 <body>
     <h1><strong>KKU Return: lost and found</strong></h1>
-    @include('partials.menu')
+    <p>Welcome to KKU Return ที่จะช่วยคุณตามหาของสำคัญ หรือเจ้าของที่พัดพรากไปเอง</p>
+    <p>ศูนย์รวมแจ้งของหายและแจ้งพบของภายในมหาวิทยาลัยขอนแก่น ปลอดภัย ตรวจสอบได้ ลดความเสี่ยงจากการแอบอ้าง</p>
 
+    <ul>
+        <li>มีหลักฐานยืนยันการส่งมอบทุกครั้ง</li>
+    </ul>
+    @include('partials.menu')
+    <br><br>
     <hr>
 
     <p>เก็บของได้ลงประกาศไว้ ของหายค้นหาก่อนแจ้ง เพื่อให้ของกลับไปหาเจ้าของเร็วที่สุด</p>
@@ -37,7 +43,7 @@
 
     <!-- ---------- จำนวนผลลัพธ์ ---------- -->
     <p aria-live="polite">
-        พบ {{ $items->count() }} รายการ
+        พบ {{ $items->total() }} รายการ
         @if ($from !== '' || $to !== '')
             ระหว่าง
             {{ $from !== '' ? date('d/m/Y', strtotime($from)) : 'เริ่มต้น' }}
@@ -50,53 +56,39 @@
     <table border="1" cellspacing="2" cellpadding="0">
         <thead>
             <tr>
-                <th>ชื่อสิ่งของ</th>
-                <th>รูป</th>
+                <th>สิ่งของ</th>
+                <th>ภาพของหาย</th>
                 <th>หมวดหมู่</th>
-                <th>สถานที่</th>
+                <th>สถานที่พบ</th>
+                <th>ชื่อผู้ใช้</th>
                 <th>วันที่พบ</th>
                 <th>สถานะ</th>
-                <th></th>
+                <th>ติดต่อ</th>
             </tr>
         </thead>
         <tbody align="center">
             @forelse ($items as $item)
-                @php $isReturned = ($item->status === 'ได้รับคืนแล้ว'); @endphp
                 <tr>
-
                     <td>{{ $item->title }}</td>
-
                     <td>
-                        @if (!empty($item->image_url))
-                            <img src="{{ asset($item->image_url) }}"
-                                 alt="{{ $item->title }}"
-                                 width="80" height="80"
-                                 onerror="this.replaceWith('ไม่มีรูป')">
+                        @if ($item->image_url)
+                            <img src="{{ asset($item->image_url) }}" alt="{{ $item->title }}" width="100">
                         @else
-                            ไม่มีรูป
+                            -
                         @endif
                     </td>
-
                     <td>{{ $item->category_name }}</td>
                     <td>{{ $item->location }}</td>
-
-                    <td title="{{ $item->event_date }}">
-                        {{ date('d/m/Y', strtotime($item->event_date)) }}
-                    </td>
-
+                    <td>{{ $item->reporter_name }}</td>
+                    <td>{{ $item->event_date }}</td>
+                    <td>{{ $item->status }}</td>
                     <td>
-                        @if ($isReturned)
-                            <strong>{{ $item->status }}</strong>
-                        @else
-                            {{ $item->status }}
-                        @endif
+                        <a href="{{ route('item.show', $item->id) }}"><button type="button">More</button></a>
                     </td>
-
-                    <td><a href="/items/{{ $item->id }}">ดูรายละเอียด</a></td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7">
+                    <td colspan="8">
                         ไม่มีประกาศในช่วงวันที่ที่เลือก —
                         <a href="{{ route('home', ['from' => date('Y-m-d', strtotime('-30 days')), 'to' => date('Y-m-d')]) }}">ลองขยายเป็น 30 วันล่าสุด</a>
                         หรือ <a href="{{ route('agency.create') }}">ลงประกาศตามหาของ</a>
@@ -105,6 +97,10 @@
             @endforelse
         </tbody>
     </table>
+
+    <div>
+        {{ $items->links('partials.pagination') }}
+    </div>
 
     <p><a href="{{ route('archive.index') }}">ดูรายการที่เก็บเข้าคลังแล้ว</a></p>
 
