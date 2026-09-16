@@ -24,4 +24,11 @@
         </form>
         ({{ auth()->user()->name }})
     @endauth
-</nav>
+<!-- </nav>
+
+    <a href="{{ route('home') }}">Home</a> /
+    <a href="{{ route('login') }}">Login</a> /
+    <a href="#">Report a lost item</a> /
+    <a href="{{ route('search.home') }}">Search</a> /
+    <a href="{{ route('dashboard') }}">Dashboard</a> /
+    <a href="{{ route('profile.edit') }}">Profile</a> -->
