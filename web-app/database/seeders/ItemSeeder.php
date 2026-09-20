@@ -169,11 +169,14 @@ class ItemSeeder extends Seeder
             ],
         ];
 
-        foreach ($items as $i => $item) {
-            if (!isset($item['returned_date'])) {
-                $items[$i]['returned_date'] = null;
-            }
+        $returnUnitCount = DB::table('return_units')->count();
+
+        foreach ($items as $index => &$item) {
+            $item['return_unit_id'] = $returnUnitCount > 0
+                ? ($index % $returnUnitCount) + 1
+                : null;
         }
+        unset($item);
 
         DB::table('items')->insert($items);
     }

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Details - KKU Return</title>
+</head>
+
+<body>
+    <h1><strong>KKU Return: lost and found</strong></h1>
+    <p>Welcome to KKU Return ที่จะช่วยคุณตามหาของสำคัญ หรือเจ้าของที่พัดพรากไปเอง</p>
+    <p>ศูนย์รวมแจ้งของหายและแจ้งพบของภายในมหาวิทยาลัยขอนแก่น ปลอดภัย ตรวจสอบได้ ลดความเสี่ยงจากการแอบอ้าง</p>
+
+    <ul>
+        <li>มีหลักฐานยืนยันการส่งมอบทุกครั้ง</li>
+    </ul>
+    <a href="index.html">Home</a> /
+    <a href="login.html">Login</a> /
+    <a href="create.html">Report a lost item</a> /
+    <a href="search.html">Search</a> /
+    <a href="profile.html">Profile</a>
+    <br><br>
+    <hr>
+
+    <h2>Details</h2>
+    
+    <!-- พื้นที่สำหรับแสดงข้อมูล -->
+    <div id="itemDetails">
+        <p>กำลังโหลดข้อมูล...</p>
+    </div>
+
+    <br>
+    <a href="home.html"><button type="button">กลับหน้าแรก</button></a>
+
+    <script>
+        // ดึงรหัส ID ของสิ่งของจาก URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const itemId = urlParams.get('id');
+
+        // ข้อมูลจำลองสำหรับข้อมูลดั้งเดิมที่มีอยู่ในตารางอยู่แล้ว
+        const staticItems = [
+            {
+                name: 'กุญแจรถเก๋งสีดำ', image: '<img src="carkey.png" alt="carkey" width="150">', category: 'กุญแจรถ', location: 'อาคารวิทยวิภาส / อาคารที่ 9', date: '20/08/2026', status: 'ยังไม่พบเจ้าของ', description: 'มีพวงกุญแจติดอยู่', email: 'kopiko@kkumail.com', phone: '081-111-1111', etc: 'ที่ facebook ชื่อ KKU'
+            },
+            {
+                name: 'กระเป๋าตังค์สีน้ำตาล', image: '<img src="money.png" alt="money" width="150">', category: 'กระเป๋าตังค์', location: 'อาคารพจน์ สารสิน', date: '03/08/2026', status: 'ได้รับคืนแล้ว', description: 'กระเป๋าหนังพับครึ่ง', email: '', phone: '', etc: 'ig:cp_kku'
+            },
+            {
+                name: 'กำไลข้อมือ', image: '<img src="ring.png" alt="ring" width="150">', category: 'เครื่องประดับ', location: 'ศูนย์ประชุมอเนกประสงค์กาญจนาภิเษก', date: '19/08/2026', status: 'ได้รับคืนแล้ว', description: 'กำไลเงิน', email: '', phone: '083-333-3333', etc: ''
+            }
+        ];
+
+        let itemData = null;
+
+        // เช็คว่ากดมาจากข้อมูลจำลอง (static) หรือข้อมูลที่สร้างใหม่จาก localStorage
+        if (itemId !== null) {
+            if (itemId.startsWith('static_')) {
+                const index = parseInt(itemId.replace('static_', ''));
+                itemData = staticItems[index];
+            } else {
+                const items = JSON.parse(localStorage.getItem('kkuItems')) || [];
+                itemData = items[parseInt(itemId)];
+            }
+        }
+
+        const detailsContainer = document.getElementById('itemDetails');
+
+        // ถ้าระบุข้อมูลเจอ ให้นำมาจัดโครงสร้าง HTML
+        if (itemData) {
+            // เช็คข้อมูลที่มี/ไม่มี
+            const emailStr = itemData.email ? itemData.email : 'ไม่ได้ระบุอีเมล';
+            const phoneStr = itemData.phone ? itemData.phone : 'ไม่ได้ระบุเบอร์โทรศัพท์';
+            const descStr = itemData.description ? itemData.description : 'ไม่มีรายละเอียดเพิ่มเติม';
+            const etcStr = itemData.etc ? itemData.etc : 'ไม่ได้ระบุช่องทางอื่น ๆ ';
+
+            detailsContainer.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    ${itemData.image === '[รอรูปภาพ]' ? '<b>[ยังไม่มีรูปภาพประกอบ]</b>' : itemData.image}
+                </div>
+                <ul>
+                    <li><b>ชื่อสิ่งของ:</b> ${itemData.name}</li>
+                    <li><b>หมวดหมู่:</b> ${itemData.category}</li>
+                    <li><b>สถานที่:</b> ${itemData.location}</li>
+                    <li><b>วันที่:</b> ${itemData.date}</li>
+                    <li><b>สถานะ:</b> ${itemData.status}</li>
+                    <li><b>รายละเอียดเพิ่มเติม:</b> ${descStr}</li>
+                </ul>
+
+                <h3>ข้อมูลการติดต่อ</h3>
+                <ul>
+                    <li><b>อีเมลติดต่อกลับ:</b> ${emailStr}</li>
+                    <li><b>เบอร์โทรศัพท์ติดต่อกลับ:</b> ${phoneStr}</li>
+                    <li><b>ช่องทางอื่นๆ:</b> ${etcStr}</li>
+                </ul>
+            `;
+        } else {
+            detailsContainer.innerHTML = '<p>ไม่พบข้อมูลสิ่งของ</p>';
+        }
+    </script>
+
+    <hr>
+    <footer>
+        <p>*หมายเหตุ: แพลตฟอร์มนี้เป็นเพียงพื้นที่สาธารณะสำหรับเชื่อมโยงข้อมูลฟรี
+            ไม่มีส่วนเกี่ยวข้องหรือรับประกันความถูกต้องของข้อมูล การส่งมอบสิ่งของ หรือการธุรกรรมใดๆ ระหว่างผู้ใช้งาน</p>
+
+        <strong>ช่องทางติดต่อ</strong>
+        <p>หากคุณมีข้อสงสัยหรือคำถามเกี่ยวกับเว็บไซต์ KKU Return โปรดติดต่อเราผ่านช่องทางดังต่อไปนี้:</p>
+        <ul>
+            <li>อีเมล: kkureturn01@kku.ac.th</li>
+            <li>โทรศัพท์: 012-345-6789</li>
+            <li>Facebook: KKU Return</li>
+        </ul>
+    </footer>
+</body>
+
+</html>

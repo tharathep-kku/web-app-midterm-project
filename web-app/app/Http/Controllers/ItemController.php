@@ -3,78 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use App\Models\Item;
 use App\Models\Category;
-use App\Models\FinderUser;
 
 class ItemController extends Controller
 {
-    public function home(Request $request)
-    {
-        $from = $request->input('from') ?? '';
-        $to = $request->input('to') ?? '';
-
-        $query = Item::query();
-
-        $sixMonthsAgo = date('Y-m-d', strtotime('-6 months'));
-
-        $query->where(function ($q) use ($sixMonthsAgo) {
-            $q->where('status', '!=', 'ได้รับคืนแล้ว')
-                ->orWhereNull('returned_date')
-                ->orWhere('returned_date', '>', $sixMonthsAgo);
-        });
-
-        if ($from !== '') {
-            $query->where('event_date', '>=', $from);
-        }
-
-        if ($to !== '') {
-            $query->where('event_date', '<=', $to);
-        }
-
-        $items = $query->orderBy('event_date', 'desc')->paginate(5)->withQueryString();
-
-        foreach ($items as $item) {
-            $itemCategory = Category::find($item->category_id);
-            $item->category_name = $itemCategory ? $itemCategory->name : 'อื่นๆ';
-
-            $reporter = FinderUser::find($item->user_id);
-            if ($reporter) {
-                $item->reporter_name = $reporter->fullname;
-            } elseif (empty($item->reporter_name)) {
-                $item->reporter_name = 'ไม่ทราบชื่อ';
-            }
-        }
-
-        return view('home', compact('items', 'from', 'to'));
-    }
-
-    public function archive()
-    {
-        $sixMonthsAgo = date('Y-m-d', strtotime('-6 months'));
-
-        $items = Item::where('status', 'ได้รับคืนแล้ว')
-            ->whereNotNull('returned_date')
-            ->where('returned_date', '<=', $sixMonthsAgo)
-            ->orderBy('returned_date', 'desc')
-            ->paginate(5);
-
-        foreach ($items as $item) {
-            $itemCategory = Category::find($item->category_id);
-            $item->category_name = $itemCategory ? $itemCategory->name : 'อื่นๆ';
-
-            $reporter = FinderUser::find($item->user_id);
-            if ($reporter) {
-                $item->reporter_name = $reporter->fullname;
-            } elseif (empty($item->reporter_name)) {
-                $item->reporter_name = 'ไม่ทราบชื่อ';
-            }
-        }
-
-        return view('archive', compact('items'));
-    }
-
-    public function index(Request $request)
+    public function home(Request $request): View
     {
         $searched = $request->has('searched');
 
@@ -114,15 +49,10 @@ class ItemController extends Controller
                 $query->where('event_date', '<=', $end_date);
             }
 
-            $items = $query->orderBy('event_date', 'desc')->paginate(5)->withQueryString();
-
-            foreach ($items as $item) {
-                $itemCategory = Category::find($item->category_id);
-                $item->category_name = $itemCategory ? $itemCategory->name : 'อื่นๆ';
-
-                $reporter = FinderUser::find($item->user_id);
-                $item->reporter_name = $reporter ? $reporter->fullname : 'ไม่ทราบชื่อ';
-            }
+            $items = $query->with(['category', 'reporter'])
+                ->orderBy('event_date', 'desc')
+                ->paginate(5)
+                ->withQueryString();
         }
 
         $categories = Category::all();
@@ -141,7 +71,12 @@ class ItemController extends Controller
             'end_date'
         ));
     }
+    public function show(Item $item): View
+    {
+        $item->load(['category', 'reporter', 'returnUnit']);
 
+        return view('item', compact('item'));
+    }
     // เปิดหน้าฟอร์มแจ้งของหาย/พบของ
     public function create()
     {
