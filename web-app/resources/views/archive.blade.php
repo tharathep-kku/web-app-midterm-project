@@ -1,24 +1,14 @@
-<!DOCTYPE html>
-<html lang="th">
+@extends('layouts.site')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>คลังประกาศของคืน - KKU Return</title>
-</head>
+@section('title', 'คลังประกาศของคืน')
 
-<body>
-    <h1><strong>KKU Return: lost and found</strong></h1>
-    <p>Welcome to KKU Return ที่จะช่วยคุณตามหาของสำคัญ หรือเจ้าของที่พัดพรากไปเอง</p>
-    <p>ศูนย์รวมแจ้งของหายและแจ้งพบของภายในมหาวิทยาลัยขอนแก่น ปลอดภัย ตรวจสอบได้ ลดความเสี่ยงจากการแอบอ้าง</p>
+@section('intro')
+    @include('partials.intro')
+@endsection
 
-    <ul>
-        <li>มีหลักฐานยืนยันการส่งมอบทุกครั้ง</li>
-    </ul>
-    @include('partials.menu')
-    <br><br>
-    <hr>
+@section('note', '*หมายเหตุ: ประกาศในคลังยังไม่ถูกลบออกจากระบบ เก็บไว้เพื่อให้ตรวจสอบย้อนหลังได้')
 
+@section('content')
     <h2><strong>รายการที่เก็บเข้าคลังแล้ว</strong></h2>
     <p>คลังประกาศของคืน: ของที่ได้รับคืนเจ้าของไปแล้วเกิน 6 เดือน จึงถูกย้ายออกจากหน้าแรก</p>
 
@@ -76,19 +66,4 @@
 
     <br>
     <p><a href="{{ route('home') }}"><button type="button">กลับหน้าแรก</button></a></p>
-
-    <br>
-    <hr>
-    <footer>
-        <p>*หมายเหตุ: ประกาศในคลังยังไม่ถูกลบออกจากระบบ เก็บไว้เพื่อให้ตรวจสอบย้อนหลังได้</p>
-
-        <strong>ช่องทางติดต่อ</strong>
-        <ul>
-            <li>อีเมล: kkureturn01@kku.ac.th</li>
-            <li>โทรศัพท์: 012-345-6789</li>
-            <li>Facebook: KKU Return</li>
-        </ul>
-    </footer>
-</body>
-
-</html>
+@endsection
