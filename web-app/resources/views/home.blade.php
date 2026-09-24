@@ -102,7 +102,7 @@
         {{ $items->links('partials.pagination') }}
     </div>
 
-    <p><a href="{{ route('archive.index') }}">ดูรายการที่เก็บเข้าคลังแล้ว</a></p>
+    <p><a href="{{ route('archive.home') }}">ดูรายการที่เก็บเข้าคลังแล้ว</a></p>
 
     <hr>
 

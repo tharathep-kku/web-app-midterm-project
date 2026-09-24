@@ -6,11 +6,12 @@ use App\Http\Controllers\ReturnUnitController;
 
 Route::get('/', [ItemController::class, 'home'])->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+// จุดรับ-ส่งคืน: ล็อกอินแล้วเข้าได้เลย ไม่ต้องยืนยันอีเมล
+Route::middleware('auth')->group(function () {
     Route::get('dashboard', [ReturnUnitController::class, 'dashboard'])->name('dashboard');
 });
 
-Route::get('/search', [ItemController::class, 'home'])->name('search.home');
+Route::get('/search', [ItemController::class, 'search'])->name('search.home');
 Route::get('/items/{item}', [ItemController::class, 'show'])->name('item.show');
 Route::get('/return-units/{returnUnit}', [ReturnUnitController::class, 'show'])->name('return-units.show');
 

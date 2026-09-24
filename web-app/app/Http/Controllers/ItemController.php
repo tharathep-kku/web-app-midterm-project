@@ -9,7 +9,64 @@ use App\Models\Category;
 
 class ItemController extends Controller
 {
+    // หน้าแรก: แสดงรายการทันที (ไม่ต้องค้นหาก่อน) กรองตามวันที่ได้ และซ่อนของที่คืนเจ้าของเกิน 6 เดือน
     public function home(Request $request): View
+    {
+        $from = $request->input('from') ?? '';
+        $to = $request->input('to') ?? '';
+        $sixMonthsAgo = date('Y-m-d', strtotime('-6 months'));
+
+        $query = Item::query()->where(function ($q) use ($sixMonthsAgo) {
+            $q->where('status', '!=', 'ได้รับคืนแล้ว')
+                ->orWhereNull('returned_date')
+                ->orWhere('returned_date', '>', $sixMonthsAgo);
+        });
+
+        if ($from !== '') {
+            $query->where('event_date', '>=', $from);
+        }
+
+        if ($to !== '') {
+            $query->where('event_date', '<=', $to);
+        }
+
+        $items = $query->with(['category', 'reporter'])
+            ->orderBy('event_date', 'desc')
+            ->paginate(5)
+            ->withQueryString();
+
+        $this->addNames($items);
+
+        return view('home', compact('items', 'from', 'to'));
+    }
+
+    // คลังประกาศ: ของที่คืนเจ้าของไปแล้วเกิน 6 เดือน
+    public function archive(): View
+    {
+        $sixMonthsAgo = date('Y-m-d', strtotime('-6 months'));
+
+        $items = Item::where('status', 'ได้รับคืนแล้ว')
+            ->whereNotNull('returned_date')
+            ->where('returned_date', '<=', $sixMonthsAgo)
+            ->with(['category', 'reporter'])
+            ->orderBy('returned_date', 'desc')
+            ->paginate(5);
+
+        $this->addNames($items);
+
+        return view('archive', compact('items'));
+    }
+
+    // ตาราง home/archive ใช้ category_name กับ reporter_name
+    private function addNames($items): void
+    {
+        foreach ($items as $item) {
+            $item->category_name = $item->category->name ?? 'อื่นๆ';
+            $item->reporter_name = $item->reporter->fullname ?? ($item->reporter_name ?: 'ไม่ทราบชื่อ');
+        }
+    }
+
+    public function search(Request $request): View
     {
         $searched = $request->has('searched');
 

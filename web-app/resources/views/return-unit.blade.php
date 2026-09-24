@@ -12,7 +12,7 @@
 
     <a href="{{ route('home') }}">Home</a> /
     <a href="{{ route('dashboard') }}">Dashboard</a> /
-    <a href="{{ route('search.index') }}">Search</a>
+    <a href="{{ route('search.home') }}">Search</a>
     <br><br>
     <hr>
 
