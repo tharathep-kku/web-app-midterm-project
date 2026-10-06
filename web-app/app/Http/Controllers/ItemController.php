@@ -9,7 +9,10 @@ use App\Models\Category;
 
 class ItemController extends Controller
 {
-    // หน้าแรก: แสดงรายการทันที (ไม่ต้องค้นหาก่อน) กรองตามวันที่ได้ และซ่อนของที่คืนเจ้าของเกิน 6 เดือน
+    // จำนวนวันหลังคืนเจ้าของ ก่อนย้ายประกาศเข้าคลัง
+    private const ARCHIVE_DAYS = 7;
+
+    // หน้าแรก: แสดงรายการทันที (ไม่ต้องค้นหาก่อน) กรองตามวันที่ได้ และซ่อนของที่คืนเจ้าของเกิน 7 วัน
     public function home(Request $request): View
     {
         $from = $request->input('from') ?? '';
@@ -17,12 +20,12 @@ class ItemController extends Controller
         $type = $request->input('type') ?? '';
         $sort = $request->input('sort') ?? '';
         $direction = $sort === 'old' ? 'asc' : 'desc';
-        $sixMonthsAgo = date('Y-m-d', strtotime('-6 months'));
+        $sevenDaysAgo = date('Y-m-d', strtotime('-' . self::ARCHIVE_DAYS . ' days'));
 
-        $query = Item::query()->where(function ($q) use ($sixMonthsAgo) {
+        $query = Item::query()->where(function ($q) use ($sevenDaysAgo) {
         $q->where('status', '!=', 'ได้รับคืนแล้ว')
             ->orWhereNull('returned_date')
-            ->orWhere('returned_date', '>', $sixMonthsAgo);
+            ->orWhere('returned_date', '>', $sevenDaysAgo);
         });
 
         if ($from !== '') {
@@ -55,11 +58,11 @@ class ItemController extends Controller
     // คลังประกาศ: ของที่คืนเจ้าของไปแล้วเกิน 6 เดือน
     public function archive(): View
     {
-        $sixMonthsAgo = date('Y-m-d', strtotime('-6 months'));
+        $sevenDaysAgo = date('Y-m-d', strtotime('-' . self::ARCHIVE_DAYS . ' days'));
 
         $items = Item::where('status', 'ได้รับคืนแล้ว')
             ->whereNotNull('returned_date')
-            ->where('returned_date', '<=', $sixMonthsAgo)
+            ->where('returned_date', '<=', $sevenDaysAgo)
             ->with(['category', 'reporter'])
             ->orderBy('returned_date', 'desc')
             ->paginate(5);
@@ -74,7 +77,12 @@ class ItemController extends Controller
     {
         foreach ($items as $item) {
             $item->category_name = $item->category->name ?? 'อื่นๆ';
-            $item->reporter_name = $item->reporter->fullname ?? ($item->reporter_name ?: 'ไม่ทราบชื่อ');
+            $item->reporter_name = $item->reporter->fullname ?? ($item->reporter_name ?: 'ไม่ทราบชื่อ');  
+            $item->days_left = 0;// กำหนดค่าเริ่มต้นเป็น 0
+            if ($item->status === 'ได้รับคืนแล้ว' && !empty($item->returned_date)) {
+                $archiveTime = strtotime($item->returned_date . ' +' . self::ARCHIVE_DAYS . ' days');
+                $item->days_left = ceil(($archiveTime - time()) / 86400);
+            }
         }
     }
 
