@@ -20,25 +20,44 @@
     <hr>
 
     <p>เก็บของได้ลงประกาศไว้ ของหายค้นหาก่อนแจ้ง เพื่อให้ของกลับไปหาเจ้าของเร็วที่สุด</p>
+    <p>
+        ประกาศทั้งหมด <strong>{{ $totalItem }}</strong> ·
+        ยังไม่พบเจ้าของ <strong>{{ $waitingOwner }}</strong> ·
+        ได้รับคืนแล้ว <strong>{{ $returnedItem }}</strong> ·
+        รอแอดมินยืนยัน <strong>{{ $waitingConfirm }}</strong>
+    </p>
 
-
-    <form method="GET" action="{{ route('home') }}">
-        <label for="from">เมื่อวันที่</label>
-        <input type="date" id="from" name="from" value="{{ $from }}">
-
-        <label for="to">ถึง</label>
-        <input type="date" id="to" name="to" value="{{ $to }}">
-
-        <button type="submit">กรอง</button>
-        <a href="{{ route('home') }}">ล้างตัวกรอง</a>
+    <!-- ให้ของที่พิมค้นหาเชื่อมไปกับหน้า search -->
+    <form method="GET" action="{{ route('search.home') }}">
+        <input type="hidden" name="searched" value="1">
+        <label for="quick">ค้นหาสิ่งของ:</label>
+        <input type="text" id="quick" name="item_name" placeholder="เช่น กระเป๋าตังค์สีน้ำตาล">
+        <button type="submit">ค้นหา</button>
+        <a href="{{ route('home') }}">ล้างคำค้นหา</a>
     </form>
+
+    <!-- กรองพบของกับของหาย -->
+    <p>
+        ประเภท:
+        <a href="{{ route('home') }}">ทั้งหมด</a> ·
+        <a href="{{ route('home', ['type' => 'found']) }}">พบของ</a> ·
+        <a href="{{ route('home', ['type' => 'lost']) }}">ของหาย</a>
+    </p>
 
     <!-- ปุ่มลัดช่วงเวลา -->
     <p>
+        ช่วงเวลา:
+        <a href="{{ route('home') }}">ทั้งหมด</a> ·
         <a href="{{ route('home', ['from' => date('Y-m-d', strtotime('-7 days')), 'to' => date('Y-m-d')]) }}">7 วันล่าสุด</a> ·
         <a href="{{ route('home', ['from' => date('Y-m-d', strtotime('-30 days')), 'to' => date('Y-m-d')]) }}">30 วันล่าสุด</a> ·
-        <a href="{{ route('home', ['from' => date('Y-m-d', strtotime('-3 months')), 'to' => date('Y-m-d')]) }}">3 เดือนล่าสุด</a> ·
-        <a href="{{ route('home') }}">ทั้งหมด</a>
+        <a href="{{ route('home', ['from' => date('Y-m-d', strtotime('-3 months')), 'to' => date('Y-m-d')]) }}">3 เดือนล่าสุด</a>
+    </p>
+    
+    <!-- เก่าสุดใหม่สุด -->
+    <p>
+        เรียงตาม:
+        <a href="{{ route('home', array_merge(request()->query(), ['sort' => 'new', 'page' => 1])) }}">ใหม่สุด</a> ·
+        <a href="{{ route('home', array_merge(request()->query(), ['sort' => 'old', 'page' => 1])) }}">เก่าสุด</a>
     </p>
 
     <!-- ---------- จำนวนผลลัพธ์ ---------- -->
@@ -81,7 +100,12 @@
                     <td>{{ $item->location }}</td>
                     <td>{{ $item->reporter_name }}</td>
                     <td>{{ $item->event_date }}</td>
-                    <td>{{ $item->status }}</td>
+                    <td>
+                        {{ $item->status }}
+                        @if ($item->days_left > 0)
+                            <br><small>เก็บเข้าคลังในอีก {{ $item->days_left }} วัน</small>
+                        @endif
+                    </td>
                     <td>
                         <a href="{{ route('item.show', $item->id) }}"><button type="button">More</button></a>
                     </td>

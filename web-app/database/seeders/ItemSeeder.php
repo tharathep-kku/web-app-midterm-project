@@ -28,10 +28,10 @@ class ItemSeeder extends Seeder
                 'title' => 'กระเป๋าตังค์สีน้ำตาล',
                 'description' => 'มีบัตรนักศึกษาอยู่ข้างใน',
                 'location' => 'อาคารพจน์ สารสิน',
-                'event_date' => '2026-01-28',
+                'event_date' => date('Y-m-d', strtotime('-25 days')),
                 'image_url' => 'images/items/money.png',
                 'status' => 'ได้รับคืนแล้ว',
-                'returned_date' => '2026-02-10',
+                'returned_date' => date('Y-m-d', strtotime('-20 days')),
             ],
             [
                 'user_id' => 1,
@@ -40,10 +40,10 @@ class ItemSeeder extends Seeder
                 'title' => 'กำไลข้อมือ',
                 'description' => 'กำไลเงินลายดอกไม้',
                 'location' => 'ศูนย์ประชุมกาญจนาภิเษก',
-                'event_date' => '2026-08-19',
+                'event_date' => date('Y-m-d', strtotime('-10 days')),
                 'image_url' => 'images/items/ring.png',
                 'status' => 'ได้รับคืนแล้ว',
-                'returned_date' => '2026-08-25',
+                'returned_date' => date('Y-m-d', strtotime('-5 days')),
             ],
             [
                 'user_id' => 2,
@@ -140,10 +140,10 @@ class ItemSeeder extends Seeder
                 'title' => 'แว่นตากันแดด',
                 'description' => 'แว่นกันแดดกรอบสีน้ำตาล',
                 'location' => 'ศูนย์ประชุมกาญจนาภิเษก',
-                'event_date' => '2026-08-07',
+                'event_date' => date('Y-m-d', strtotime('-7 days')),
                 'image_url' => 'images/items/sunglasses_black.png',
                 'status' => 'ได้รับคืนแล้ว',
-                'returned_date' => '2026-08-12',
+                'returned_date' => date('Y-m-d', strtotime('-1 days')),
             ],
             [
                 'user_id' => 9,
@@ -175,6 +175,11 @@ class ItemSeeder extends Seeder
             $item['return_unit_id'] = $returnUnitCount > 0
                 ? ($index % $returnUnitCount) + 1
                 : null;
+
+            // insert หลายแถวพร้อมกันบังคับให้ทุกแถวมีคีย์ชุดเดียวกัน
+            if (!isset($item['returned_date'])) {
+                $item['returned_date'] = null;
+            }
         }
         unset($item);
 
