@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use App\Models\Item;
 use App\Models\Category;
@@ -164,7 +165,7 @@ class ItemController extends Controller
         }
 
         Item::create([
-            'user_id'        => null, // โพสต์จากบุคคลทั่วไป ไม่ผูกกับหน่วยงาน
+            'user_id'        => Auth::check() ? Auth::user()->finder_user_id : null, // ผูกโพสต์กับคนที่ล็อกอิน เพื่อให้แก้ไขโพสต์ตัวเองได้
             'category_id'    => $validated['category'],
             'type'           => $validated['postType'],
             'title'          => $validated['itemName'],
