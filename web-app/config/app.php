@@ -78,7 +78,7 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    'locale' => 'th', // เว็บนี้ใช้ภาษาไทยอย่างเดียว ไม่อ่านจาก .env เพื่อให้ทุกเครื่องเป็นไทยเหมือนกัน
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 

@@ -101,11 +101,11 @@
         <table border="1" cellspacing="2" cellpadding="0">
             <thead>
                 <tr>
-                    <th>สิ่งของ</th>
+                    <th>สิ่งของ</th>   
                     <th>ภาพของหาย</th>
                     <th>หมวดหมู่</th>
                     <th>สถานที่พบ</th>
-                    <th>ชื่อผู้ใช้</th>
+                    <th>รายละเอียด</th>
                     <th>วันที่พบ</th>
                     <th>สถานะ</th>
                     <th>ติดต่อ</th>
@@ -124,7 +124,7 @@
                         </td>
                         <td>{{ $item->category?->name ?? 'อื่นๆ' }}</td>
                         <td>{{ $item->location }}</td>
-                        <td>{{ $item->reporter?->fullname ?? 'ไม่ทราบชื่อ' }}</td>
+                        <td>{{ $item->description }}</td>
                         <td>{{ $item->event_date }}</td>
                         <td>{{ $item->status }}</td>
                         <td style="text-align: center;">

@@ -9,7 +9,7 @@ Route::get('/', [ItemController::class, 'home'])->name('home');
 
 // จุดรับ-ส่งคืน: ล็อกอินแล้วเข้าได้เลย ไม่ต้องยืนยันอีเมล
 Route::middleware('auth')->group(function () {
-    Route::get('dashboard', [ReturnUnitController::class, 'dashboard'])->name('dashboard');
+    Route::get('location', [ReturnUnitController::class, 'index'])->name('location');
 });
 
 Route::get('/search', [ItemController::class, 'search'])->name('search.home');

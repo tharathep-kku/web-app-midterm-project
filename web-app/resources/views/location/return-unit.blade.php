@@ -10,10 +10,7 @@
 <body>
     <h1><strong>KKU Return: lost and found</strong></h1>
 
-    <a href="{{ route('home') }}">Home</a> /
-    <a href="{{ route('dashboard') }}">Dashboard</a> /
-    <a href="{{ route('search.home') }}">Search</a>
-    <br><br>
+    @include('partials.menu')
     <hr>
 
     <h2><strong>{{ $returnUnit->name }}</strong></h2>
@@ -45,12 +42,13 @@
                     <th>หมวดหมู่</th>
                     <th>วันที่พบ</th>
                     <th>รายละเอียด</th>
+                    <th>ติดต่อ</th>
                 </tr>
             </thead>
             <tbody align="center">
                 @foreach ($items as $item)
                     <tr>
-                        <td><a href="{{ route('item.show', $item->id) }}">{{ $item->title }}</a></td>
+                        <td>{{ $item->title }}</td>
                         <td>
                             @if ($item->image_url)
                                 <img src="{{ asset($item->image_url) }}" alt="{{ $item->title }}" width="80">
@@ -61,17 +59,19 @@
                         <td>{{ $item->category?->name ?? 'อื่นๆ' }}</td>
                         <td>{{ $item->event_date }}</td>
                         <td>{{ $item->description }}</td>
+                        <td><a href="{{ route('item.show', $item->id) }}"><button type="button">More</button></a></td>
+                        
                     </tr>
                 @endforeach
             </tbody>
         </table>
         <br>
     @empty
-        <p>ยังไม่มีของที่หน่วยงานนี้</p>
+        <p>ยังไม่มีของที่จุดรับ-ส่งคืนนี้</p>
     @endforelse
 
     <br>
-    <a href="{{ route('dashboard') }}"><button type="button">กลับไป Dashboard</button></a>
+    <a href="{{ route('location') }}"><button type="button">กลับไปหน้าจุดรับ-ส่งคืนของ</button></a>
 
     <br>
     <hr>
