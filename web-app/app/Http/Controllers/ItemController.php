@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use App\Models\Item;
@@ -93,6 +94,8 @@ class ItemController extends Controller
 
         $item_name = trim($request->input('item_name') ?? '');
         $category = $request->input('category') ?? '';
+        $type = $request->input('type') ?? '';
+        $status = $request->input('status') ?? '';
         $location = trim($request->input('location') ?? '');
         $description = trim($request->input('description') ?? '');
         $start_date = $request->input('start_date') ?? '';
@@ -109,6 +112,14 @@ class ItemController extends Controller
 
             if ($category !== '') {
                 $query->where('category_id', $category);
+            }
+
+            if ($type !== '') {
+                $query->where('type', $type);
+            }
+
+            if ($status !== '') {
+                $query->where('status', $status);
             }
 
             if ($location !== '') {
@@ -131,31 +142,61 @@ class ItemController extends Controller
                 ->orderBy('event_date', 'desc')
                 ->paginate(5)
                 ->withQueryString();
+
+            // บันทึกประวัติการค้นหาไว้ใน Session (เก็บล่าสุด 5 รายการ)
+            if (!$request->has('page')) {
+                $label = $item_name !== '' ? $item_name : 'ค้นหาทั้งหมด';
+                $history = session('search_history', []);
+                array_unshift($history, ['label' => $label, 'url' => $request->fullUrl()]);
+                session(['search_history' => array_slice($history, 0, 5)]);
+            }
         }
 
         $categories = Category::all();
         $locations = Item::select('location')->distinct()->orderBy('location')->pluck('location');
+        $statuses = Item::select('status')->distinct()->orderBy('status')->pluck('status');
+        $history = session('search_history', []);
 
         return view('search', compact(
             'searched',
             'items',
             'categories',
             'locations',
+            'statuses',
             'item_name',
             'category',
+            'type',
+            'status',
             'location',
             'description',
             'start_date',
-            'end_date'
+            'end_date',
+            'history'
         ));
     }
+
+    public function clearHistory(): RedirectResponse
+    {
+        session()->forget('search_history');
+        return redirect()->route('search.home');
+    }
+
+    public function clearHistoryItem(int $index): RedirectResponse
+    {
+        $history = session('search_history', []);
+        unset($history[$index]);
+        session(['search_history' => array_values($history)]);
+
+        return redirect()->route('search.home');
+    }
+
     public function show(Item $item): View
     {
         $item->load(['category', 'reporter', 'returnUnit']);
 
         return view('item', compact('item'));
     }
-    // เปิดหน้าฟอร์มแจ้งของหาย/พบของ
+
     public function create()
     {
         $categories = Category::all();
@@ -164,7 +205,6 @@ class ItemController extends Controller
         return view('create', compact('categories', 'locations'));
     }
 
-    // บันทึกข้อมูลโพสต์ลงฐานข้อมูล
     public function store(Request $request)
     {
         $validated = $request->validate([

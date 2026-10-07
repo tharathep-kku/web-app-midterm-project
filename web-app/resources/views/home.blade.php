@@ -22,7 +22,7 @@
         <label for="quick">ค้นหาสิ่งของ:</label>
         <input type="text" id="quick" name="item_name" placeholder="เช่น กระเป๋าตังค์สีน้ำตาล">
         <button type="submit">ค้นหา</button>
-        <a href="{{ route('home') }}">ล้างคำค้นหา</a>
+        <a href="{{ route('home') }}"><button type="button">ล้างคำค้นหา</button></a>
     </form>
 
     <!-- กรองพบของกับของหาย -->
