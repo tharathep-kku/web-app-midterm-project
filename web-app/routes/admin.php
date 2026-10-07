@@ -9,4 +9,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/stats', [AdminController::class, 'stats'])->name('admin.stats');
     Route::put('/admin/{iid}/approve', [AdminController::class, 'approve'])->whereNumber('iid')->name('admin.approve');
     Route::put('/admin/{iid}/reject', [AdminController::class, 'reject'])->whereNumber('iid')->name('admin.reject');
+    Route::put('/admin/{iid}/handover/confirm', [AdminController::class, 'confirmHandover'])->whereNumber('iid')->name('admin.handover.confirm');
+    Route::put('/admin/{iid}/handover/reject', [AdminController::class, 'rejectHandover'])->whereNumber('iid')->name('admin.handover.reject');
 });

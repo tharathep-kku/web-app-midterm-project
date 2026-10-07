@@ -38,8 +38,14 @@ class AdminController extends Controller
         $keyword = trim($request->input('keyword') ?? '');
 
         $items = collect();
+        $handovers = collect();
 
         if ($admin !== null) {
+            $handovers = Item::with('reporter')
+            ->where('status', 'รอแอดมินยืนยัน')
+            ->orderBy('id', 'DESC')
+            ->get();
+
             $query = Item::query();
 
             if ($approval_status !== '') {
@@ -66,7 +72,7 @@ class AdminController extends Controller
             }
         }
 
-        return view('admin.index', compact('admin', 'items', 'approval_status', 'type', 'keyword'));
+        return view('admin.index', compact('admin', 'items', 'handovers', 'approval_status', 'type', 'keyword'));
     }
 
     public function approve(int $id)
@@ -78,6 +84,9 @@ class AdminController extends Controller
         }
 
         $item = Item::findOrFail($id);
+        if ($item->approval_status !== 'รออนุมัติ') {
+            return redirect()->back()->with('error', 'โพสต์ ' . $item->title . ' ถูกตรวจไปแล้ว');
+        }
         $item->approval_status = 'อนุมัติแล้ว';
         $item->reject_reason = null;
         $item->approved_by = $admin->id;
@@ -100,6 +109,9 @@ class AdminController extends Controller
         ]);
 
         $item = Item::findOrFail($id);
+        if ($item->approval_status !== 'รออนุมัติ') {
+            return redirect()->back()->with('error', 'โพสต์ ' . $item->title . ' ถูกตรวจไปแล้ว');
+        }
         $item->approval_status = 'ไม่อนุมัติ';
         $item->reject_reason = $validated['reject_reason'];
         $item->approved_by = $admin->id;
@@ -107,6 +119,49 @@ class AdminController extends Controller
         $item->save();
 
         return redirect()->back()->with('success', 'ปฏิเสธโพสต์ ' . $item->title . ' แล้ว');
+    }
+
+    // ยืนยันหลักฐานการส่งมอบ: จุดรับ-ส่งได้รับของแล้ว
+    public function confirmHandover(int $id)
+    {
+        $admin = $this->currentAdmin();
+
+        if ($admin === null) {
+            return redirect()->route('admin.index')->with('error', 'เฉพาะแอดมินเท่านั้นที่ยืนยันการส่งมอบได้');
+        }
+
+        $item = Item::findOrFail($id);
+
+        // ยืนยันได้เฉพาะรายการที่รอแอดมินยืนยันอยู่เท่านั้น
+        if ($item->status !== 'รอแอดมินยืนยัน') {
+            return redirect()->back()->with('error', 'รายการ ' . $item->title . ' ไม่ได้อยู่ในสถานะรอยืนยัน');
+        }
+
+        $item->status = 'ได้รับของแล้ว';
+        $item->save();
+
+        return redirect()->back()->with('success', 'ยืนยันการส่งมอบ ' . $item->title . ' แล้ว');
+    }
+
+    // ปฏิเสธหลักฐานการส่งมอบ: ให้ผู้ใช้ส่งหลักฐานใหม่
+    public function rejectHandover(int $id)
+    {
+        $admin = $this->currentAdmin();
+
+        if ($admin === null) {
+            return redirect()->route('admin.index')->with('error', 'เฉพาะแอดมินเท่านั้นที่ปฏิเสธการส่งมอบได้');
+        }
+
+        $item = Item::findOrFail($id);
+
+        if ($item->status !== 'รอแอดมินยืนยัน') {
+            return redirect()->back()->with('error', 'รายการ ' . $item->title . ' ไม่ได้อยู่ในสถานะรอยืนยัน');
+        }
+
+        $item->status = 'หลักฐานไม่ถูกต้อง';
+        $item->save();
+
+        return redirect()->back()->with('success', 'ปฏิเสธหลักฐานการส่งมอบ ' . $item->title . ' แล้ว');
     }
 
     // หน้าสถิติต่างๆ ของระบบ
@@ -129,6 +184,8 @@ class AdminController extends Controller
         $returned_item = Item::where('status', 'ได้รับคืนแล้ว')->count();
         $waiting_owner = Item::where('status', 'ยังไม่พบเจ้าของ')->count();
         $waiting_confirm = Item::where('status', 'รอแอดมินยืนยัน')->count();
+        $received_item = Item::where('status', 'ได้รับของแล้ว')->count();
+        $invalid_evidence = Item::where('status', 'หลักฐานไม่ถูกต้อง')->count();
 
         // อัตราการได้รับคืน คิดเป็นเปอร์เซ็นต์ ต้องกันหารด้วยศูนย์ตอนที่ยังไม่มีข้อมูล
         $return_rate = 0;
@@ -175,6 +232,8 @@ class AdminController extends Controller
             'returned_item',
             'waiting_owner',
             'waiting_confirm',
+            'received_item',
+            'invalid_evidence',
             'return_rate',
             'first_date',
             'last_date',

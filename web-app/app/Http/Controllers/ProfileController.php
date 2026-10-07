@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Models\Item;
 
 class ProfileController extends Controller
 {
@@ -15,7 +16,18 @@ class ProfileController extends Controller
 
     public function edit(Request $request): View
     {
-        return view('user.profile', ['user' => $request->user()]);
+        $user = $request->user();
+
+        // โพสต์ของฉัน: แสดงเฉพาะ user ทั่วไป แอดมินดูโพสต์ทั้งหมดได้ที่หน้าหลังบ้านอยู่แล้ว
+        $items = collect();
+        if ($user->role === 'user' && $user->finder_user_id !== null) {
+            $items = Item::with('category')
+                ->where('user_id', $user->finder_user_id)
+                ->orderBy('id', 'DESC')
+                ->get();
+        }
+
+        return view('user.profile', compact('user', 'items'));
     }
 
     public function update(Request $request): RedirectResponse

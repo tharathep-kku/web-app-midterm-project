@@ -39,6 +39,60 @@
     <hr>
 
     @if ($admin)
+        <h2><strong>รายการรอยืนยันการส่งมอบ</strong></h2>
+        <p>รายการที่มีผู้แจ้งว่าส่งมอบของแล้ว รอแอดมินตรวจหลักฐาน</p>
+
+        <table border="1" cellspacing="2" cellpadding="0">
+            <thead>
+                <tr>
+                    <th>รหัส</th>
+                    <th>สิ่งของ</th>
+                    <th>ชื่อผู้แจ้ง</th>
+                    <th>หลักฐาน</th>
+                    <th>สถานะปัจจุบัน</th>
+                    <th>จัดการ</th>
+                </tr>
+            </thead>
+            <tbody align="center">
+                @forelse ($handovers as $handover)
+                    <tr>
+                        <td>{{ $handover->id }}</td>
+                        <td>{{ $handover->title }}</td>
+                        <td>{{ $handover->reporter ? $handover->reporter->fullname : ($handover->reporter_name ?? 'ไม่ทราบชื่อ') }}</td>
+                        <td>
+                            @if ($handover->evidence_url)
+                                <img src="{{ asset($handover->evidence_url) }}" alt="หลักฐานของ {{ $handover->title }}" width="80"><br>
+                            @endif
+                            {{ $handover->evidence_note ? $handover->evidence_note : 'ไม่มีหลักฐานแนบ' }}
+                        </td>
+                        <td>{{ $handover->status }}</td>
+                        <td>
+                            <form method="POST" action="{{ route('admin.handover.confirm', $handover->id) }}"
+                                onsubmit="return confirm('ตรวจสอบหลักฐานแล้ว ต้องการยืนยันว่าได้รับของแล้วใช่หรือไม่?');">
+                                @csrf
+                                @method('PUT')
+                                <button type="submit">ยืนยัน</button>
+                            </form>
+
+                            <form method="POST" action="{{ route('admin.handover.reject', $handover->id) }}"
+                                onsubmit="return confirm('ต้องการปฏิเสธหลักฐานนี้ใช่หรือไม่? (ผู้ใช้ต้องส่งหลักฐานใหม่)');">
+                                @csrf
+                                @method('PUT')
+                                <button type="submit">ปฏิเสธ</button>
+                            </form>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6">ไม่มีรายการรอยืนยันการส่งมอบ</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        <br>
+        <hr>
+
         <h2><strong>ข้อมูลหลังบ้าน: โพสต์ทั้งหมด</strong></h2>
 
         <form method="GET" action="{{ route('admin.index') }}">
@@ -103,6 +157,8 @@
                             @endif
                         </td>
                         <td>
+                        {{-- แสดงปุ่มเฉพาะโพสต์ที่ยังไม่ได้ตรวจ ตรวจแล้วกดซ้ำไม่ได้ --}}
+                        @if ($item->approval_status === 'รออนุมัติ')
                             <form method="POST" action="{{ route('admin.approve', $item->id) }}"
                                 onsubmit="return confirm('ยืนยันการอนุมัติโพสต์นี้หรือไม่?');">
                                 @csrf
@@ -117,7 +173,10 @@
                                 <input type="text" name="reject_reason" placeholder="เหตุผล" required>
                                 <button type="submit">ไม่อนุมัติ</button>
                             </form>
-                        </td>
+                        @else
+                            ดำเนินการเรียบร้อย
+                        @endif
+                    </td>
                     </tr>
                 @empty
                     <tr>

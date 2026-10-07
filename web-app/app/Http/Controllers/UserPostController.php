@@ -9,31 +9,13 @@ use App\Models\Category;
 
 class UserPostController extends Controller
 {
-    // รายการโพสต์ของ user ที่ล็อกอินอยู่
-    public function index()
-    {
-        $finderUserId = Auth::user()->finder_user_id;
-
-        // บัญชีที่ไม่ได้ผูกกับ finder_users จะไม่มีโพสต์ของตัวเอง
-        if ($finderUserId === null) {
-            $items = collect();
-        } else {
-            $items = Item::with('category')
-                ->where('user_id', $finderUserId)
-                ->orderBy('id', 'DESC')
-                ->get();
-        }
-
-        return view('user.my-posts', compact('items'));
-    }
-
     // หน้าฟอร์มแก้ไขโพสต์ แก้ได้เฉพาะโพสต์ของตัวเอง
     public function edit($id)
     {
         $item = Item::findOrFail($id);
 
         if ($item->user_id === null || $item->user_id !== Auth::user()->finder_user_id) {
-            return redirect()->route('my-posts.index')->with('error', 'ไม่สามารถแก้ไขโพสต์ของคนอื่นได้');
+            return redirect()->route('profile.edit')->with('error', 'ไม่สามารถแก้ไขโพสต์ของคนอื่นได้');
         }
 
         $categories = Category::all();
@@ -49,7 +31,7 @@ class UserPostController extends Controller
 
         // เช็คเจ้าของซ้ำอีกรอบ เพราะยิง PUT ตรงมาได้โดยไม่ต้องผ่านหน้าฟอร์ม
         if ($item->user_id === null || $item->user_id !== Auth::user()->finder_user_id) {
-            return redirect()->route('my-posts.index')->with('error', 'ไม่สามารถแก้ไขโพสต์ของคนอื่นได้');
+            return redirect()->route('profile.edit')->with('error', 'ไม่สามารถแก้ไขโพสต์ของคนอื่นได้');
         }
 
         // กฎเดียวกับตอนสร้างโพสต์ใน ItemController@store
@@ -82,6 +64,6 @@ class UserPostController extends Controller
         $item->approval_status = 'รออนุมัติ';
         $item->save();
 
-        return redirect()->route('my-posts.index')->with('success', 'แก้ไขโพสต์ ' . $item->title . ' เรียบร้อยแล้ว');
+        return redirect()->route('profile.edit')->with('success', 'แก้ไขโพสต์ ' . $item->title . ' เรียบร้อยแล้ว');
     }
 }
