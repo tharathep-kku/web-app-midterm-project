@@ -7,13 +7,13 @@
 @endsection
 
 @section('content')
-
-    <p>เก็บของได้ลงประกาศไว้ ของหายค้นหาก่อนแจ้ง เพื่อให้ของกลับไปหาเจ้าของเร็วที่สุด</p>
+    <h2>ศูนย์รวมแจ้งของหายและพบของมหาวิทยาลัยขอนแก่น</h2>
+    <p>ปลอดภัย ตรวจสอบได้ มีหลักฐานยืนยันการส่งมอบทุกครั้ง</p>
     <p>
-        ประกาศทั้งหมด <strong>{{ $totalItem }}</strong> ·
-        ยังไม่พบเจ้าของ <strong>{{ $waitingOwner }}</strong> ·
-        ได้รับคืนแล้ว <strong>{{ $returnedItem }}</strong> ·
-        รอแอดมินยืนยัน <strong>{{ $waitingConfirm }}</strong>
+        ประกาศทั้งหมด <strong>{{ $totalItem }}</strong> รายการ ·
+        ยังไม่พบเจ้าของ <strong>{{ $waitingOwner }}</strong> รายการ ·
+        ได้รับคืนแล้ว <strong>{{ $returnedItem }}</strong> รายการ ·
+        รอแอดมินยืนยัน <strong>{{ $waitingConfirm }}</strong> รายการ
     </p>
 
     <!-- ให้ของที่พิมค้นหาเชื่อมไปกับหน้า search -->
@@ -51,7 +51,7 @@
 
     <!-- ---------- จำนวนผลลัพธ์ ---------- -->
     <p aria-live="polite">
-        พบ {{ $items->total() }} รายการ
+        พบ {{ $items->total() }} รายการที่ยังไม่เข้าคลัง
         @if ($from !== '' || $to !== '')
             ระหว่าง
             {{ $from !== '' ? date('d/m/Y', strtotime($from)) : 'เริ่มต้น' }}
@@ -123,5 +123,11 @@
         <br>
         <a href="{{ route('posts.create') }}"><button type="button">แจ้งของหาย / แจ้งพบของ</button></a>
     </p>
+
+    <hr>
+
+    <h2><strong>จุดรับ-ส่งคืนของ</strong></h2>
+    <p>นำของที่เก็บได้ไปฝาก หรือไปรับของคืนได้ที่จุดเหล่านี้</p>
+    @include('partials.return-units')
 
 @endsection

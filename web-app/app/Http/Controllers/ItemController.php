@@ -52,9 +52,10 @@ class ItemController extends Controller
         $totalItem = Item::count();
         $waitingOwner = Item::where('status', 'ยังไม่พบเจ้าของ')->count();
         $returnedItem = Item::where('status', 'ได้รับคืนแล้ว')->count();
-        $waitingConfirm = Item::where('status', 'รอแอดมินยืนยัน')->count();
+        $waitingConfirm = Item::where('status', 'รอแอดมินยืนยัน')->count();      
+        $returnUnits = \App\Models\ReturnUnit::withCount('items')->get();
 
-        return view('home', compact('items', 'from', 'to', 'type', 'sort', 'totalItem', 'waitingOwner', 'returnedItem', 'waitingConfirm'));
+        return view('home', compact('items', 'from', 'to', 'type', 'sort', 'returnUnits', 'totalItem', 'waitingOwner', 'returnedItem', 'waitingConfirm'));
     }
 
     // คลังประกาศ: ของที่คืนเจ้าของไปแล้วเกิน 6 เดือน
@@ -74,12 +75,11 @@ class ItemController extends Controller
         return view('archive', compact('items'));
     }
 
-    // ตาราง home/archive ใช้ category_name กับ reporter_name
+    // ตาราง home/archive ใช้ category_name กับ days_left
     private function addNames($items): void
     {
         foreach ($items as $item) {
-            $item->category_name = $item->category->name ?? 'อื่นๆ';
-            $item->reporter_name = $item->reporter->fullname ?? ($item->reporter_name ?: 'ไม่ทราบชื่อ');  
+            $item->category_name = $item->category->name ?? 'อื่นๆ';  
             $item->days_left = 0;// กำหนดค่าเริ่มต้นเป็น 0
             if ($item->status === 'ได้รับคืนแล้ว' && !empty($item->returned_date)) {
                 $archiveTime = strtotime($item->returned_date . ' +' . self::ARCHIVE_DAYS . ' days');
