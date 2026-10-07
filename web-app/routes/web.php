@@ -13,6 +13,8 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/search', [ItemController::class, 'search'])->name('search.home');
+Route::delete('/search/history', [ItemController::class, 'clearHistory'])->name('search.history.clear');
+Route::delete('/search/history/{index}', [ItemController::class, 'clearHistoryItem'])->whereNumber('index')->name('search.history.clear-one');
 Route::get('/items/{item}', [ItemController::class, 'show'])->name('item.show');
 Route::get('/return-units/{returnUnit}', [ReturnUnitController::class, 'show'])->name('return-units.show');
 
