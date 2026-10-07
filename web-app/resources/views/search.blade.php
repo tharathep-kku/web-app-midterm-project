@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search - KKU Return</title>
+    <title>ค้นหาของหาย - KKU Return</title>
 </head>
 
 <body>
@@ -18,7 +18,7 @@
     @include('partials.menu')
     <hr>
 
-    <h2><strong>Search</strong></h2>
+    <h2><strong>ค้นหาของหาย</strong></h2>
 
     <form id="searchForm" method="GET" action="{{ route('search.home') }}" onsubmit="document.getElementById('loadingMessage').style.display='block'; document.getElementById('searchBtn').disabled=true;">
 
@@ -57,11 +57,6 @@
                 <option value="{{ $loc }}">
             @endforeach
         </datalist>
-        <br><br>
-
-        <label for="description">รายละเอียดเพิ่มเติม:</label>
-        <br>
-        <textarea id="description" name="description" placeholder="อธิบายลักษณะของสิ่งของ...">{{ $description }}</textarea>
         <br><br>
 
         <label>ช่วงวันที่พบ/วันที่หาย: </label><br>
