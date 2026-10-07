@@ -7,7 +7,7 @@ use Illuminate\View\View;
 
 class ReturnUnitController extends Controller
 {
-    public function dashboard(): View
+    public function index(): View
     {
         $returnUnits = ReturnUnit::withCount('items')->get();
 
@@ -21,7 +21,7 @@ class ReturnUnitController extends Controller
             'show_url' => route('return-units.show', $unit->id),
         ])->values();
 
-        return view('location.dashboard', compact('returnUnits', 'returnUnitsForMap'));
+        return view('location.index', compact('returnUnits', 'returnUnitsForMap'));
     }
 
     public function show(ReturnUnit $returnUnit): View

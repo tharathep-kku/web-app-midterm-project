@@ -21,7 +21,7 @@
                 <th>ภาพของหาย</th>
                 <th>หมวดหมู่</th>
                 <th>สถานที่พบ</th>
-                <th>ชื่อผู้ใช้</th>
+                <th>รายละเอียด</th>
                 <th>วันที่พบ</th>
                 <th>วันที่คืนเจ้าของ</th>
                 <th>สถานะ</th>
@@ -41,7 +41,7 @@
                     </td>
                     <td>{{ $item->category_name }}</td>
                     <td>{{ $item->location }}</td>
-                    <td>{{ $item->reporter_name }}</td>
+                    <td>{{ $item->description }}</td>
                     <td>{{ $item->event_date }}</td>
                     <td>{{ $item->returned_date }}</td>
                     <td>{{ $item->status }}</td>
