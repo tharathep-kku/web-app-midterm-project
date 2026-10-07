@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Item;
 use App\Models\Category;
 use App\Models\FinderUser;
@@ -53,10 +54,10 @@ class AgencyItemController extends Controller
         'ตลาดโนนม่วง',
     ];
 
-    // ตอนนี้ระบบ login ยังเป็นงานของอีกส่วนหนึ่ง เลยเก็บ id ของหน่วยงานที่กำลังใช้งานไว้ใน session ก่อน
+    // หาข้อมูลหน่วยงานจากบัญชีที่ล็อกอินอยู่ (users.finder_user_id ชี้ไปที่ finder_users)
     private function currentAgency()
     {
-        $id = session('finder_user_id');
+        $id = Auth::user()->finder_user_id;
 
         if ($id === null) {
             return null;
@@ -64,7 +65,7 @@ class AgencyItemController extends Controller
 
         $user = FinderUser::find($id);
 
-        // กันกรณีที่ session ค้างไว้แต่ user ถูกลบไปแล้ว หรือไม่ใช่หน่วยงาน
+        // กันกรณีที่บัญชีไม่ได้ผูกกับหน่วยงาน หรือข้อมูลใน finder_users ไม่ใช่หน่วยงาน
         if ($user === null || $user->role !== 'agency') {
             return null;
         }
@@ -72,29 +73,10 @@ class AgencyItemController extends Controller
         return $user;
     }
 
-    // เลือกว่าจะใช้งานในนามหน่วยงานไหน (ใช้แทนหน้า login ชั่วคราว)
-    public function switchUser(Request $request)
-    {
-        $validated = $request->validate([
-            'finder_user_id' => ['required', 'integer'],
-        ]);
-
-        $user = FinderUser::find($validated['finder_user_id']);
-
-        if ($user === null || $user->role !== 'agency') {
-            return redirect()->route('agency.index')->with('error', 'ไม่พบบัญชีหน่วยงานนี้');
-        }
-
-        session(['finder_user_id' => $user->id]);
-
-        return redirect()->route('agency.index')->with('success', 'เข้าใช้งานในนาม ' . $user->fullname . ' แล้ว');
-    }
-
     // รายการโพสต์ทั้งหมดของหน่วยงานตัวเอง
     public function index()
     {
         $agency = $this->currentAgency();
-        $agencies = FinderUser::where('role', 'agency')->orderBy('id')->get();
 
         $items = collect();
 
@@ -109,7 +91,7 @@ class AgencyItemController extends Controller
             }
         }
 
-        return view('agency.index', compact('agency', 'agencies', 'items'));
+        return view('agency.index', compact('agency', 'items'));
     }
 
     // หน้าฟอร์มโพสต์ของที่เก็บได้
@@ -118,7 +100,7 @@ class AgencyItemController extends Controller
         $agency = $this->currentAgency();
 
         if ($agency === null) {
-            return redirect()->route('agency.index')->with('error', 'กรุณาเลือกบัญชีหน่วยงานก่อนโพสต์');
+            return redirect()->route('agency.index')->with('error', 'บัญชีนี้ยังไม่ได้ผูกกับข้อมูลหน่วยงาน');
         }
 
         $categories = Category::all();

@@ -21,27 +21,12 @@
         <p><strong>{{ session('error') }}</strong></p>
     @endif
 
-    <h2><strong>เข้าใช้งานในนามหน่วยงาน</strong></h2>
-
     @if ($agency)
-        <p>กำลังใช้งานในนาม: <strong>{{ $agency->fullname }}</strong> ({{ $agency->email }} / {{ $agency->phone }})</p>
+        <p>เข้าสู่ระบบในนาม: <strong>{{ $agency->fullname }}</strong> ({{ $agency->email }} / {{ $agency->phone }})</p>
     @else
-        <p>ยังไม่ได้เลือกหน่วยงาน กรุณาเลือกจากรายการด้านล่างก่อนจึงจะโพสต์ได้</p>
+        <p>บัญชีนี้ยังไม่ได้ผูกกับข้อมูลหน่วยงาน กรุณาติดต่อแอดมิน</p>
     @endif
 
-    <form method="POST" action="{{ route('agency.switch') }}">
-        @csrf
-        <label for="finder_user_id">หน่วยงาน:</label>
-        <select id="finder_user_id" name="finder_user_id" required>
-            <option value="">-- เลือกหน่วยงาน --</option>
-            @foreach ($agencies as $ag)
-                <option value="{{ $ag->id }}" {{ $agency && $agency->id === $ag->id ? 'selected' : '' }}>{{ $ag->fullname }}</option>
-            @endforeach
-        </select>
-        <button type="submit">เข้าใช้งาน</button>
-    </form>
-
-    <br>
     <hr>
 
     <h2><strong>โพสต์ของหน่วยงาน</strong></h2>

@@ -3,25 +3,30 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use App\Models\Item;
 use App\Models\Category;
-use App\Models\FinderUser;
 
 class ItemController extends Controller
 {
-    public function home(Request $request)
+    // จำนวนวันหลังคืนเจ้าของ ก่อนย้ายประกาศเข้าคลัง
+    private const ARCHIVE_DAYS = 7;
+
+    // หน้าแรก: แสดงรายการทันที (ไม่ต้องค้นหาก่อน) กรองตามวันที่ได้ และซ่อนของที่คืนเจ้าของเกิน 7 วัน
+    public function home(Request $request): View
     {
         $from = $request->input('from') ?? '';
         $to = $request->input('to') ?? '';
+        $type = $request->input('type') ?? '';
+        $sort = $request->input('sort') ?? '';
+        $direction = $sort === 'old' ? 'asc' : 'desc';
+        $sevenDaysAgo = date('Y-m-d', strtotime('-' . self::ARCHIVE_DAYS . ' days'));
 
-        $query = Item::query();
-
-        $sixMonthsAgo = date('Y-m-d', strtotime('-6 months'));
-
-        $query->where(function ($q) use ($sixMonthsAgo) {
-            $q->where('status', '!=', 'ได้รับคืนแล้ว')
-                ->orWhereNull('returned_date')
-                ->orWhere('returned_date', '>', $sixMonthsAgo);
+        $query = Item::query()->where(function ($q) use ($sevenDaysAgo) {
+        $q->where('status', '!=', 'ได้รับคืนแล้ว')
+            ->orWhereNull('returned_date')
+            ->orWhere('returned_date', '>', $sevenDaysAgo);
         });
 
         if ($from !== '') {
@@ -32,35 +37,57 @@ class ItemController extends Controller
             $query->where('event_date', '<=', $to);
         }
 
-        $items = $query->orderBy('event_date', 'desc')->get();
-
-        foreach ($items as $item) {
-            $itemCategory = Category::find($item->category_id);
-            $item->category_name = $itemCategory ? $itemCategory->name : 'อื่นๆ';
+        if ($type !== '') {
+            $query->where('type', $type);
         }
 
-        return view('home', compact('items', 'from', 'to'));
+        $items = $query->with(['category', 'reporter'])
+            ->orderBy('event_date', $direction)
+            ->paginate(5)
+            ->withQueryString();
+
+        $this->addNames($items);
+
+        $totalItem = Item::count();
+        $waitingOwner = Item::where('status', 'ยังไม่พบเจ้าของ')->count();
+        $returnedItem = Item::where('status', 'ได้รับคืนแล้ว')->count();
+        $waitingConfirm = Item::where('status', 'รอแอดมินยืนยัน')->count();
+
+        return view('home', compact('items', 'from', 'to', 'type', 'sort', 'totalItem', 'waitingOwner', 'returnedItem', 'waitingConfirm'));
     }
 
-    public function archive()
+    // คลังประกาศ: ของที่คืนเจ้าของไปแล้วเกิน 6 เดือน
+    public function archive(): View
     {
-        $sixMonthsAgo = date('Y-m-d', strtotime('-6 months'));
+        $sevenDaysAgo = date('Y-m-d', strtotime('-' . self::ARCHIVE_DAYS . ' days'));
 
         $items = Item::where('status', 'ได้รับคืนแล้ว')
             ->whereNotNull('returned_date')
-            ->where('returned_date', '<=', $sixMonthsAgo)
+            ->where('returned_date', '<=', $sevenDaysAgo)
+            ->with(['category', 'reporter'])
             ->orderBy('returned_date', 'desc')
-            ->get();
+            ->paginate(5);
 
-        foreach ($items as $item) {
-            $itemCategory = Category::find($item->category_id);
-            $item->category_name = $itemCategory ? $itemCategory->name : 'อื่นๆ';
-        }
+        $this->addNames($items);
 
         return view('archive', compact('items'));
     }
 
-    public function index(Request $request)
+    // ตาราง home/archive ใช้ category_name กับ reporter_name
+    private function addNames($items): void
+    {
+        foreach ($items as $item) {
+            $item->category_name = $item->category->name ?? 'อื่นๆ';
+            $item->reporter_name = $item->reporter->fullname ?? ($item->reporter_name ?: 'ไม่ทราบชื่อ');  
+            $item->days_left = 0;// กำหนดค่าเริ่มต้นเป็น 0
+            if ($item->status === 'ได้รับคืนแล้ว' && !empty($item->returned_date)) {
+                $archiveTime = strtotime($item->returned_date . ' +' . self::ARCHIVE_DAYS . ' days');
+                $item->days_left = ceil(($archiveTime - time()) / 86400);
+            }
+        }
+    }
+
+    public function search(Request $request): View
     {
         $searched = $request->has('searched');
 
@@ -100,15 +127,10 @@ class ItemController extends Controller
                 $query->where('event_date', '<=', $end_date);
             }
 
-            $items = $query->orderBy('event_date', 'desc')->paginate(5)->withQueryString();
-
-            foreach ($items as $item) {
-                $itemCategory = Category::find($item->category_id);
-                $item->category_name = $itemCategory ? $itemCategory->name : 'อื่นๆ';
-
-                $reporter = FinderUser::find($item->user_id);
-                $item->reporter_name = $reporter ? $reporter->fullname : 'ไม่ทราบชื่อ';
-            }
+            $items = $query->with(['category', 'reporter'])
+                ->orderBy('event_date', 'desc')
+                ->paginate(5)
+                ->withQueryString();
         }
 
         $categories = Category::all();
@@ -127,7 +149,12 @@ class ItemController extends Controller
             'end_date'
         ));
     }
+    public function show(Item $item): View
+    {
+        $item->load(['category', 'reporter', 'returnUnit']);
 
+        return view('item', compact('item'));
+    }
     // เปิดหน้าฟอร์มแจ้งของหาย/พบของ
     public function create()
     {
@@ -158,7 +185,7 @@ class ItemController extends Controller
         }
 
         Item::create([
-            'user_id'        => null, // โพสต์จากบุคคลทั่วไป ไม่ผูกกับหน่วยงาน
+            'user_id'        => Auth::check() ? Auth::user()->finder_user_id : null, // ผูกโพสต์กับคนที่ล็อกอิน เพื่อให้แก้ไขโพสต์ตัวเองได้
             'category_id'    => $validated['category'],
             'type'           => $validated['postType'],
             'title'          => $validated['itemName'],

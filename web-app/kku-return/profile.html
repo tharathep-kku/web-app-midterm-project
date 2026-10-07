@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Profile - KKU Lost &amp; Found</title>
+</head>
+
+<body>
+  <h1><strong>KKU Return: lost and found</strong></h1>
+  <p>Welcome to KKU Return ที่จะช่วยคุณตามหาของสำคัญ หรือเจ้าของที่พัดพรากไปเอง</p>
+  <p>ศูนย์รวมแจ้งของหายและแจ้งพบของภายในมหาวิทยาลัยขอนแก่น ปลอดภัย ตรวจสอบได้ ลดความเสี่ยงจากการแอบอ้าง</p>
+
+  <ul>
+    <li>มีหลักฐานยืนยันการส่งมอบทุกครั้ง</li>
+  </ul>
+  <a href="index.html">Home</a> /
+  <a href="login.html">Login</a> /
+  <a href="create.html">Report a lost item</a> /
+  <a href="search.html">Search</a> /
+  <a href="profile.html">Profile</a>
+  <br><br>
+  <hr>
+
+  <h2>User Profile</h2>
+  <h3>บัญชีของคุณ</h3>
+  <p>ข้อมูลที่ใช้ในการติดต่อเมื่อมีการแจ้งของหายหรือแจ้งพบของ</p>
+
+  <p>ชื่อผู้ใช้: <span id="display_username">Kopiko</span></p>
+  <p>ชื่อ-นามสกุล: <span id="display_name">สหรัฐ งามเริ่ด</span></p>
+  <p>อีเมล: <span id="display_mail">kopiko@kkumail.com</span></p>
+  <p>เบอร์โทรศัพท์: <span id="display_tel">081-111-1111</span></p>
+
+  <form action="login.html" method="get">
+    <button type="submit">ออกจากระบบ (logout)</button>
+  </form><br>
+
+  <h3>เปลี่ยนรหัสผ่าน</h3>
+  <form id="changePasswordForm">
+    <p>
+      <label>รหัสผ่านเดิม: </label><br>
+      <input type="password" id="old_password" required>
+    </p>
+    <p>
+      <label>รหัสผ่านใหม่ (ขั้นต่ำ 8 ตัว): </label><br>
+      <input type="password" id="new_password" minlength="8" required>
+    </p>
+    <p>
+      <button type="submit">ยืนยันการเปลี่ยนรหัสผ่าน</button>
+    </p>
+  </form><br>
+
+  <h3>ประวัติการแจ้งข้อมูลของคุณ</h3>
+  <table border="1" cellspacing="2" cellpadding="0">
+    <thead>
+      <tr>
+        <th>สิ่งของ</th>
+        <th>ภาพของหาย</th>
+        <th>หมวดหมู่</th>
+        <th>สถานที่พบ</th>
+        <th>ชื่อผู้ใช้</th>
+        <th>วันที่พบ</th>
+        <th>สถานะ</th>
+        <th>ติดต่อ</th>
+        <th>ส่งคืนแล้ว</th>
+      </tr>
+    </thead>
+    <tbody id="userPostsBody">
+      <tr>
+        <td>กุญแจรถเก๋งสีดำ</td>
+        <td style="text-align: center;"><img src="carkey.png" alt="carkey" width="100"></td>
+        <td>กุญแจรถ</td>
+        <td>อาคารวิทยวิภาส</td>
+        <td>Kopiko</td>
+        <td>20/08/2026</td>
+        <td>ยังไม่พบเจ้าของ</td>
+        <td>081-111-1111</td>
+        <td style="text-align: center;">
+          <input type="file" accept="image/*" style="width: 150px; font-size: 12px;"><br>
+          <button type="button" onclick="alert('จำลองการอัปโหลดหลักฐาน: ระบบจะเปลี่ยนสถานะเป็น รอแอดมินยืนยัน')"
+            style="font-size: 12px; margin-top: 5px;">ยืนยัน</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <br>
+
+  <hr>
+  <footer>
+    <p>*หมายเหตุ: แพลตฟอร์มนี้เป็นเพียงพื้นที่สาธารณะสำหรับเชื่อมโยงข้อมูลฟรี
+      ไม่มีส่วนเกี่ยวข้องหรือรับประกันความถูกต้องของข้อมูล การส่งมอบสิ่งของ หรือการธุรกรรมใดๆ ระหว่างผู้ใช้งาน</p>
+
+    <strong>ช่องทางติดต่อ</strong>
+    <p>หากคุณมีข้อสงสัยหรือคำถามเกี่ยวกับเว็บไซต์ KKU Return โปรดติดต่อเราผ่านช่องทางดังต่อไปนี้:</p>
+    <ul>
+      <li>อีเมล: kkureturn01@kku.ac.th</li>
+      <li>โทรศัพท์: 012-345-6789</li>
+      <li>Facebook: KKU Return</li>
+    </ul>
+  </footer>
+
+
+</body>
+
+</html>

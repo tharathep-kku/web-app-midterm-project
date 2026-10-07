@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - KKU Lost & Found</title>
+</head>
+
+<body>
+    <h1><strong>Admin Dashboard</strong></h1>
+    <p>Welcome to KKU Return ที่จะช่วยคุณตามหาของสำคัญ หรือเจ้าของที่พัดพรากไปเอง</p>
+    <p>ศูนย์รวมแจ้งของหายและแจ้งพบของภายในมหาวิทยาลัยขอนแก่น ปลอดภัย ตรวจสอบได้ ลดความเสี่ยงจากการแอบอ้าง</p>
+
+    <ul>
+        <li>มีหลักฐานยืนยันการส่งมอบทุกครั้ง</li>
+    </ul>
+    <a href="index.html">Home</a> /
+    <a href="login.html">Login</a> /
+    <a href="create.html">Report a lost item</a> /
+    <a href="search.html">Search</a> /
+    <a href="profile.html">Profile</a>
+    <br><br>
+    <hr>
+
+    <h2>Admin</h2>
+
+    <form action="login.html" method="get">
+        <button type="submit">ออกจากระบบ (logout)</button>
+    </form><br>
+
+
+    <h2>รายการรอตรวจสอบการส่งมอบ (Pending Approvals)</h2>
+    <p style="color: red; font-size: 14px;">* ข้อมูลส่วนบุคคล (เปิดเผยเฉพาะแอดมิน)</p>
+    <table border="1" cellspacing="2" cellpadding="5">
+        <thead>
+            <!-- style="background-color: #faf171;" -->
+            <tr>
+                <th>รหัสรายการ</th>
+                <th>สิ่งของ</th>
+                <th>ชื่อผู้แจ้ง</th>
+                <th>ชื่อผู้รับคืน (อ้างอิง)</th>
+                <th>วันที่อัปโหลดหลักฐาน</th>
+                <th>สถานะปัจจุบัน</th>
+                <th>รูปหลักฐาน</th>
+                <th>การจัดการ (แอดมิน)</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            <!-- รายการจำลองที่รอการอนุมัติ -->
+            <tr>
+                <td>#10045</td>
+                <td>กระเป๋าตังค์สีน้ำตาล</td>
+                <td>สหรัฐ งามเริ่ด</td>
+                <td>สมชาย ใจดี</td>
+                <td>03/08/2026</td>
+                <td>รอแอดมินยืนยัน</td>
+                <td style="text-align: center;">
+                    <button type="button"
+                        onclick="alert('แสดง Pop-up รูปภาพหลักฐานการส่งมอบสิ่งของ')">ดูรูปหลักฐาน</button>
+                </td>
+                <td style="text-align: center;">
+                    <button type="button" onclick="approveItem(this)">✅ อนุมัติ</button>
+                    <button type="button" onclick="rejectItem(this)">❌ ปฏิเสธ</button>
+                </td>
+            </tr>
+
+            <tr>
+                <td>#10052</td>
+                <td>บัตรนักศึกษา (คณะวิศวกรรมศาสตร์)</td>
+                <td>มานี มีนา</td>
+                <td>ปิติ รักเรียน</td>
+                <td>04/08/2026</td>
+                <td>รอแอดมินยืนยัน</td>
+                <td style="text-align: center;">
+                    <button type="button"
+                        onclick="alert('แสดง Pop-up รูปภาพหลักฐานการส่งมอบสิ่งของ')">ดูรูปหลักฐาน</button>
+                </td>
+                <td style="text-align: center;">
+                    <button type="button" onclick="approveItem(this)">✅ อนุมัติ</button>
+                    <button type="button" onclick="rejectItem(this)">❌ ปฏิเสธ</button>
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
+    <br>
+    <h2>ฐานข้อมูลผู้ใช้งาน (User Database)</h2>
+    <p style="color: red; font-size: 14px;">* ข้อมูลส่วนบุคคล (เปิดเผยเฉพาะแอดมิน)</p>
+    <table border="1" cellspacing="2" cellpadding="8">
+        <thead>
+            <!-- style="background-color: #c8e6c9;" -->
+            <tr>
+                <th>User ID</th>
+                <th>ชื่อ-นามสกุลจริง</th>
+                <th>อีเมล (KKU Mail)</th>
+                <th>เบอร์โทรศัพท์</th>
+                <th>รหัสผ่าน (เข้ารหัส/ซ่อน)</th>
+                <th>วันที่สมัคร</th>
+                <th>สถานะบัญชี</th>
+                <th>จัดการ</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>U-001</td>
+                <td>สหรัฐ งามเริ่ด</td>
+                <td>saharat.n@kku.ac.th</td>
+                <td>081-234-5678</td>
+                <td>********</td>
+                <td>01/08/2026</td>
+                <td>ปกติ</td>
+                <td>
+                    <button type="button" onclick="alert('ระงับการใช้งานบัญชีนี้?')">ระงับบัญชี (Ban)</button>
+                </td>
+            </tr>
+            <tr>
+                <td>U-002</td>
+                <td>มานี มีนา</td>
+                <td>manee.m@kku.ac.th</td>
+                <td>089-999-9999</td>
+                <td>********</td>
+                <td>15/08/2026</td>
+                <td>ปกติ</td>
+                <td>
+                    <button type="button" onclick="alert('ระงับการใช้งานบัญชีนี้?')">ระงับบัญชี (Ban)</button>
+                </td>
+            </tr>
+            <tr>
+                <td>U-003</td>
+                <td>สมชาย ใจดี</td>
+                <td>somchai.j@kku.ac.th</td>
+                <td>082-222-2222</td>
+                <td>********</td>
+                <td>20/08/2026</td>
+                <td>ถูกระงับ</td>
+                <td>
+                    <button type="button" onclick="alert('ปลดแบนบัญชีนี้?')">ปลดแบน</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <br>
+
+    <!-- ส่วนที่ 3: ฐานข้อมูลโพสต์ทั้งหมด -->
+    <h2>ฐานข้อมูลโพสต์ทั้งหมด (Post Database)</h2>
+    <p style="color: red; font-size: 14px;">* ดูรายละเอียดผู้โพสต์และช่องทางติดต่อแบบไม่ปิดบัง</p>
+    <table border="1" cellspacing="2" cellpadding="8">
+        <thead>
+            <!--  style="background-color: #bbdefb;" -->
+            <tr>
+                <th>Post ID</th>
+                <th>ประเภท</th>
+                <th>สิ่งของ</th>
+                <th>หมวดหมู่</th>
+                <th>สถานที่</th>
+                <th>ชื่อผู้ใช้</th>
+                <th>ชื่อ-นามสกุล</th>
+                <th>เบอร์ติดต่อผู้โพสต์</th>
+                <th>วันที่เกิดเหตุ</th>
+                <th>สถานะ</th>
+                <th>จัดการโพสต์</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>P-101</td>
+                <td>แจ้งพบของ</td>
+                <td>กุญแจรถเก๋งสีดำ</td>
+                <td>กุญแจรถ</td>
+                <td>อาคารวิทยวิภาส</td>
+                <td>Kopiko</td>
+                <td>สหรัฐ งามเริ่ด</td>
+                <td>081-234-5678</td>
+                <td>20/08/2026</td>
+                <td>ยังไม่พบเจ้าของ</td>
+                <td>
+                    <button type="button" onclick="alert('ลบโพสต์นี้ออกจากระบบ?')">ลบโพสต์</button>
+                </td>
+            </tr>
+            <tr>
+                <td>P-102</td>
+                <td>แจ้งของหาย</td>
+                <td>กระเป๋าตังค์สีน้ำตาล</td>
+                <td>กระเป๋าตังค์</td>
+                <td>อาคารพจน์ สารสิน</td>
+                <td>Arifeen</td>
+                <td>สมหญิง สวยงาม</td>
+                <td>083-333-3333</td>
+                <td>03/08/2026</td>
+                <td>ได้รับคืนแล้ว</td>
+                <td>
+                    <button type="button" onclick="alert('ลบโพสต์นี้ออกจากระบบ?')">ลบโพสต์</button>
+                </td>
+            </tr>
+            <tr>
+                <td>P-103</td>
+                <td>แจ้งพบของ</td>
+                <td>กำไลข้อมือ</td>
+                <td>เครื่องประดับ</td>
+                <td>ศูนย์ประชุมอเนกประสงค์กาญจนาภิเษก</td>
+                <td>BokBaek</td>
+                <td>มานี มีนา</td>
+                <td>083-333-3333</td>
+                <td>19/08/2026</td>
+                <td>ได้รับคืนแล้ว</td>
+                <td>
+                    <button type="button" onclick="alert('ลบโพสต์นี้ออกจากระบบ?')">ลบโพสต์</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <br>
+
+    <hr>
+    <footer>
+        <p>*หมายเหตุ: แพลตฟอร์มนี้เป็นเพียงพื้นที่สาธารณะสำหรับเชื่อมโยงข้อมูลฟรี
+            ไม่มีส่วนเกี่ยวข้องหรือรับประกันความถูกต้องของข้อมูล การส่งมอบสิ่งของ หรือการธุรกรรมใดๆ ระหว่างผู้ใช้งาน</p>
+
+        <strong>ช่องทางติดต่อ</strong>
+        <p>หากคุณมีข้อสงสัยหรือคำถามเกี่ยวกับเว็บไซต์ KKU Return โปรดติดต่อเราผ่านช่องทางดังต่อไปนี้:</p>
+        <ul>
+            <li>อีเมล: kkureturn01@kku.ac.th</li>
+            <li>โทรศัพท์: 012-345-6789</li>
+            <li>Facebook: KKU Return</li>
+        </ul>
+    </footer>
+
+    <!-- สคริปต์จำลองการกดปุ่มของแอดมิน -->
+    <script>
+        function approveItem(buttonElement) {
+            // ถามเพื่อยืนยันก่อนกด
+            if (confirm('คุณตรวจสอบหลักฐานและต้องการ "อนุมัติ" รายการนี้ใช่หรือไม่?\n(สถานะจะเปลี่ยนเป็น "ได้รับคืนแล้ว")')) {
+                const row = buttonElement.closest('tr'); // หาแถวของปุ่มที่ถูกกด
+                const statusCell = row.cells[5]; // คอลัมน์สถานะ
+                const actionCell = row.cells[7]; // คอลัมน์การจัดการ
+
+                // เปลี่ยนสถานะเป็นอนุมัติ
+                statusCell.innerHTML = '<b style="color: green;">อนุมัติแล้ว (ได้รับคืนแล้ว)</b>';
+                actionCell.innerHTML = 'ดำเนินการเรียบร้อย';
+
+                alert('บันทึกข้อมูลสำเร็จ! ระบบจะแจ้งเตือนไปยังผู้ใช้');
+            }
+        }
+
+        function rejectItem(buttonElement) {
+            if (confirm('คุณต้องการ "ปฏิเสธ" หลักฐานนี้ใช่หรือไม่?\n(ระบบจะให้ผู้ใช้อัปโหลดหลักฐานใหม่)')) {
+                const row = buttonElement.closest('tr');
+                const statusCell = row.cells[5];
+                const actionCell = row.cells[7];
+
+                // เปลี่ยนสถานะเป็นปฏิเสธ
+                statusCell.innerHTML = '<b style="color: red;">หลักฐานไม่ถูกต้อง</b>';
+                actionCell.innerHTML = 'แจ้งผู้ใช้ให้อัปโหลดใหม่';
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -3,16 +3,17 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Item;
 use App\Models\Category;
 use App\Models\FinderUser;
 
 class AdminController extends Controller
 {
-    // ใช้ session ตัวเดียวกับฝั่งหน่วยงาน แต่ role ต้องเป็น admin เท่านั้น
+    // หาข้อมูลแอดมินจากบัญชีที่ล็อกอินอยู่ (users.finder_user_id ชี้ไปที่ finder_users)
     private function currentAdmin()
     {
-        $id = session('finder_user_id');
+        $id = Auth::user()->finder_user_id;
 
         if ($id === null) {
             return null;
@@ -27,28 +28,10 @@ class AdminController extends Controller
         return $user;
     }
 
-    public function switchUser(Request $request)
-    {
-        $validated = $request->validate([
-            'finder_user_id' => ['required', 'integer'],
-        ]);
-
-        $user = FinderUser::find($validated['finder_user_id']);
-
-        if ($user === null || $user->role !== 'admin') {
-            return redirect()->route('admin.index')->with('error', 'ไม่พบบัญชีแอดมินนี้');
-        }
-
-        session(['finder_user_id' => $user->id]);
-
-        return redirect()->route('admin.index')->with('success', 'เข้าใช้งานในนาม ' . $user->fullname . ' แล้ว');
-    }
-
     // หน้าข้อมูลหลังบ้าน ดูโพสต์ทั้งหมดและกรองตามสถานะได้
     public function index(Request $request)
     {
         $admin = $this->currentAdmin();
-        $admins = FinderUser::where('role', 'admin')->orderBy('id')->get();
 
         $approval_status = $request->input('approval_status') ?? '';
         $type = $request->input('type') ?? '';
@@ -83,7 +66,7 @@ class AdminController extends Controller
             }
         }
 
-        return view('admin.index', compact('admin', 'admins', 'items', 'approval_status', 'type', 'keyword'));
+        return view('admin.index', compact('admin', 'items', 'approval_status', 'type', 'keyword'));
     }
 
     public function approve(int $id)

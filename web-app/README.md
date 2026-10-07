@@ -276,3 +276,306 @@ php artisan migrate:fresh --seed
 1. เพิ่มค่า `role` เป็น `'institution'` ในตาราง `finder_users` เดิม — ง่าย ไม่ต้องเพิ่มตาราง
 2. แยกตาราง `institutions` ใหม่ (มี field เช่น ที่ตั้ง, เวลาเปิด-ปิด) — เหมาะถ้าต้องมีข้อมูล
    เฉพาะที่ user ทั่วไปไม่มี แต่จะซับซ้อนขึ้นอีกระดับ
+
+# หน้าแรก (Home) และคลังประกาศ (Archive)
+
+แปลงโค้ด `home.php` เดิม (PHP + mysqli + `style.css`) ให้เป็น Laravel แบบเดียวกับระบบค้นหา
+หน้าที่ทำใหม่ **ไม่มี CSS** ใช้ HTML ธรรมดาเหมือน `search.blade.php`
+
+---
+
+## 1. สิ่งที่ทำ
+
+- [x] หน้า `/` — ตารางประกาศ แบ่งหน้าละ 5 รายการ
+- [x] แถบสรุปตัวเลข: ประกาศทั้งหมด / ยังไม่พบเจ้าของ / ได้รับคืนแล้ว / รอแอดมินยืนยัน
+- [x] ช่องค้นหาเร็ว 1 ช่อง ส่งต่อไปหน้า `/search` พร้อมผลลัพธ์
+- [x] กรองตามประเภท: ทั้งหมด · พบของ · ของหาย
+- [x] ปุ่มลัดช่วงเวลา: ทั้งหมด · 7 วันล่าสุด · 30 วันล่าสุด · 3 เดือนล่าสุด
+- [x] เรียงลำดับ: ใหม่สุด · เก่าสุด (ตัวกรองอื่นไม่หายตอนกด)
+- [x] แสดง "พบ N รายการ ระหว่าง dd/mm/yyyy ถึง dd/mm/yyyy"
+- [x] ซ่อนประกาศที่ได้รับคืนแล้วเกิน 7 วันออกจากหน้าแรก (ไม่ลบข้อมูลจริง)
+- [x] นับถอยหลัง "เก็บเข้าคลังในอีก N วัน" ใต้สถานะของที่คืนแล้วแต่ยังไม่ครบกำหนด
+- [x] หน้า `/archive` — แสดงเฉพาะประกาศที่คืนแล้วเกิน 7 วัน
+- [x] เพิ่มคอลัมน์ `returned_date` ในตาราง `items`
+- [x] เมนูกลาง `partials/menu.blade.php` ใช้ร่วมในหน้า home, search, archive
+
+---
+
+## 2. ฐานข้อมูล
+
+### เพิ่มคอลัมน์ในตาราง `items`
+| คอลัมน์ | ชนิด | รายละเอียด |
+|---|---|---|
+| returned_date | date, nullable | วันที่คืนของให้เจ้าของ ใช้คู่กับ `status = 'ได้รับคืนแล้ว'` |
+
+เพิ่มผ่าน migration ใหม่ ไม่ได้แก้ migration เดิม
+
+### ข้อมูลตัวอย่าง (`ItemSeeder.php`)
+
+ใช้วันที่แบบ **นับจากวันที่ seed** ไม่ใช่วันที่ตายตัว เพื่อให้ข้อมูลไม่หมดอายุ
+(ถ้าเขียน `'2026-02-10'` ตายตัว พอเวลาผ่านไปของจะเข้าคลังหมด ตัวนับถอยหลังจะไม่มีวันแสดง)
+
+```php
+'event_date'    => date('Y-m-d', strtotime('-10 days')),
+'returned_date' => date('Y-m-d', strtotime('-5 days')),
+```
+
+| id | title | เจอเมื่อ | คืนเมื่อ | แสดงที่ |
+|---|---|---|---|---|
+| 2 | กระเป๋าตังค์สีน้ำตาล | -25 วัน | -20 วัน | หน้าคลัง |
+| 3 | กำไลข้อมือ | -10 วัน | -5 วัน | หน้าแรก + "อีก 2 วัน" |
+| 12 | แว่นตากันแดด | -7 วัน | -1 วัน | หน้าแรก + "อีก 6 วัน" |
+
+รายการอื่น `returned_date` เป็น `NULL` — ครบทั้ง 3 สถานะให้เห็นในครั้งเดียว
+
+---
+
+## 3. ไฟล์
+
+### ไฟล์ใหม่
+| ไฟล์ | หน้าที่ |
+|---|---|
+| `database/migrations/2026_09_12_000001_add_returned_date_to_items_table.php` | เพิ่มคอลัมน์ `returned_date` |
+| `resources/views/home.blade.php` | หน้าแรก |
+| `resources/views/archive.blade.php` | หน้าคลังประกาศของคืน |
+| `resources/views/partials/menu.blade.php` | เมนูกลาง 8 ลิงก์ |
+
+### ไฟล์ที่แก้
+| ไฟล์ | แก้อะไร |
+|---|---|
+| `routes/web.php` | `/` เปลี่ยนจาก `Route::view('/', 'welcome')` เป็น `ItemController@home` และเพิ่ม `/archive` |
+| `app/Http/Controllers/ItemController.php` | เพิ่ม `home()` และ `archive()` (ไม่แตะ `index()`) |
+| `database/seeders/ItemSeeder.php` | ใส่ `returned_date` 3 รายการ (วันที่สัมพัทธ์) + loop เติม `null` ให้รายการที่เหลือ |
+| `resources/views/search.blade.php` | เปลี่ยนเมนูเดิมเป็น `@include('partials.menu')` |
+
+```php
+Route::get('/', [ItemController::class, 'home'])->name('home');
+Route::get('/archive', [ItemController::class, 'archive'])->name('archive.home');
+```
+
+---
+
+## 4. Logic
+
+### ค่าคงที่ `ARCHIVE_DAYS`
+จำนวนวันก่อนย้ายเข้าคลัง **เก็บไว้ที่เดียว** บนสุดของคลาส
+```php
+private const ARCHIVE_DAYS = 7;
+```
+ถูกใช้ 3 ที่: `home()` (ซ่อนของเก่า), `archive()` (ดึงของเก่า), `addNames()` (นับถอยหลัง)
+เดิมพิมพ์ `-6 months` ซ้ำ 2 ที่ ถ้าแก้ไม่ครบจะมีของหายไปจากทั้งสองหน้า หรือโผล่ทั้งสองหน้า
+ตอนนี้เปลี่ยนเลขที่เดียว ทุกที่เปลี่ยนตามพร้อมกัน
+
+### หน้าแรก (`ItemController@home`)
+1. อ่าน `from`, `to`, `type`, `sort` จาก query string ด้วย `$request->input('...') ?? ''`
+2. คำนวณเส้นแบ่ง `date('Y-m-d', strtotime('-' . self::ARCHIVE_DAYS . ' days'))`
+3. แสดงรายการที่เข้าเงื่อนไขข้อใดข้อหนึ่ง (ห่อด้วย closure ให้เป็นวงเล็บเดียวกัน):
+   ```sql
+   WHERE (status != 'ได้รับคืนแล้ว'
+          OR returned_date IS NULL
+          OR returned_date > เส้นแบ่ง)
+   ```
+4. ถ้ากรอกวันที่ → เพิ่ม `event_date >= $from` / `event_date <= $to`
+5. ถ้าเลือกประเภท → เพิ่ม `where('type', $type)` (`found` / `lost`)
+6. เรียงด้วย `orderBy('event_date', $direction)` แล้ว `paginate(5)->withQueryString()`
+7. `addNames($items)` เติมชื่อหมวดหมู่ ชื่อผู้แจ้ง และจำนวนวันที่เหลือก่อนเข้าคลัง
+8. นับตัวเลข 4 ตัวด้วย `Item::count()` / `Item::where('status', ...)->count()`
+
+### เรียงลำดับ — ป้องกัน SQL injection
+```php
+$direction = $sort === 'old' ? 'asc' : 'desc';
+```
+**ห้ามส่งค่าจาก URL เข้า `orderBy()` ตรง ๆ** เพราะทิศทางการเรียงถูกต่อเข้าคำสั่ง SQL ตรง ๆ
+ไม่ได้ผ่านระบบ binding เหมือนค่าใน `where()` — จึงใช้ค่าจากผู้ใช้มา**เลือก**ค่าที่เราเขียนไว้เองแทน (whitelist)
+พิมพ์อะไรแปลก ๆ มาก็ได้ `desc` เสมอ
+
+### ตัวนับถอยหลัง (`addNames()`)
+```php
+$item->days_left = 0;
+if ($item->status === 'ได้รับคืนแล้ว' && !empty($item->returned_date)) {
+    $archiveTime = strtotime($item->returned_date . ' +' . self::ARCHIVE_DAYS . ' days');
+    $item->days_left = ceil(($archiveTime - time()) / 86400);
+}
+```
+- `strtotime()` แปลงวันที่เป็นวินาที ลบกับ `time()` แล้วหาร `86400` (วินาทีใน 1 วัน) ได้จำนวนวัน
+- `ceil()` ปัดขึ้น เพราะเหลือ 3.4 วันต้องบอก "อีก 4 วัน" ไม่ใช่ "อีก 3 วัน"
+- คำนวณใน controller ไม่ใช่ใน view เพราะ view มีหน้าที่แสดงผลอย่างเดียว
+
+### หน้าคลัง (`ItemController@archive`)
+ตรงข้ามกับหน้าแรก ต้องเข้าครบทุกข้อ:
+```sql
+WHERE status = 'ได้รับคืนแล้ว'
+  AND returned_date IS NOT NULL
+  AND returned_date <= เส้นแบ่ง
+ORDER BY returned_date DESC
+```
+ประกาศแต่ละรายการจะอยู่หน้าแรก **หรือ** หน้าคลัง ที่ใดที่หนึ่งเท่านั้น เพราะทั้งสองหน้าใช้ `ARCHIVE_DAYS` ตัวเดียวกัน
+
+### ตัวแปรสำคัญ
+| ตัวแปร | ความสำคัญ |
+|---|---|
+| `$from`, `$to` | ช่วงวันที่ ใช้กรอง และแสดงในข้อความ "ระหว่าง ... ถึง ..." |
+| `$type` | `found` / `lost` / ว่าง = ทั้งหมด |
+| `$sort` | `old` = เรียงเก่าก่อน นอกนั้น = ใหม่ก่อน |
+| `$direction` | ค่าจริงที่ส่งเข้า `orderBy()` มีได้แค่ `asc` หรือ `desc` |
+| `$items` | `LengthAwarePaginator` หน้าละ 5 — นับทั้งหมดด้วย `total()` ไม่ใช่ `count()` |
+| `$item->days_left` | จำนวนวันก่อนเข้าคลัง (0 = ไม่ต้องแสดง) ไม่ใช่คอลัมน์ในฐานข้อมูล |
+
+---
+
+## 5. บั๊กที่เจอและวิธีแก้
+
+### บั๊ก 1: `migrate:fresh --seed` พัง `all VALUES must have the same number of terms`
+**สาเหตุ:** `DB::table('items')->insert([...])` แบบหลายแถวพร้อมกัน บังคับให้ทุกแถวมีคีย์ชุดเดียวกัน
+แต่ใส่ `returned_date` แค่ 3 แถว
+
+**วิธีแก้:** เก็บข้อมูลไว้ใน `$items` ก่อน แล้ว loop เติม `returned_date => null` ให้แถวที่ไม่มี จากนั้นค่อย insert
+
+> บั๊กนี้กลับมาอีกครั้งหลัง merge เพราะมีคนเขียน loop ใหม่ (เพิ่ม `return_unit_id`) ทับบรรทัดเติม `null`
+> ถ้าเจอ error นี้อีก ให้ดูว่า loop ท้าย `ItemSeeder` ยังมีส่วนเติม `returned_date` อยู่ไหม
+
+### บั๊ก 2: `DATE_SUB(CURDATE(), INTERVAL 6 MONTH)` ใช้กับ SQLite ไม่ได้
+**สาเหตุ:** โค้ดเดิมเขียนสำหรับ MySQL
+
+**วิธีแก้:** คำนวณวันที่ใน PHP ด้วย `date('Y-m-d', strtotime('-' . self::ARCHIVE_DAYS . ' days'))` แล้วส่งเข้า query
+
+### บั๊ก 3: เงื่อนไข `OR` ไปปนกับตัวกรองวันที่
+**สาเหตุ:** ถ้าเขียน `where()->orWhere()->orWhere()` ต่อกันตรง ๆ แล้วตามด้วย `where('event_date', ...)`
+SQL จะกลายเป็น `A OR B OR (C AND วันที่)` ทำให้กรองวันที่ไม่ได้ผล
+
+**วิธีแก้:** ห่อ 3 เงื่อนไขไว้ใน `$query->where(function ($q) use ($archiveBefore) { ... })` ให้เป็นวงเล็บเดียวกัน
+
+### บั๊ก 4: กดเรียงลำดับแล้วตัวกรองประเภทหาย
+**สาเหตุ:** เขียนลิงก์เป็น `route('home', ['sort' => 'old'])` ซึ่งสร้าง URL ใหม่ที่มีแค่ `sort`
+ค่า `type` ที่ผู้ใช้เลือกไว้ก่อนหน้าหายไปทั้งหมด
+
+**วิธีแก้:** เอา query string ปัจจุบันมารวมกับค่าใหม่
+```blade
+{{ route('home', array_merge(request()->query(), ['sort' => 'old', 'page' => 1])) }}
+```
+`'page' => 1` บังคับกลับหน้าแรก เพราะพอลำดับเปลี่ยน หน้า 3 เดิมไม่มีความหมายแล้ว
+
+---
+
+## 6. วิธีรัน
+
+หลัง pull ต้องรัน migrate เพราะมีคอลัมน์ใหม่ ไม่งั้นหน้าแรกจะ error `no such column: returned_date`
+```bash
+php artisan migrate
+```
+
+ถ้าต้องการข้อมูลตัวอย่างที่มี `returned_date` ด้วย (ลบข้อมูลเดิมทั้งหมด)
+```bash
+php artisan migrate:fresh --seed
+```
+
+แล้วเข้า `http://127.0.0.1:8000/` และ `http://127.0.0.1:8000/archive`
+
+**ทดสอบแล้ว:**
+
+| เคส | ผล |
+|---|---|
+| หน้าแรก + หน้าคลัง | 13 + 1 = 14 ครบทุกรายการ |
+| กรอง `?type=found` / `?type=lost` | 7 + 6 = 13 ตรงกับจำนวนที่แสดงทั้งหมด |
+| `?type=found&sort=old` | ตัวกรองไม่หายตอนเรียงลำดับ แถวแรกเป็นวันที่เก่าสุด |
+| แบ่งหน้า | หน้า 1-2 หน้าละ 5 หน้า 3 เหลือ 3 รายการ |
+| ตัวนับถอยหลัง | แสดง "อีก 2 วัน" และ "อีก 6 วัน" ใต้สถานะ |
+| ช่องค้นหาเร็ว | เด้งไป `/search?searched=1&item_name=...` พร้อมผลลัพธ์ |
+
+---
+
+## 7. สิ่งที่ยังไม่ทำ
+
+- ยังไม่มีโค้ดบันทึก `returned_date` ตอนเปลี่ยนสถานะเป็น "ได้รับคืนแล้ว" (ตอนนี้มีแค่ใน seeder)
+- หน้าแรกยังไม่กรองตาม `approval_status` (แสดงทั้งที่อนุมัติแล้วและรออนุมัติ)
+- ตัวกรองยังไม่บอกว่ากำลังเลือกอะไรอยู่ (ลิงก์ทุกอันหน้าตาเหมือนกันหมด)
+- ลิงก์ "ประเภท" กับ "ช่วงเวลา" ยังล้างค่ากันเอง — มีแค่ "เรียงตาม" ที่ใช้ `array_merge` คงค่าเดิมไว้
+- แถบสรุปตัวเลขนับจากทั้งระบบ (14) ไม่เท่ากับจำนวนในตาราง (13) เพราะตารางไม่นับของในคลัง — ตั้งใจให้เป็นภาพรวมทั้งระบบ
+- ยังไม่ได้เอาฟอร์มแจ้งของหายมาต่อท้ายหน้าแรก
+
+---
+
+# Folk แก้
+
+งานที่ Folk รับผิดชอบ: **ข้อ 6 User หน่วยงาน** (โพสต์ หลักฐานยืนยัน จุดสถานที่), **ข้อ 7 User แอดมิน** (อนุมัติ ดูข้อมูลหลังบ้าน สถิติ),
+ระบบ **login แยกตาม role** และหน้า **แจ้งของหาย** ของ user ทั่วไป
+
+## 1. หน่วยงาน (agency) — ข้อ 6
+
+- เพิ่มคอลัมน์ในตาราง `items` ด้วย migration `2026_09_12_100001_add_report_columns_to_items_table.php`
+  - `place_point` จุดสถานที่แบบละเอียด เช่น "ชั้น 3 โซนอ่านเงียบ โต๊ะ B12"
+  - `evidence_url`, `evidence_note` รูปและคำอธิบายหลักฐานยืนยัน
+- `AgencyUserSeeder.php` บัญชีหน่วยงาน 3 บัญชีในตาราง `finder_users` (role `agency`)
+- `AgencyItemController.php` รายการโพสต์ของหน่วยงานตัวเอง / ฟอร์มโพสต์ / บันทึกโพสต์
+  (โพสต์ใหม่มีสถานะ `รออนุมัติ` เสมอ)
+- หน้า `resources/views/agency/` → `index`, `create`, `show`
+
+## 2. แอดมิน (admin) — ข้อ 7
+
+- เพิ่มคอลัมน์ `approval_status`, `reject_reason`, `approved_by`, `approved_at` ในตาราง `items` (migration เดียวกับข้อ 6)
+- `AdminController.php`
+  - หน้าข้อมูลหลังบ้าน กรองตามสถานะอนุมัติ / ประเภท / ชื่อสิ่งของ
+  - อนุมัติ และไม่อนุมัติ (ต้องกรอกเหตุผล) บันทึกว่าแอดมินคนไหนตรวจ ตรวจเมื่อไหร่
+  - หน้าสถิติ: ภาพรวม, สถานะอนุมัติ, แยกตามหมวดหมู่ / สถานที่ / หน่วยงาน, จำนวนผู้ใช้แต่ละ role
+- หน้า `resources/views/admin/` → `index`, `stats`
+- route ของหน่วยงานและแอดมินแยกไว้ใน `routes/agency_admin.php` แล้ว `require` ต่อท้าย `routes/web.php`
+
+## 3. Login แยกตาม role
+
+login หน้าเดียวสำหรับทุกบัญชี แต่ละบัญชีจะเห็นเฉพาะเมนูและหน้าของ role ตัวเอง
+
+| บัญชี | เมนู | เข้าหน้าของ role อื่น |
+|---|---|---|
+| ยังไม่ล็อกอิน | หน้าแรก / ค้นหา / เข้าสู่ระบบ | `/agency`, `/admin` → ไปหน้า login |
+| user | หน้าแรก / ค้นหา / แจ้งของหาย / โปรไฟล์ / ออกจากระบบ | ถูกส่งกลับหน้าแรก |
+| agency | หน้าแรก / ค้นหา / หน่วยงาน / โปรไฟล์ / ออกจากระบบ | ถูกส่งกลับหน้าแรก |
+| admin | หน้าแรก / ค้นหา / แอดมิน / สถิติ / โปรไฟล์ / ออกจากระบบ | ถูกส่งกลับหน้าแรก |
+
+**ไฟล์ใหม่**
+- `database/migrations/2026_09_16_100001_add_role_to_users_table.php` เพิ่ม `role` (user / agency / admin) และ `finder_user_id`
+  ในตาราง `users` ของ Laravel เพื่อผูกบัญชี login เข้ากับข้อมูลคนใน `finder_users`
+- `database/seeders/LoginUserSeeder.php` สร้างบัญชี login ให้ทุกคนใน `finder_users` ใช้อีเมลเดียวกัน
+- `app/Http/Middleware/EnsureUserIsAgency.php`, `EnsureUserIsAdmin.php` กันไม่ให้ role อื่นเข้าหน้า (ตามตัวอย่าง middleware ใน Laravel Part 03)
+- `resources/views/login.blade.php` หน้า login หน้าตาแบบเว็บ KKU Return
+
+**ไฟล์ที่แก้**
+- `bootstrap/app.php` ลงทะเบียน alias middleware `agency`, `admin` และให้คนที่ล็อกอินแล้วเปิด `/login` ซ้ำไปหน้าแรก
+- `routes/agency_admin.php` ครอบ route ด้วย `middleware(['auth', 'agency'])` และ `middleware(['auth', 'admin'])`
+- `AgencyItemController.php`, `AdminController.php` เลิกใช้กล่องเลือกบัญชีแบบ session เปลี่ยนมาใช้ `Auth::user()->finder_user_id`
+- หน้า `agency/index`, `admin/index`, `admin/stats` ลบกล่องเลือกบัญชีออก และใช้เมนูกลาง
+- `resources/views/partials/menu.blade.php` แสดงเมนูตาม role ด้วย `@guest` / `@auth` และเพิ่มปุ่มออกจากระบบ
+- `app/Providers/FortifyServiceProvider.php` ใช้หน้า `login` ของเราแทนหน้า login ของ Laravel
+- `config/fortify.php` login เสร็จไปที่ `/` แทน `/dashboard`
+
+## 4. หน้าแจ้งของหาย (user ทั่วไป)
+
+- `resources/views/create.blade.php` ฟอร์มแจ้งของหาย / แจ้งพบของ ที่ `ItemController@create` เรียกใช้แต่ยังไม่มีไฟล์
+- ชื่อช่องในฟอร์มตรงกับที่ `ItemController@store` ตรวจ: `postType`, `itemName`, `category`, `location`, `date`,
+  `description`, `image`, `reporterName`, `phone`
+- ไม่ได้แก้ `ItemController`
+
+ถ้าจะให้รูปที่อัปโหลดแสดงบนเว็บ ต้องรันคำสั่งนี้ครั้งเดียวในเครื่องตัวเอง
+```bash
+php artisan storage:link
+```
+
+**บัญชีทดสอบ** รหัสผ่าน `password` ทุกบัญชี
+
+| role | อีเมล |
+|---|---|
+| admin | `pimchanok.r@kku.ac.th` |
+| agency | `security@kku.ac.th`, `library@kku.ac.th`, `studentaffairs@kku.ac.th` |
+| user | `sarath.n@kku.ac.th`, `piyada.p@kkumail.com` และ user อื่นใน `finder_users` |
+
+**ทดสอบแล้ว:** แต่ละ role ล็อกอินแล้วเห็นเมนูถูกต้อง, เข้าหน้าของ role อื่นไม่ได้, ออกจากระบบแล้วกลับเป็นเมนู guest,
+user แจ้งของหายสำเร็จและบันทึกลงตาราง `items`, ส่งฟอร์มไม่ครบขึ้นข้อความ error และคงค่าที่กรอกไว้
+
+## 5. สิ่งที่ยังไม่ทำ
+
+- `AgencyItemController` ไม่มีเมธอด `show()` ถ้าหน่วยงานโพสต์เสร็จ หรือกด "รายละเอียด" จะ error
+- `LoginUserSeeder` ยังไม่ได้ใส่ใน `DatabaseSeeder` ถ้ามีคนรัน `migrate:fresh --seed` บัญชี login จะหาย
+  ต้องรัน `php artisan db:seed --class=LoginUserSeeder` เพิ่มเอง
+- `ItemController@store` บันทึก `user_id` เป็น `null` ทำให้ไม่รู้ว่าโพสต์แจ้งของหายเป็นของบัญชีไหน
+- route `/posts/create` ยังไม่บังคับ login (ซ่อนไว้แค่ในเมนู)
+- หน้าแรกไม่แสดงข้อความ error ตอนถูกส่งกลับเพราะเข้าหน้าของ role อื่น
+- หน้าโปรไฟล์ / สมัครสมาชิก ยังเป็นหน้าของ Laravel ต้อง `npm run build` ก่อนถึงจะเปิดได้

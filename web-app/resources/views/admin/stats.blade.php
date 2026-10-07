@@ -9,14 +9,8 @@
 
 <body>
     <h1><strong>KKU Return: lost and found</strong></h1>
+    @include('partials.menu')
     <p>สถิติของระบบ (ดูโดย {{ $admin->fullname }})</p>
-
-    <a href="index.html">Home</a> /
-    <a href="{{ route('search.index') }}">Search</a> /
-    <a href="{{ route('agency.index') }}">หน่วยงาน</a> /
-    <a href="{{ route('admin.index') }}">แอดมิน</a> /
-    <a href="{{ route('admin.stats') }}">สถิติ</a>
-    <br><br>
     <hr>
 
     <h2><strong>ภาพรวม</strong></h2>

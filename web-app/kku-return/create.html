@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Lost Item - KKU Return</title>
+</head>
+
+<body>
+    <h1><strong>KKU Return: lost and found</strong></h1>
+    <p>Welcome to KKU Return ที่จะช่วยคุณตามหาของสำคัญ หรือเจ้าของที่พัดพรากไปเอง</p>
+    <p>ศูนย์รวมแจ้งของหายและแจ้งพบของภายในมหาวิทยาลัยขอนแก่น ปลอดภัย ตรวจสอบได้ ลดความเสี่ยงจากการแอบอ้าง</p>
+
+    <ul>
+        <li>มีหลักฐานยืนยันการส่งมอบทุกครั้ง</li>
+    </ul>
+    <a href="index.html">Home</a> /
+    <a href="login.html">Login</a> /
+    <a href="create.html">Report a lost item</a> /
+    <a href="search.html">Search</a> /
+    <a href="profile.html">Profile</a>
+    <br><br>
+    <hr>
+    <h2>Report a Lost Item</h2>
+    <h3>
+        <p>กรุณากรอกรายละเอียดสิ่งของให้ครบถ้วน เพื่อให้ผู้อื่นสามารถติดต่อกลับได้ง่ายขึ้น</p>
+    </h3>
+
+    <form id="createForm">
+        <label>ประเภทการแจ้ง:</label>
+        <div class="radio-group">
+            <label><input type="radio" name="postType" checked> แจ้งพบของ</label>
+            <label><input type="radio" name="postType"> แจ้งของหาย</label>
+        </div>
+        <br>
+
+        <label for="itemName">ชื่อสิ่งของ:</label>
+        <input type="text" id="itemName" placeholder="เช่น กระเป๋าตังค์สีน้ำตาล">
+        <br><br>
+
+        <label for="category">หมวดหมู่:</label>
+        <select id="category">
+            <option>-- เลือกหมวดหมู่ --</option>
+            <option>กุญแจ</option>
+            <option>กระเป๋าตังค์</option>
+            <option>เครื่องประดับ</option>
+            <option>เอกสาร</option>
+            <option>อุปกรณ์อิเล็กทรอนิกส์</option>
+            <option>อื่นๆ</option>
+        </select>
+        <br><br>
+
+        <label for="location">สถานที่พบ/สถานที่หาย:</label>
+        <br>
+        <input type="text" id="location" placeholder="เช่น อาคารวิทยวิภาส">
+        <br><br>
+
+        <label for="date">วันที่พบ/วันที่หาย:</label>
+        <br>
+        <input type="date" id="date">
+        <br><br>
+
+        <label for="description">รายละเอียดเพิ่มเติม:</label>
+        <br>
+        <textarea id="description" placeholder="อธิบายลักษณะของสิ่งของ..."></textarea>
+        <br><br>
+
+        <label for="image">แนบรูปภาพ:</label>
+        <input type="file" id="image" accept="image/*">
+        <br><br>
+
+        <label for="reporterName">ชื่อผู้แจ้ง:</label>
+        <input type="text" id="reporterName" placeholder="ชื่อ-นามสกุล">
+        <br><br>
+
+        <label for="phone">เบอร์โทรศัพท์ติดต่อกลับ:</label>
+        <input type="tel" id="phone" placeholder="0XX-XXX-XXXX">
+        <br><br>
+
+        <button type="submit" class="btn">ยืนยันการแจ้ง</button>
+    </form>
+
+    <script>
+        document.getElementById('createForm').addEventListener('submit', function (e) {
+            e.preventDefault(); // ป้องกันไม่ให้หน้ารีเฟรชเมื่อกดปุ่ม
+
+            // ดึงค่าประเภทการแจ้งเพื่อกำหนดสถานะ
+            const postType = document.querySelector('input[name="postType"]:checked').value;
+            const status = (postType === 'found') ? 'ยังไม่พบเจ้าของ' : 'กำลังตามหา';
+
+            // จัดรูปแบบวันที่ให้ออกมาเป็น วัน/เดือน/ปี
+            const dateInput = document.getElementById('date').value;
+            let formattedDate = "";
+            if (dateInput) {
+                const d = new Date(dateInput);
+                formattedDate = d.getDate().toString().padStart(2, '0') + '/' +
+                    (d.getMonth() + 1).toString().padStart(2, '0') + '/' +
+                    d.getFullYear();
+            }
+
+            // สร้าง Object เก็บข้อมูลที่กรอก
+            const newItem = {
+                name: document.getElementById('itemName').value,
+                image: '[รอรูปภาพ]', // ใช้ข้อความแทนรูปไปก่อนสำหรับการทำ Prototype HTML
+                category: document.getElementById('category').value,
+                location: document.getElementById('location').value,
+                reporter: document.getElementById('reporterName').value,
+                date: formattedDate,
+                status: status
+            };
+
+            // ดึงข้อมูลเดิมจาก localStorage (ถ้ามี) แล้วเพิ่มข้อมูลใหม่เข้าไป
+            let items = JSON.parse(localStorage.getItem('kkuItems')) || [];
+            items.push(newItem);
+            localStorage.setItem('kkuItems', JSON.stringify(items));
+
+            alert('แจ้งข้อมูลสำเร็จ!');
+            window.location.href = 'home.html'; // ส่งกลับไปหน้า home
+        });
+    </script>
+
+    <hr>
+    <footer>
+        <p>*หมายเหตุ: แพลตฟอร์มนี้เป็นเพียงพื้นที่สาธารณะสำหรับเชื่อมโยงข้อมูลฟรี
+            ไม่มีส่วนเกี่ยวข้องหรือรับประกันความถูกต้องของข้อมูล การส่งมอบสิ่งของ หรือการธุรกรรมใดๆ ระหว่างผู้ใช้งาน</p>
+
+        <strong>ช่องทางติดต่อ</strong>
+        <p>หากคุณมีข้อสงสัยหรือคำถามเกี่ยวกับเว็บไซต์ KKU Return โปรดติดต่อเราผ่านช่องทางดังต่อไปนี้:</p>
+        <ul>
+            <li>อีเมล: kkureturn01@kku.ac.th</li>
+            <li>โทรศัพท์: 012-345-6789</li>
+            <li>Facebook: KKU Return</li>
+        </ul>
+    </footer>
+</body>
+
+</html>

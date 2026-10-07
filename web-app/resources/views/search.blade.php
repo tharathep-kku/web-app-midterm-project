@@ -21,7 +21,7 @@
 
     <h2><strong>Search</strong></h2>
 
-    <form id="searchForm" method="GET" action="{{ route('search.index') }}" onsubmit="document.getElementById('loadingMessage').style.display='block'; document.getElementById('searchBtn').disabled=true;">
+    <form id="searchForm" method="GET" action="{{ route('search.home') }}" onsubmit="document.getElementById('loadingMessage').style.display='block'; document.getElementById('searchBtn').disabled=true;">
 
         <input type="hidden" name="searched" value="1">
 
@@ -94,9 +94,9 @@
                                 -
                             @endif
                         </td>
-                        <td>{{ $item->category_name }}</td>
+                        <td>{{ $item->category?->name ?? 'อื่นๆ' }}</td>
                         <td>{{ $item->location }}</td>
-                        <td>{{ $item->reporter_name }}</td>
+                        <td>{{ $item->reporter?->fullname ?? 'ไม่ทราบชื่อ' }}</td>
                         <td>{{ $item->event_date }}</td>
                         <td>{{ $item->status }}</td>
                         <td style="text-align: center;">

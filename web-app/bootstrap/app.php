@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\EnsureUserIsAgency;
+use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,7 +14,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // middleware แยกหน้าต่างตาม role
+        $middleware->alias([
+            'agency' => EnsureUserIsAgency::class,
+            'admin' => EnsureUserIsAdmin::class,
+        ]);
+
+        // ถ้าล็อกอินอยู่แล้วแต่เปิดหน้า login ซ้ำ ให้กลับไปหน้าแรกของเว็บ
+        $middleware->redirectUsersTo('/');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

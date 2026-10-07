@@ -5,13 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class FinderUser extends Model
+class ReturnUnit extends Model
 {
     /**
      * @return HasMany<Item, $this>
      */
     public function items(): HasMany
     {
-        return $this->hasMany(Item::class, 'user_id');
+        return $this->hasMany(Item::class);
     }
 }
