@@ -16,7 +16,6 @@
         <li>มีหลักฐานยืนยันการส่งมอบทุกครั้ง</li>
     </ul>
     @include('partials.menu')
-    <br><br>
     <hr>
 
     <h2><strong>Search</strong></h2>

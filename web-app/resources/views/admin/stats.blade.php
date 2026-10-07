@@ -95,40 +95,11 @@
     </table>
 
     <br>
-    <h2><strong>สถิติการโพสต์ของหน่วยงาน</strong></h2>
-
-    <table border="1" cellspacing="2" cellpadding="0">
-        <thead>
-            <tr>
-                <th>หน่วยงาน</th>
-                <th>โพสต์ทั้งหมด</th>
-                <th>รออนุมัติ</th>
-                <th>อนุมัติแล้ว</th>
-            </tr>
-        </thead>
-        <tbody align="center">
-            @forelse ($agency_stats as $row)
-                <tr>
-                    <td>{{ $row['name'] }}</td>
-                    <td>{{ $row['total'] }}</td>
-                    <td>{{ $row['wait'] }}</td>
-                    <td>{{ $row['pass'] }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="4">ยังไม่มีบัญชีหน่วยงาน</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
-
-    <br>
     <h2><strong>ผู้ใช้งานในระบบ</strong></h2>
 
     <ul>
         <li>ผู้ใช้ทั้งหมด {{ $total_user }} คน</li>
         <li>ผู้ใช้ทั่วไป {{ $normal_user }} คน</li>
-        <li>หน่วยงาน {{ $agency_user }} หน่วยงาน</li>
         <li>แอดมิน {{ $admin_user }} คน</li>
     </ul>
 

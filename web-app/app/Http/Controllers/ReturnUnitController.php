@@ -21,7 +21,7 @@ class ReturnUnitController extends Controller
             'show_url' => route('return-units.show', $unit->id),
         ])->values();
 
-        return view('dashboard', compact('returnUnits', 'returnUnitsForMap'));
+        return view('location.dashboard', compact('returnUnits', 'returnUnitsForMap'));
     }
 
     public function show(ReturnUnit $returnUnit): View
@@ -32,6 +32,6 @@ class ReturnUnitController extends Controller
 
         $itemsByStatus = $returnUnit->items->groupBy('status');
 
-        return view('return-unit', compact('returnUnit', 'itemsByStatus'));
+        return view('location.return-unit', compact('returnUnit', 'itemsByStatus'));
     }
 }

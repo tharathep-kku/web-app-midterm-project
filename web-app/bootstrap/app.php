@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Middleware\EnsureUserIsAgency;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,7 +15,6 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // middleware แยกหน้าต่างตาม role
         $middleware->alias([
-            'agency' => EnsureUserIsAgency::class,
             'admin' => EnsureUserIsAdmin::class,
         ]);
 
