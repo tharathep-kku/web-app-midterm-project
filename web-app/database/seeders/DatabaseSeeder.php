@@ -23,7 +23,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(FinderUserSeeder::class);
-        $this->call(AgencyUserSeeder::class);
         $this->call(CategorySeeder::class);
         $this->call(ReturnUnitSeeder::class);
         $this->call(ItemSeeder::class);

@@ -202,7 +202,7 @@ class ItemController extends Controller
         $categories = Category::all();
         $locations = Item::select('location')->distinct()->orderBy('location')->pluck('location');
 
-        return view('create', compact('categories', 'locations'));
+        return view('user.create', compact('categories', 'locations'));
     }
 
     public function store(Request $request)

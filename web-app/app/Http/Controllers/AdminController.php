@@ -160,21 +160,8 @@ class AdminController extends Controller
             ];
         }
 
-        // จำนวนโพสต์ของแต่ละหน่วยงาน
-        $agencies = FinderUser::where('role', 'agency')->orderBy('id')->get();
-        $agency_stats = [];
-        foreach ($agencies as $ag) {
-            $agency_stats[] = [
-                'name' => $ag->fullname,
-                'total' => Item::where('user_id', $ag->id)->count(),
-                'wait' => Item::where('user_id', $ag->id)->where('approval_status', 'รออนุมัติ')->count(),
-                'pass' => Item::where('user_id', $ag->id)->where('approval_status', 'อนุมัติแล้ว')->count(),
-            ];
-        }
-
         $total_user = FinderUser::count();
         $normal_user = FinderUser::where('role', 'user')->count();
-        $agency_user = FinderUser::where('role', 'agency')->count();
         $admin_user = FinderUser::where('role', 'admin')->count();
 
         return view('admin.stats', compact(
@@ -193,10 +180,8 @@ class AdminController extends Controller
             'last_date',
             'category_stats',
             'location_stats',
-            'agency_stats',
             'total_user',
             'normal_user',
-            'agency_user',
             'admin_user'
         ));
     }

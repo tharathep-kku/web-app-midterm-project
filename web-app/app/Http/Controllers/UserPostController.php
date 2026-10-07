@@ -24,7 +24,7 @@ class UserPostController extends Controller
                 ->get();
         }
 
-        return view('my-posts', compact('items'));
+        return view('user.my-posts', compact('items'));
     }
 
     // หน้าฟอร์มแก้ไขโพสต์ แก้ได้เฉพาะโพสต์ของตัวเอง
@@ -39,7 +39,7 @@ class UserPostController extends Controller
         $categories = Category::all();
         $locations = Item::select('location')->distinct()->orderBy('location')->pluck('location');
 
-        return view('edit', compact('item', 'categories', 'locations'));
+        return view('user.edit', compact('item', 'categories', 'locations'));
     }
 
     // บันทึกการแก้ไขโพสต์

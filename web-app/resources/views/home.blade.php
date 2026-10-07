@@ -104,7 +104,7 @@
                     <td colspan="8">
                         ไม่มีประกาศในช่วงวันที่ที่เลือก —
                         <a href="{{ route('home', ['from' => date('Y-m-d', strtotime('-30 days')), 'to' => date('Y-m-d')]) }}">ลองขยายเป็น 30 วันล่าสุด</a>
-                        หรือ <a href="{{ route('agency.create') }}">ลงประกาศตามหาของ</a>
+                        หรือ <a href="{{ route('posts.create') }}">ลงประกาศตามหาของ</a>
                     </td>
                 </tr>
             @endforelse

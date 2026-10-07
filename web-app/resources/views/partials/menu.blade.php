@@ -7,10 +7,8 @@
     @endguest
 
     @auth
-        <!-- เมนูแยกตาม role ของบัญชีที่ล็อกอิน (user / agency / admin) -->
-        @if (auth()->user()->role === 'agency')
-            <a href="{{ route('agency.index') }}">หน่วยงาน</a> /
-        @elseif (auth()->user()->role === 'admin')
+        <!-- เมนูแยกตาม role ของบัญชีที่ล็อกอิน (user / admin) -->
+        @if (auth()->user()->role === 'admin')
             <a href="{{ route('admin.index') }}">แอดมิน</a> /
             <a href="{{ route('admin.stats') }}">สถิติ</a> /
         @else

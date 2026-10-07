@@ -103,7 +103,8 @@
                             @endif
                         </td>
                         <td>
-                            <form method="POST" action="{{ route('admin.approve', $item->id) }}">
+                            <form method="POST" action="{{ route('admin.approve', $item->id) }}"
+                                onsubmit="return confirm('ยืนยันการอนุมัติโพสต์นี้หรือไม่?');">
                                 @csrf
                                 @method('PUT')
                                 <button type="submit">อนุมัติ</button>
