@@ -44,9 +44,8 @@
         <br><br>
 
         <label for="status">สถานะ:</label>
-        <input type="radio" name="status" value="" {{ $status === '' ? 'checked' : '' }}>ทั้งหมด
         @foreach ($statuses as $st)
-            <input type="radio" name="status" value="{{ $st }}" {{ $status === $st ? 'checked' : '' }}>{{ $st }}
+            <input type="checkbox" name="status" value="{{ $st }}" {{ $status === $st ? 'checked' : '' }}>{{ $st }}
         @endforeach
         <br><br>
 
