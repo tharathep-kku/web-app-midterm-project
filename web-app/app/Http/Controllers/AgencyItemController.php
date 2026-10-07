@@ -9,6 +9,50 @@ use App\Models\FinderUser;
 
 class AgencyItemController extends Controller
 {
+    // สีที่ให้เลือกในฟอร์มโพสต์ (ใช้กรองในหน้าค้นหาได้)
+    private const COLORS = [
+        'ดำ',
+        'ขาว',
+        'เทา',
+        'เงิน',
+        'ทอง',
+        'แดง',
+        'ชมพู',
+        'ส้ม',
+        'เหลือง',
+        'เขียว',
+        'ฟ้า',
+        'น้ำเงิน',
+        'ม่วง',
+        'น้ำตาล',
+        'หลายสี',
+    ];
+
+    // สถานที่ในและรอบ มข. ที่ให้เลือกในฟอร์มโพสต์ (21 แห่ง)
+    private const LOCATIONS = [
+        'อาคารวิทยวิภาส',
+        'อาคาร SC09',
+        'อาคารพจน์ สารสิน',
+        'ศูนย์ประชุมกาญจนาภิเษก',
+        'ศูนย์อาหารคอมเพล็กซ์',
+        'สำนักหอสมุด มข.',
+        'วิทยาลัยการคอมพิวเตอร์',
+        'คณะวิศวกรรมศาสตร์',
+        'คณะบริหารธุรกิจและการบัญชี',
+        'คณะมนุษยศาสตร์และสังคมศาสตร์',
+        'คณะศึกษาศาสตร์',
+        'คณะเกษตรศาสตร์',
+        'คณะสถาปัตยกรรมศาสตร์',
+        'โรงพยาบาลศรีนครินทร์',
+        'สนามกีฬากลาง มข.',
+        'สระว่ายน้ำ มข.',
+        'หอพักนักศึกษา มข.',
+        'บึงสีฐาน',
+        'ตลาดกังสดาล',
+        'หลังมอ',
+        'ตลาดโนนม่วง',
+    ];
+
     // ตอนนี้ระบบ login ยังเป็นงานของอีกส่วนหนึ่ง เลยเก็บ id ของหน่วยงานที่กำลังใช้งานไว้ใน session ก่อน
     private function currentAgency()
     {
@@ -78,9 +122,10 @@ class AgencyItemController extends Controller
         }
 
         $categories = Category::all();
-        $locations = Item::select('location')->distinct()->orderBy('location')->pluck('location');
+        $locations = self::LOCATIONS;
+        $colors = self::COLORS;
 
-        return view('agency.create', compact('agency', 'categories', 'locations'));
+        return view('agency.create', compact('agency', 'categories', 'locations', 'colors'));
     }
 
     public function store(Request $request)
@@ -96,7 +141,9 @@ class AgencyItemController extends Controller
         'category_id' => ['required', 'integer'],
         'type' => ['required', 'string'],
         'description' => ['nullable', 'string'],
-        'location' => ['required', 'string', 'max:255'],
+        'color' => ['nullable', 'string', 'in:' . implode(',', self::COLORS)],
+        'brand' => ['nullable', 'string', 'max:100'],
+        'location' => ['required', 'string', 'max:255', 'in:' . implode(',', self::LOCATIONS)],
         'place_point' => ['required', 'string', 'max:255'],
         'event_date' => ['required', 'date'],
         'image_url' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
@@ -126,6 +173,8 @@ class AgencyItemController extends Controller
     $item->type = $validated['type'];
     $item->title = $validated['title'];
     $item->description = $validated['description'];
+    $item->color = $validated['color'] ?? null;
+    $item->brand = $validated['brand'] ?? null;
     $item->location = $validated['location'];
     $item->place_point = $validated['place_point'];
     $item->event_date = $validated['event_date'];

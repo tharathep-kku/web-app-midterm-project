@@ -12,6 +12,8 @@ class Item extends Model
         'type',
         'title',
         'description',
+        'color',
+        'brand',
         'location',
         'event_date',
         'image_url',

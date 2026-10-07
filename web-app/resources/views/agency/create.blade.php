@@ -51,14 +51,14 @@
         </select>
         <br><br>
 
-        <!-- สถานที่ (Autocomplete ผ่าน datalist) -->
+        <!-- สถานที่ (เลือกจากรายการสถานที่ในและรอบ มข.) -->
         <label for="location">สถานที่ (อาคาร/บริเวณ): <span style="color: red;">*</span></label><br>
-        <input type="text" id="location" name="location" list="locationList" placeholder="เช่น อาคารวิทยวิภาส" value="{{ old('location') }}" required autocomplete="off">
-        <datalist id="locationList">
+        <select id="location" name="location" required>
+            <option value="">-- เลือกสถานที่ --</option>
             @foreach ($locations as $loc)
-                <option value="{{ $loc }}">
+                <option value="{{ $loc }}" @selected(old('location') === $loc)>{{ $loc }}</option>
             @endforeach
-        </datalist>
+        </select>
         <br><br>
 
         <label for="place_point">จุดสถานที่ (ระบุให้ละเอียด): <span style="color: red;">*</span></label><br>
@@ -69,6 +69,22 @@
         <label for="event_date">วันที่พบ/วันที่หาย: <span style="color: red;">*</span></label><br>
         <input type="date" id="event_date" name="event_date" value="{{ old('event_date') }}" required><br><br>
 
+        <!-- สี / ยี่ห้อ: แยกช่องเพื่อให้หน้าค้นหากรองได้ -->
+        <label for="color">สี:</label>
+        <select id="color" name="color">
+            <option value="">-- ไม่ระบุ --</option>
+            @foreach ($colors as $color)
+                <option value="{{ $color }}" @selected(old('color') === $color)>{{ $color }}</option>
+            @endforeach
+        </select>
+        @error('color') <div style="color: red;">{{ $message }}</div> @enderror
+        <br><br>
+
+        <label for="brand">ยี่ห้อ:</label><br>
+        <input type="text" id="brand" name="brand" placeholder="เช่น Apple, Samsung, Casio (ถ้าไม่ทราบให้เว้นว่าง)" value="{{ old('brand') }}" maxlength="100">
+        @error('brand') <div style="color: red;">{{ $message }}</div> @enderror
+        <br><br>
+
         <label for="description">รายละเอียดของสิ่งของ:</label><br>
         <textarea id="description" name="description" placeholder="อธิบายลักษณะของสิ่งของ...">{{ old('description') }}</textarea>
         <br><br>
@@ -76,6 +92,7 @@
         <!-- รูปสิ่งของ: เปลี่ยนเป็นไฟล์อัปโหลดจริง -->
         <label for="image_url">รูปสิ่งของ:</label><br>
         <input type="file" id="image_url" name="image_url" accept="image/*">
+        <br><img id="image_url_preview" alt="ตัวอย่างรูปสิ่งของ" style="display: none; max-width: 250px; max-height: 250px; margin-top: 8px; border: 1px solid #ccc;">
         @error('image_url') <div style="color: red;">{{ $message }}</div> @enderror
         <br><br>
 
@@ -85,6 +102,7 @@
         <!-- รูปหลักฐาน: เปลี่ยนเป็นไฟล์อัปโหลดจริง -->
         <label for="evidence_url">รูปหลักฐาน: <span style="color: red;">*</span></label><br>
         <input type="file" id="evidence_url" name="evidence_url" accept="image/*" required>
+        <br><img id="evidence_url_preview" alt="ตัวอย่างรูปหลักฐาน" style="display: none; max-width: 250px; max-height: 250px; margin-top: 8px; border: 1px solid #ccc;">
         <small>รูปตอนรับของเข้าหน่วยงาน หรือรูปแบบฟอร์มรับฝากของที่มีลายเซ็นผู้ส่งมอบ</small>
         @error('evidence_url') <div style="color: red;">{{ $message }}</div> @enderror
         <br><br>
@@ -102,6 +120,32 @@
     <footer>
         <p>*หมายเหตุ: โพสต์จะมีสถานะ "รออนุมัติ" จนกว่าแอดมินจะตรวจสอบหลักฐานยืนยันเรียบร้อย</p>
     </footer>
+    <script>
+        // แสดงรูปตัวอย่างทันทีที่เลือกไฟล์ เพื่อเช็คว่าเลือกรูปถูก
+        function setupPreview(inputId, previewId) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+
+            input.addEventListener('change', function () {
+                const file = input.files[0];
+
+                if (preview.src) {
+                    URL.revokeObjectURL(preview.src);
+                }
+
+                if (file && file.type.startsWith('image/')) {
+                    preview.src = URL.createObjectURL(file);
+                    preview.style.display = 'block';
+                } else {
+                    preview.removeAttribute('src');
+                    preview.style.display = 'none';
+                }
+            });
+        }
+
+        setupPreview('image_url', 'image_url_preview');
+        setupPreview('evidence_url', 'evidence_url_preview');
+    </script>
 </body>
 
 </html>
