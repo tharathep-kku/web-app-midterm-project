@@ -74,6 +74,6 @@
         <input type="tel" id="phone" name="phone" value="{{ old('phone', $item->reporter_phone) }}" maxlength="20"><br><br>
 
         <button type="submit">บันทึกการแก้ไข</button>
-        <a href="{{ route('my-posts.index') }}"><button type="button">ยกเลิก</button></a>
+        <a href="{{ route('profile.edit') }}"><button type="button">ยกเลิก</button></a>
     </form>
 @endsection

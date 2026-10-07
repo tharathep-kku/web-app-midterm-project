@@ -26,7 +26,6 @@ Route::post('/posts', [ItemController::class, 'store'])->name('posts.store');
 
 # เพิ่มใหม่
 Route::middleware('auth')->group(function () {
-    Route::get('/my-posts', [UserPostController::class, 'index'])->name('my-posts.index');
     Route::get('/posts/{id}/edit', [UserPostController::class, 'edit'])->whereNumber('id')->name('posts.edit');
     Route::put('/posts/{id}', [UserPostController::class, 'update'])->whereNumber('id')->name('posts.update');
 });
