@@ -53,9 +53,18 @@ class ItemController extends Controller
         $waitingOwner = Item::where('status', 'ยังไม่พบเจ้าของ')->count();
         $returnedItem = Item::where('status', 'ได้รับคืนแล้ว')->count();
         $waitingConfirm = Item::where('status', 'รอแอดมินยืนยัน')->count();      
-        $returnUnits = \App\Models\ReturnUnit::withCount('items')->get();
+        $returnUnits = \App\Models\ReturnUnit::withCount('items')->get();    
+        $returnUnitsForMap = $returnUnits->map(fn ($unit) => [
+            'id' => $unit->id,
+            'name' => $unit->name,
+            'description' => $unit->description,
+            'lat' => (float) $unit->latitude,
+            'lng' => (float) $unit->longitude,
+            'items_count' => $unit->items_count,
+            'show_url' => route('return-units.show', $unit->id),
+        ])->values();
 
-        return view('home', compact('items', 'from', 'to', 'type', 'sort', 'returnUnits', 'totalItem', 'waitingOwner', 'returnedItem', 'waitingConfirm'));
+        return view('home', compact('items', 'from', 'to', 'type', 'sort', 'returnUnits', 'returnUnitsForMap', 'totalItem', 'waitingOwner', 'returnedItem', 'waitingConfirm'));
     }
 
     // คลังประกาศ: ของที่คืนเจ้าของไปแล้วเกิน 6 เดือน
