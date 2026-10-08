@@ -75,7 +75,7 @@
         <input type="text" id="reporterName" name="reporterName" value="{{ old('reporterName', $item->reporter_name) }}"><br><br>
         <label for="">เบอร์โทรติดต่อ(ปัจจุบัน):{{ $item->reporter?->phone ?? 'ไม่ได้ระบุเบอร์โทรศัพท์' }}</label><br>
         <label for="phone">เบอร์โทรติดต่อ:</label>
-        <input type="tel" id="phone" name="phone" value="{{ old('phone', $item->reporter_phone) }}" maxlength="20"><br><br>
+        <input type="tel" id="phone" name="phone" value="{{ old('phone', $item->reporter_phone) }}" maxlength="12" pattern="0[0-9]{2}-?[0-9]{3}-?[0-9]{4}" title="กรอกเบอร์โทร 10 หลัก ขึ้นต้นด้วย 0 เช่น 081-234-5678 หรือ 0812345678"><br><br>
 
         <button type="submit">บันทึกการแก้ไข</button>
         <a href="{{ route('profile.edit') }}"><button type="button">ยกเลิก</button></a>

@@ -29,9 +29,9 @@
 
     <h3>ข้อมูลการติดต่อ</h3>
     <ul>
-        <li><b>ผู้แจ้ง:</b> {{ $item->reporter?->fullname ?? 'ไม่ทราบชื่อ' }}</li>
+        <li><b>ผู้แจ้ง:</b> {{ $item->reporter_name ?: ($item->reporter?->fullname ?? 'ไม่ทราบชื่อ') }}</li>
         <li><b>อีเมลติดต่อกลับ:</b> {{ $item->reporter?->email ?? 'ไม่ได้ระบุอีเมล' }}</li>
-        <li><b>เบอร์โทรศัพท์ติดต่อกลับ:</b> {{ $item->reporter?->phone ?? 'ไม่ได้ระบุเบอร์โทรศัพท์' }}</li>
+        <li><b>เบอร์โทรศัพท์ติดต่อกลับ:</b> {{ $item->reporter_phone ?: ($item->reporter?->phone ?? 'ไม่ได้ระบุเบอร์โทรศัพท์') }}</li>
     </ul>
 
     <h3>จุดรับ-ส่งคืน</h3>
@@ -50,8 +50,16 @@
         <a href="https://www.google.com/maps/dir/?api=1&destination={{ $item->returnUnit->latitude }},{{ $item->returnUnit->longitude }}" target="_blank" rel="noopener">
             <button type="button">นำทางไปด้วย Google Maps</button>
         </a>
+        <br><br>
+
+        <b>รูปตอนฝากของ:</b><br>
+        @if ($item->deposit_image_url)
+            <img src="{{ asset($item->deposit_image_url) }}" alt="รูปตอนฝากของ {{ $item->title }}" width="200">
+        @else
+            <p>[ไม่มีรูปตอนฝากของ]</p>
+        @endif
     @else
-        <p>ยังไม่ได้ระบุจุดรับ-ส่งคืนสำหรับรายการนี้</p>
+        <p>ไม่มีการฝาก หรือ ยังไม่ได้ระบุจุดรับ-ส่งคืนสำหรับรายการนี้</p>
     @endif
 
     <br>

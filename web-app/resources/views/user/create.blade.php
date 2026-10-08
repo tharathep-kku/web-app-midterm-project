@@ -105,7 +105,7 @@
         </select>
         <br><br>
 
-        <label for="location">สถานที่หาย/สถานที่พบ: <span style="color: red;">*</span></label><br>
+        <label for="location">สถานที่: <span style="color: red;">*</span></label><br>
         <input type="text" id="location" name="location" list="locationList" placeholder="เช่น อาคารวิทยวิภาส" value="{{ old('location') }}" required autocomplete="off">
         <datalist id="locationList">
             @foreach ($locations as $loc)
@@ -114,15 +114,15 @@
         </datalist>
         <br><br>
 
-        <label for="date">วันที่หาย/วันที่พบ: <span style="color: red;">*</span></label><br>
+        <label for="date">วันที่พบ/หาย: <span style="color: red;">*</span></label><br>
         <input type="date" id="date" name="date" value="{{ old('date') }}" max="{{ date('Y-m-d') }}" required><br><br>
 
         <label for="description">รายละเอียดเพิ่มเติม:</label><br>
         <textarea id="description" name="description" placeholder="อธิบายลักษณะของสิ่งของ เช่น สี ยี่ห้อ ของที่อยู่ข้างใน...">{{ old('description') }}</textarea>
         <br><br>
 
-        <label for="image">รูปสิ่งของ (jpeg, png, jpg, gif ไม่เกิน 2 MB):</label><br>
-        <input type="file" id="image" name="image" accept="image/*">
+        <label for="image">รูปสิ่งของ (jpeg, png, jpg, gif ไม่เกิน 2 MB): <span style="color: red;">*</span></label><br>
+        <input type="file" id="image" name="image" accept="image/*" required>
         <br>
         <!-- รูปตัวอย่าง: แสดงทันทีที่เลือกไฟล์ -->
         <img id="imagePreview" alt="ตัวอย่างรูปสิ่งของ" style="display: none; max-width: 250px; max-height: 250px; margin-top: 8px; border: 1px solid #ccc;">
@@ -161,11 +161,11 @@
         <hr>
         <h3><strong>ข้อมูลติดต่อ</strong></h3>
 
-        <label for="reporterName">ชื่อผู้แจ้ง:</label><br>
-        <input type="text" id="reporterName" name="reporterName" placeholder="เช่น สมชาย ใจดี" value="{{ old('reporterName') }}"><br><br>
+        <label for="reporterName">ชื่อผู้แจ้ง: <span style="color: red;">*</span></label><br>
+        <input type="text" id="reporterName" name="reporterName" placeholder="เช่น สมชาย ใจดี" value="{{ old('reporterName') }}" required><br><br>
 
-        <label for="phone">เบอร์โทรติดต่อ:</label><br>
-        <input type="tel" id="phone" name="phone" placeholder="เช่น 081-234-5678" value="{{ old('phone') }}" maxlength="20"><br><br>
+        <label for="phone">เบอร์โทรติดต่อ: <span style="color: red;">*</span></label><br>
+        <input type="tel" id="phone" name="phone" placeholder="เช่น 081-234-5678" value="{{ old('phone') }}" maxlength="12" pattern="0[0-9]{2}-?[0-9]{3}-?[0-9]{4}" required><br><br>
 
         <button type="submit">ส่งข้อมูลการแจ้ง</button>
         <a href="{{ route('home') }}"><button type="button">ยกเลิก</button></a>
