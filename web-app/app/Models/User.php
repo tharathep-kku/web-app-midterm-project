@@ -7,7 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -17,13 +17,14 @@ use Illuminate\Support\Str;
  * @property int $id
  * @property string $name
  * @property string $email
+ * @property string|null $phone
  * @property string $password
  * @property string|null $remember_token
  * @property bool $is_banned
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'phone', 'password'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -43,10 +44,10 @@ class User extends Authenticatable
         ];
     }
 
-    // ข้อมูลโปรไฟล์ (ชื่อ-นามสกุล, เบอร์โทร) อยู่ที่ finder_users
-    public function finderUser(): BelongsTo
+    // โพสต์แจ้งของหาย/พบของที่ user คนนี้เป็นคนลง
+    public function items(): HasMany
     {
-        return $this->belongsTo(FinderUser::class);
+        return $this->hasMany(Item::class, 'user_id');
     }
 
     /**

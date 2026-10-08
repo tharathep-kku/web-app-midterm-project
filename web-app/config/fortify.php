@@ -161,7 +161,7 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // สมัครสมาชิกย้ายไปใช้ RegisterController เอง (routes/web.php) ไม่ผ่าน Fortify แล้ว
     ],
 
 ];

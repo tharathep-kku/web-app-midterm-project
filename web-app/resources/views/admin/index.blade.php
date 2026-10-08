@@ -29,7 +29,7 @@
     @endif
 
     @if ($admin)
-        <p>เข้าสู่ระบบในนาม: <strong>{{ $admin->fullname }}</strong> ({{ $admin->email }})</p>
+        <p>เข้าสู่ระบบในนาม: <strong>{{ $admin->name }}</strong> ({{ $admin->email }})</p>
     @else
         <p>บัญชีนี้ยังไม่ได้ผูกกับข้อมูลแอดมิน</p>
     @endif
@@ -56,7 +56,7 @@
                     <tr>
                         <td>{{ $handover->id }}</td>
                         <td>{{ $handover->title }}</td>
-                        <td>{{ $handover->reporter ? $handover->reporter->fullname : ($handover->reporter_name ?? 'ไม่ทราบชื่อ') }}</td>
+                        <td>{{ $handover->reporter ? $handover->reporter->name : ($handover->reporter_name ?? 'ไม่ทราบชื่อ') }}</td>
                         <td>
                             @if ($handover->evidence_url)
                                 <img src="{{ asset($handover->evidence_url) }}" alt="หลักฐานของ {{ $handover->title }}" width="80"><br>
@@ -118,9 +118,9 @@
                 @forelse ($users as $u)
                     <tr>
                         <td>U-{{ str_pad($u->id, 3, '0', STR_PAD_LEFT) }}</td>
-                        <td>{{ $u->finderUser ? $u->finderUser->fullname : $u->name }}</td>
+                        <td>{{ $u->name }}</td>
                         <td>{{ $u->email }}</td>
-                        <td>{{ $u->finderUser ? $u->finderUser->phone : '-' }}</td>
+                        <td>{{ $u->phone ?? '-' }}</td>
                         <td>{{ $u->created_at ? $u->created_at->format('d/m/Y') : '-' }}</td>
                         <td>{{ $u->is_banned ? 'ถูกระงับ' : 'ปกติ' }}</td>
                         <td>

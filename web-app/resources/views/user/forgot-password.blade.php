@@ -28,7 +28,7 @@
         <label for="name">ชื่อ (ตามที่สมัครไว้):</label><br>
         <input type="text" id="name" name="name" placeholder="เช่น สมชาย ใจดี" value="{{ old('name') }}" required><br><br>
 
-        <label for="password">รหัสผ่านใหม่:</label>
+        <label for="password">รหัสผ่านใหม่:</label><br>
         <input type="password" id="password" name="password" placeholder="เช่น KkuReturn26" required><br><br>
 
         <label for="password_confirmation">ยืนยันรหัสผ่านใหม่:</label><br>

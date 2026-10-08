@@ -6,21 +6,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Item;
 use App\Models\Category;
-use App\Models\FinderUser;
 use App\Models\User;
 
 class AdminController extends Controller
 {
-    // หาข้อมูลแอดมินจากบัญชีที่ล็อกอินอยู่ (users.finder_user_id ชี้ไปที่ finder_users)
+    // หาบัญชีแอดมินจากบัญชีที่ล็อกอินอยู่
     private function currentAdmin()
     {
-        $id = Auth::user()->finder_user_id;
-
-        if ($id === null) {
-            return null;
-        }
-
-        $user = FinderUser::find($id);
+        $user = Auth::user();
 
         if ($user === null || $user->role !== 'admin') {
             return null;
@@ -57,14 +50,14 @@ class AdminController extends Controller
             ->get();
 
             // ponytail: ไม่แบ่งหน้า ถ้าผู้ใช้เยอะค่อยเปลี่ยนเป็น paginate()
-            $users = User::with('finderUser')->orderBy('id')->get();
+            $users = User::orderBy('id')->get();
 
             $query = Item::query();
             $query = $this->filter($query, $request);
 
             // ตัวกรอง reporter เป็นสิทธิ์เฉพาะแอดมิน ไม่อยู่ใน filter() ที่ใช้ร่วมกับหน้าอื่น
             if ($reporter !== '') {
-                $ownerIds = FinderUser::where('fullname', 'like', '%' . $reporter . '%')->pluck('id');
+                $ownerIds = User::where('name', 'like', '%' . $reporter . '%')->pluck('id');
                 $query->whereIn('user_id', $ownerIds);
             }
 
@@ -74,8 +67,8 @@ class AdminController extends Controller
                 $itemCategory = Category::find($item->category_id);
                 $item->category_name = $itemCategory ? $itemCategory->name : 'อื่นๆ';
 
-                $owner = FinderUser::find($item->user_id);
-                $item->owner_name = $owner ? $owner->fullname : 'ไม่ทราบชื่อ';
+                $owner = User::find($item->user_id);
+                $item->owner_name = $owner ? $owner->name : 'ไม่ทราบชื่อ';
                 $item->owner_role = $owner ? $owner->role : '-';
             }
 
@@ -273,9 +266,9 @@ class AdminController extends Controller
             ];
         }
 
-        $total_user = FinderUser::count();
-        $normal_user = FinderUser::where('role', 'user')->count();
-        $admin_user = FinderUser::where('role', 'admin')->count();
+        $total_user = User::count();
+        $normal_user = User::where('role', 'user')->count();
+        $admin_user = User::where('role', 'admin')->count();
 
         return view('admin.stats', compact(
             'admin',

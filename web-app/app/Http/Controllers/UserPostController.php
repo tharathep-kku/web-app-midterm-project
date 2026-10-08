@@ -15,7 +15,7 @@ class UserPostController extends Controller
     {
         $item = Item::findOrFail($id);
 
-        if ($item->user_id === null || $item->user_id !== Auth::user()->finder_user_id) {
+        if ($item->user_id === null || $item->user_id !== Auth::user()->id) {
             return redirect()->route('profile.edit')->with('error', 'ไม่สามารถแก้ไขโพสต์ของคนอื่นได้');
         }
 
@@ -37,7 +37,7 @@ class UserPostController extends Controller
         $item = Item::findOrFail($id);
 
         // เช็คเจ้าของซ้ำอีกรอบ เพราะยิง PUT ตรงมาได้โดยไม่ต้องผ่านหน้าฟอร์ม
-        if ($item->user_id === null || $item->user_id !== Auth::user()->finder_user_id) {
+        if ($item->user_id === null || $item->user_id !== Auth::user()->id) {
             return redirect()->route('profile.edit')->with('error', 'ไม่สามารถแก้ไขโพสต์ของคนอื่นได้');
         }
 
@@ -83,7 +83,7 @@ class UserPostController extends Controller
     {
         $item = Item::findOrFail($id);
 
-        if ($item->user_id === null || $item->user_id !== Auth::user()->finder_user_id) {
+        if ($item->user_id === null || $item->user_id !== Auth::user()->id) {
             return redirect()->route('profile.edit')->with('error', 'ไม่สามารถส่งหลักฐานของโพสต์คนอื่นได้');
         }
 
@@ -109,7 +109,7 @@ class UserPostController extends Controller
     {
         $item = Item::findOrFail($id);
 
-        if ($item->user_id === null || $item->user_id !== Auth::user()->finder_user_id) {
+        if ($item->user_id === null || $item->user_id !== Auth::user()->id) {
             return redirect()->route('profile.edit')->with('error', 'ไม่สามารถลบโพสต์ของคนอื่นได้');
         }
 
