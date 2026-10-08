@@ -24,32 +24,6 @@
         <li>ช่วงวันที่ของข้อมูล {{ $first_date ? $first_date : '-' }} ถึง {{ $last_date ? $last_date : '-' }}</li>
     </ul>
 
-    <h2><strong>สถานะการอนุมัติ</strong></h2>
-
-    <table border="1" cellspacing="2" cellpadding="0">
-        <thead>
-            <tr>
-                <th>สถานะ</th>
-                <th>จำนวน</th>
-            </tr>
-        </thead>
-        <tbody align="center">
-            <tr>
-                <td>รออนุมัติ</td>
-                <td>{{ $wait_item }}</td>
-            </tr>
-            <tr>
-                <td>อนุมัติแล้ว</td>
-                <td>{{ $pass_item }}</td>
-            </tr>
-            <tr>
-                <td>ไม่อนุมัติ</td>
-                <td>{{ $reject_item }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <br>
     <h2><strong>สถิติแยกตามหมวดหมู่</strong></h2>
 
     <table border="1" cellspacing="2" cellpadding="0">

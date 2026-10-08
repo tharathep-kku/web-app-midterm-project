@@ -33,7 +33,6 @@ class AdminController extends Controller
     {
         $admin = $this->currentAdmin();
 
-        $approval_status = $request->input('approval_status') ?? '';
         $type = $request->input('type') ?? '';
         $keyword = trim($request->input('keyword') ?? '');
 
@@ -47,10 +46,6 @@ class AdminController extends Controller
             ->get();
 
             $query = Item::query();
-
-            if ($approval_status !== '') {
-                $query->where('approval_status', $approval_status);
-            }
 
             if ($type !== '') {
                 $query->where('type', $type);
@@ -72,53 +67,22 @@ class AdminController extends Controller
             }
         }
 
-        return view('admin.index', compact('admin', 'items', 'handovers', 'approval_status', 'type', 'keyword'));
+        return view('admin.index', compact('admin', 'items', 'handovers', 'type', 'keyword'));
     }
 
-    public function approve(int $id)
+    // ลบโพสต์ใดก็ได้ออกจากระบบ
+    public function destroy(int $id)
     {
         $admin = $this->currentAdmin();
 
         if ($admin === null) {
-            return redirect()->route('admin.index')->with('error', 'เฉพาะแอดมินเท่านั้นที่อนุมัติได้');
+            return redirect()->route('admin.index')->with('error', 'เฉพาะแอดมินเท่านั้นที่ลบโพสต์ได้');
         }
 
         $item = Item::findOrFail($id);
-        if ($item->approval_status !== 'รออนุมัติ') {
-            return redirect()->back()->with('error', 'โพสต์ ' . $item->title . ' ถูกตรวจไปแล้ว');
-        }
-        $item->approval_status = 'อนุมัติแล้ว';
-        $item->reject_reason = null;
-        $item->approved_by = $admin->id;
-        $item->approved_at = now();
-        $item->save();
+        $item->deleteWithFiles();
 
-        return redirect()->back()->with('success', 'อนุมัติโพสต์ ' . $item->title . ' แล้ว');
-    }
-
-    public function reject(Request $request, int $id)
-    {
-        $admin = $this->currentAdmin();
-
-        if ($admin === null) {
-            return redirect()->route('admin.index')->with('error', 'เฉพาะแอดมินเท่านั้นที่ปฏิเสธโพสต์ได้');
-        }
-
-        $validated = $request->validate([
-            'reject_reason' => ['required', 'string', 'max:255'],
-        ]);
-
-        $item = Item::findOrFail($id);
-        if ($item->approval_status !== 'รออนุมัติ') {
-            return redirect()->back()->with('error', 'โพสต์ ' . $item->title . ' ถูกตรวจไปแล้ว');
-        }
-        $item->approval_status = 'ไม่อนุมัติ';
-        $item->reject_reason = $validated['reject_reason'];
-        $item->approved_by = $admin->id;
-        $item->approved_at = now();
-        $item->save();
-
-        return redirect()->back()->with('success', 'ปฏิเสธโพสต์ ' . $item->title . ' แล้ว');
+        return redirect()->back()->with('success', 'ลบโพสต์ ' . $item->title . ' แล้ว');
     }
 
     // ยืนยันหลักฐานการส่งมอบ: จุดรับ-ส่งได้รับของแล้ว
@@ -174,9 +138,6 @@ class AdminController extends Controller
         }
 
         $total_item = Item::count();
-        $wait_item = Item::where('approval_status', 'รออนุมัติ')->count();
-        $pass_item = Item::where('approval_status', 'อนุมัติแล้ว')->count();
-        $reject_item = Item::where('approval_status', 'ไม่อนุมัติ')->count();
 
         $found_item = Item::where('type', 'found')->count();
         $lost_item = Item::where('type', 'lost')->count();
@@ -224,9 +185,6 @@ class AdminController extends Controller
         return view('admin.stats', compact(
             'admin',
             'total_item',
-            'wait_item',
-            'pass_item',
-            'reject_item',
             'found_item',
             'lost_item',
             'returned_item',

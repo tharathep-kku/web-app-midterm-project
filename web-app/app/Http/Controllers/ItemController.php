@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use App\Models\Item;
 use App\Models\Category;
+use App\Models\ReturnUnit;
 
 class ItemController extends Controller
 {
@@ -29,9 +30,6 @@ class ItemController extends Controller
             ->orWhereNull('returned_date')
             ->orWhere('returned_date', '>', $sevenDaysAgo);
         });
-
-        // แสดงเฉพาะโพสต์ที่แอดมินอนุมัติแล้ว
-        $query->where('approval_status', 'อนุมัติแล้ว');
 
         if ($from !== '') {
             $query->where('event_date', '>=', $from);
@@ -118,8 +116,6 @@ class ItemController extends Controller
         if ($searched) {
             $query = Item::query();
 
-            $query->where('approval_status', 'อนุมัติแล้ว');
-
             if ($item_name !== '') {
                 $query->where('title', 'like', '%' . $item_name . '%');
             }
@@ -204,13 +200,8 @@ class ItemController extends Controller
         return redirect()->route('search.home');
     }
 
-    public function show(Item $item)
+    public function show(Item $item): View
     {
-        // โพสต์ที่ยังไม่ได้รับการอนุมัติ ห้ามเปิดดูผ่าน URL ตรง ๆ
-        if ($item->approval_status !== 'อนุมัติแล้ว') {
-            return redirect()->route('home');
-        }
-
         $item->load(['category', 'reporter', 'returnUnit']);
 
         return view('item', compact('item'));
@@ -219,7 +210,8 @@ class ItemController extends Controller
     public function create()
     {
         $categories = Category::all();
-        $locations = Item::select('location')->distinct()->orderBy('location')->pluck('location');
+        // autocomplete สถานที่ใช้ชื่อจุดรับ-ส่งคืน (return_units)
+        $locations = ReturnUnit::orderBy('name')->pluck('name');
 
         return view('user.create', compact('categories', 'locations'));
     }

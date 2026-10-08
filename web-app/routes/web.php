@@ -28,6 +28,8 @@ Route::post('/posts', [ItemController::class, 'store'])->name('posts.store');
 Route::middleware('auth')->group(function () {
     Route::get('/posts/{id}/edit', [UserPostController::class, 'edit'])->whereNumber('id')->name('posts.edit');
     Route::put('/posts/{id}', [UserPostController::class, 'update'])->whereNumber('id')->name('posts.update');
+    Route::delete('/posts/{id}', [UserPostController::class, 'destroy'])->whereNumber('id')->name('posts.destroy');
+    Route::put('/posts/{id}/evidence', [UserPostController::class, 'submitEvidence'])->whereNumber('id')->name('posts.evidence');
 });
 
 require __DIR__.'/settings.php';

@@ -27,6 +27,7 @@ return [
     'required' => 'กรุณากรอก:attribute',
     'string' => ':attribute ต้องเป็นข้อความ',
     'unique' => ':attribute นี้ถูกใช้แล้ว',
+    'uploaded' => 'อัปโหลด:attributeไม่สำเร็จ (ไฟล์ต้องไม่เกิน 2 MB)',
 
     'attributes' => [
         'name' => 'ชื่อ',
@@ -44,5 +45,7 @@ return [
         'reporterName' => 'ชื่อผู้แจ้ง',
         'phone' => 'เบอร์โทรศัพท์',
         'reject_reason' => 'เหตุผลที่ปฏิเสธ',
+        'evidence' => 'รูปหลักฐาน',
+        'evidence_note' => 'หมายเหตุ',
     ],
 ];
