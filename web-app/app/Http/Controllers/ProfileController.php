@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Models\Category;
 use App\Models\Item;
 
 class ProfileController extends Controller
@@ -18,16 +19,86 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        // โพสต์ของฉัน: แสดงเฉพาะ user ทั่วไป แอดมินดูโพสต์ทั้งหมดได้ที่หน้าหลังบ้านอยู่แล้ว
+        // โพสต์ของฉัน: แสดงให้ทุก role ที่ผูกกับ finder_users (แอดมินก็โพสต์เองได้เหมือนกัน)
         $items = collect();
-        if ($user->role === 'user' && $user->finder_user_id !== null) {
-            $items = Item::with('category')
-                ->where('user_id', $user->finder_user_id)
-                ->orderBy('id', 'DESC')
-                ->get();
+        $categories = collect();
+        $locations = collect();
+        $statuses = collect();
+
+        if ($user->finder_user_id !== null) {
+            $query = Item::with('category')->where('user_id', $user->finder_user_id);
+            $query = $this->filter($query, $request);
+            $items = $query->orderBy('id', 'DESC')->get();
+
+            $categories = Category::all();
+            $locations = Item::select('location')->distinct()->orderBy('location')->pluck('location');
+            $statuses = Item::select('status')->distinct()->orderBy('status')->pluck('status');
         }
 
-        return view('user.profile', compact('user', 'items'));
+        $type = $request->input('type') ?? '';
+        $status = $request->input('status') ?? '';
+        $category = $request->input('category') ?? '';
+        $keyword = trim($request->input('keyword') ?? '');
+        $location = trim($request->input('location') ?? '');
+        $start_date = $request->input('start_date') ?? '';
+        $end_date = $request->input('end_date') ?? '';
+
+        return view('user.profile', compact(
+            'user',
+            'items',
+            'categories',
+            'locations',
+            'statuses',
+            'type',
+            'status',
+            'category',
+            'keyword',
+            'location',
+            'start_date',
+            'end_date'
+        ));
+    }
+
+    // ใส่เงื่อนไข where ให้ query ของ "โพสต์ของฉัน" ตามช่องที่กรอกจริง (ไม่ใช่ค่าว่าง)
+    private function filter($query, Request $request)
+    {
+        $keyword = trim($request->input('keyword') ?? '');
+        $type = $request->input('type') ?? '';
+        $status = $request->input('status') ?? '';
+        $category = $request->input('category') ?? '';
+        $location = trim($request->input('location') ?? '');
+        $start_date = $request->input('start_date') ?? '';
+        $end_date = $request->input('end_date') ?? '';
+
+        if ($keyword !== '') {
+            $query->where('title', 'like', '%' . $keyword . '%');
+        }
+
+        if ($type !== '') {
+            $query->where('type', $type);
+        }
+
+        if ($status !== '') {
+            $query->where('status', $status);
+        }
+
+        if ($category !== '') {
+            $query->where('category_id', $category);
+        }
+
+        if ($location !== '') {
+            $query->where('location', 'like', '%' . $location . '%');
+        }
+
+        if ($start_date !== '') {
+            $query->where('event_date', '>=', $start_date);
+        }
+
+        if ($end_date !== '') {
+            $query->where('event_date', '<=', $end_date);
+        }
+
+        return $query;
     }
 
     public function update(Request $request): RedirectResponse

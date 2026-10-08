@@ -231,13 +231,14 @@ class ItemController extends Controller
             'description'  => 'nullable|string',
             'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'reporterName' => 'nullable|string|max:255',
-            'phone'        => 'nullable|string|max:20',
+            'phone'        => ['nullable', 'string', 'max:12', 'regex:/^0[0-9]{2}-?[0-9]{3}-?[0-9]{4}$/'],
             'deposit'      => 'nullable|in:yes,no',
             'returnUnit'   => 'required_if:deposit,yes|nullable|exists:return_units,id',
             'depositImage' => 'required_if:deposit,yes|nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
             'returnUnit.required_if'   => 'กรุณาเลือกจุดที่ฝากของไว้',
             'depositImage.required_if' => 'กรุณาแนบรูปตอนฝากของ',
+            'phone.regex'              => 'กรุณากรอกเบอร์โทร 10 หลัก ขึ้นต้นด้วย 0 เช่น 081-234-5678',
         ]);
 
         // ฝากของได้เฉพาะประกาศ "พบของ" ที่เลือกว่าฝากไว้แล้ว

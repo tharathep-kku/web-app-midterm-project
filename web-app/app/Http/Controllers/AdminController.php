@@ -60,38 +60,12 @@ class AdminController extends Controller
             $users = User::with('finderUser')->orderBy('id')->get();
 
             $query = Item::query();
+            $query = $this->filter($query, $request);
 
-            if ($type !== '') {
-                $query->where('type', $type);
-            }
-
-            if ($keyword !== '') {
-                $query->where('title', 'like', '%' . $keyword . '%');
-            }
-
-            if ($status !== '') {
-                $query->where('status', $status);
-            }
-
-            if ($category !== '') {
-                $query->where('category_id', $category);
-            }
-
-            if ($location !== '') {
-                $query->where('location', 'like', '%' . $location . '%');
-            }
-
+            // ตัวกรอง reporter เป็นสิทธิ์เฉพาะแอดมิน ไม่อยู่ใน filter() ที่ใช้ร่วมกับหน้าอื่น
             if ($reporter !== '') {
                 $ownerIds = FinderUser::where('fullname', 'like', '%' . $reporter . '%')->pluck('id');
                 $query->whereIn('user_id', $ownerIds);
-            }
-
-            if ($start_date !== '') {
-                $query->where('event_date', '>=', $start_date);
-            }
-
-            if ($end_date !== '') {
-                $query->where('event_date', '<=', $end_date);
             }
 
             $items = $query->orderBy('id', 'DESC')->paginate(10)->withQueryString();
@@ -127,6 +101,48 @@ class AdminController extends Controller
             'locations',
             'statuses'
         ));
+    }
+
+    // ใส่เงื่อนไข where ให้ query ของตารางโพสต์ทั้งหมด ตามช่องที่แอดมินกรอกจริง (ไม่ใช่ค่าว่าง)
+    private function filter($query, Request $request)
+    {
+        $keyword = trim($request->input('keyword') ?? '');
+        $type = $request->input('type') ?? '';
+        $status = $request->input('status') ?? '';
+        $category = $request->input('category') ?? '';
+        $location = trim($request->input('location') ?? '');
+        $start_date = $request->input('start_date') ?? '';
+        $end_date = $request->input('end_date') ?? '';
+
+        if ($keyword !== '') {
+            $query->where('title', 'like', '%' . $keyword . '%');
+        }
+
+        if ($type !== '') {
+            $query->where('type', $type);
+        }
+
+        if ($status !== '') {
+            $query->where('status', $status);
+        }
+
+        if ($category !== '') {
+            $query->where('category_id', $category);
+        }
+
+        if ($location !== '') {
+            $query->where('location', 'like', '%' . $location . '%');
+        }
+
+        if ($start_date !== '') {
+            $query->where('event_date', '>=', $start_date);
+        }
+
+        if ($end_date !== '') {
+            $query->where('event_date', '<=', $end_date);
+        }
+
+        return $query;
     }
 
     // ระงับบัญชี / ปลดแบน (กดซ้ำเพื่อสลับสถานะ) ระงับบัญชีแอดมินไม่ได้

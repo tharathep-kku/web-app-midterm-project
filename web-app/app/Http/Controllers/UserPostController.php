@@ -55,7 +55,9 @@ class UserPostController extends Controller
             'description' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
             'reporterName' => ['nullable', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:20'],
+            'phone' => ['nullable', 'string', 'max:12', 'regex:/^0[0-9]{2}-?[0-9]{3}-?[0-9]{4}$/'],
+        ], [
+            'phone.regex' => 'กรุณากรอกเบอร์โทร 10 หลัก ขึ้นต้นด้วย 0 เช่น 081-234-5678',
         ]);
 
         // ถ้าไม่ได้เลือกรูปใหม่ ใช้รูปเดิมต่อ

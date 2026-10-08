@@ -26,31 +26,83 @@
     @endif
 
     <h3>ข้อมูลส่วนตัว</h3>
+    <p>แก้ไขชื่อและอีเมลที่ใช้เข้าสู่ระบบ</p>
     <form method="POST" action="{{ route('profile.update') }}">
         @csrf
         @method('PUT')
 
         <label for="name">ชื่อ:</label><br>
         <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}" required><br><br>
-
+        
         <label for="email">อีเมล:</label><br>
         <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}" required><br><br>
 
         <button type="submit">บันทึก</button>
     </form>
 
-    {{-- โพสต์ของฉัน แสดงเฉพาะ user ทั่วไป --}}
-    @if ($user->role === 'user')
         <hr>
 
         <h3>โพสต์ของฉัน</h3>
+        <p>ดูและจัดการโพสต์แจ้งของหาย/พบของที่คุณเคยลงไว้ ใช้ตัวกรองด้านล่างเพื่อหารายการที่ต้องการให้เจอง่ายขึ้น</p>
+
+        <form method="GET" action="{{ route('profile.edit') }}">
+            <label for="type">ประเภท:</label>
+            <select id="type" name="type">
+                <option value="" {{ $type === '' ? 'selected' : '' }}>-- ทั้งหมด --</option>
+                <option value="found" {{ $type === 'found' ? 'selected' : '' }}>พบของ</option>
+                <option value="lost" {{ $type === 'lost' ? 'selected' : '' }}>ของหาย</option>
+            </select>
+
+            <label for="status">สถานะ:</label>
+            <select id="status" name="status">
+                <option value="" {{ $status === '' ? 'selected' : '' }}>-- ทั้งหมด --</option>
+                @foreach ($statuses as $st)
+                    <option value="{{ $st }}" {{ $status === $st ? 'selected' : '' }}>{{ $st }}</option>
+                @endforeach
+            </select>
+
+            <label for="category">หมวดหมู่:</label>
+            <select id="category" name="category">
+                <option value="" {{ $category === '' ? 'selected' : '' }}>-- ทั้งหมด --</option>
+                @foreach ($categories as $cat)
+                    <option value="{{ $cat->id }}" {{ (string) $category === (string) $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                @endforeach
+            </select>
+            <br><br>
+
+            <label for="keyword">ชื่อสิ่งของ:</label>
+            <input type="text" id="keyword" name="keyword" value="{{ $keyword }}">
+
+            <label for="location">สถานที่:</label>
+            <input type="text" id="location" name="location" list="profileLocationList" value="{{ $location }}">
+            <datalist id="profileLocationList">
+                @foreach ($locations as $loc)
+                    <option value="{{ $loc }}">
+                @endforeach
+            </datalist>
+
+
+            <label for="start_date">ช่วงวันที่พบ/หาย ตั้งแต่:</label>
+            <input type="date" id="start_date" name="start_date" value="{{ $start_date }}">
+
+            <label for="end_date">ถึง:</label>
+            <input type="date" id="end_date" name="end_date" value="{{ $end_date }}">
+
+            <button type="submit">กรองข้อมูล</button>
+            <a href="{{ route('profile.edit') }}"><button type="button">ล้างตัวกรอง</button></a>
+        </form>
+
+        <br>
+
         <table border="1" cellspacing="2" cellpadding="0">
             <thead>
                 <tr>
-                    <th>ชื่อสิ่งของ</th>
+                    <th>สิ่งของ</th>
+                    <th>ภาพของที่หาย</th>
                     <th>ประเภท</th>
                     <th>หมวดหมู่</th>
                     <th>สถานที่</th>
+                    <th>รายละเอียดเพิ่มเติม</th>
                     <th>วันที่พบ/หาย</th>
                     <th>สถานะ</th>
                     <th>จัดการ</th>
@@ -61,9 +113,17 @@
                 @forelse ($items as $item)
                     <tr>
                         <td>{{ $item->title }}</td>
+                        <td style="text-align: center;">
+                            @if ($item->image_url)
+                                <img src="{{ asset($item->image_url) }}" alt="{{ $item->title }}" width="100">
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td>{{ $item->type === 'found' ? 'พบของ' : 'ของหาย' }}</td>
                         <td>{{ $item->category ? $item->category->name : 'อื่นๆ' }}</td>
                         <td>{{ $item->location }}</td>
+                        <td>{{ $item->description }}</td>
                         <td>{{ $item->event_date }}</td>
                         <td>{{ $item->status }}</td>
                         <td>
@@ -103,16 +163,17 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8">ยังไม่มีโพสต์ของคุณ</td>
+                        <td colspan="10">ยังไม่มีโพสต์ของคุณ</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
-    @endif
+    
 
     <hr>
 
     <h3>เปลี่ยนรหัสผ่าน</h3>
+    <p>ตั้งรหัสผ่านใหม่เพื่อความปลอดภัยของบัญชี</p>
     <form method="POST" action="{{ route('profile.password') }}">
         @csrf
         @method('PUT')
@@ -120,9 +181,9 @@
         <label for="current_password">รหัสผ่านปัจจุบัน:</label><br>
         <input type="password" id="current_password" name="current_password" required><br><br>
 
-        <label for="password">รหัสผ่านใหม่:</label>
-        <small>อย่างน้อย 8 ตัวอักษร ต้องมีพิมพ์ใหญ่ พิมพ์เล็ก และตัวเลข</small><br>
-        <input type="password" id="password" name="password" placeholder="เช่น KkuReturn26" required><br><br>
+        <label for="password">รหัสผ่านใหม่:</label><br>
+        <input type="password" id="password" name="password" placeholder="เช่น KkuReturn26" required><br>
+        <span style="color: red;">*<small>อย่างน้อย 8 ตัวอักษร ต้องมีพิมพ์ใหญ่ พิมพ์เล็ก และตัวเลข</small></span><br><br>
 
         <label for="password_confirmation">ยืนยันรหัสผ่านใหม่:</label><br>
         <input type="password" id="password_confirmation" name="password_confirmation" required><br><br>

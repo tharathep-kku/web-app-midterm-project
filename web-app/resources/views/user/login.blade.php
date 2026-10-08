@@ -32,7 +32,7 @@
         <input type="email" id="email" name="email" placeholder="เช่น email@kku.ac.th" value="{{ old('email') }}" required autofocus><br><br>
 
         <label for="password">รหัสผ่าน:</label><br>
-        <input type="password" id="password" name="password" required><br><br>
+        <input type="password" id="password" name="password" placeholder="เช่น KkuReturn26" required><br><br>
 
         <input type="checkbox" id="remember" name="remember" @checked(old('remember'))>
         <label for="remember">จดจำการเข้าสู่ระบบ</label>

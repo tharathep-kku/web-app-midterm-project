@@ -23,15 +23,14 @@
         @csrf
 
         <label for="name">ชื่อ:</label><br>
-        <input type="text" id="name" name="name" value="{{ old('name') }}" required autofocus><br><br>
+        <input type="text" id="name" name="name" placeholder="เช่น สมชาย ใจดี" value="{{ old('name') }}" required autofocus><br><br>
 
         <label for="email">อีเมล:</label><br>
         <input type="email" id="email" name="email" placeholder="เช่น email@kku.ac.th" value="{{ old('email') }}" required><br><br>
-
-        <label for="password">รหัสผ่าน:</label>
-        <small>อย่างน้อย 8 ตัวอักษร ต้องมีพิมพ์ใหญ่ พิมพ์เล็ก และตัวเลข</small><br>
-        <input type="password" id="password" name="password" placeholder="เช่น KkuReturn26" required><br><br>
-        
+    
+        <label for="password">รหัสผ่าน:</label><br>
+        <input type="password" id="password" name="password" placeholder="เช่น KkuReturn26" required><br>
+        <span style="color: red;">*<small>อย่างน้อย 8 ตัวอักษร ต้องมีพิมพ์ใหญ่ พิมพ์เล็ก และตัวเลข</small></span><br><br>
 
         <label for="password_confirmation">ยืนยันรหัสผ่าน:</label><br>
         <input type="password" id="password_confirmation" name="password_confirmation" required><br><br>

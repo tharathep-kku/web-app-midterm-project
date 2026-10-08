@@ -22,6 +22,15 @@
         <input type="radio" name="type" value="lost" {{ $type === 'lost' ? 'checked' : '' }}>ของหาย
         <br><br>
 
+        <label for="status">สถานะ:</label>
+        <select id="status" name="status">
+            <option value="" {{ $status === '' ? 'selected' : '' }}>-- ทั้งหมด --</option>
+            @foreach ($statuses as $st)
+                <option value="{{ $st }}" {{ $status === $st ? 'selected' : '' }}>{{ $st }}</option>
+            @endforeach
+        </select>
+        <br><br>
+
         <label for="item_name">ชื่อสิ่งของ: </label><br>
         <input type="text" id="item_name" name="item_name" placeholder="เช่น กระเป๋าตังค์สีน้ำตาล" value="{{ $item_name }}"><br><br>
 
@@ -34,7 +43,7 @@
         </select>
         <br><br>
 
-        <label for="location">สถานที่หาย/สถานที่พบ:</label>
+        <label for="location">สถานที่:</label>
         <br>
         <input type="text" id="location" name="location" list="locationList" placeholder="เช่น อาคารวิทยวิภาส" value="{{ $location }}">
         <!-- <datalist> เป็น element ของ HTML5 ที่ทำ autocomplete ให้กับ <input> -->
@@ -47,15 +56,7 @@
 
         <label>ช่วงวันที่พบ/วันที่หาย: </label><br>
         ตั้งแต่ <input type="date" name="start_date" id="start_date" value="{{ $start_date }}">
-        ถึง <input type="date" name="end_date" id="end_date" value="{{ $end_date }}"><br><br>
-
-        <label for="status">สถานะ:</label>
-        <select id="status" name="status">
-            <option value="" {{ $status === '' ? 'selected' : '' }}>-- ทั้งหมด --</option>
-            @foreach ($statuses as $st)
-                <option value="{{ $st }}" {{ $status === $st ? 'selected' : '' }}>{{ $st }}</option>
-            @endforeach
-        </select>
+        ถึง <input type="date" name="end_date" id="end_date" value="{{ $end_date }}">
         <br><br>
 
         <button type="submit" id="searchBtn" class="btn">ค้นหา</button>
@@ -97,11 +98,12 @@
             <thead>
                 <tr>
                     <th>สิ่งของ</th>   
-                    <th>ภาพของหาย</th>
+                    <th>ภาพของที่หาย</th>
+                    <th>ประเภท</th>
                     <th>หมวดหมู่</th>
                     <th>สถานที่พบ</th>
-                    <th>รายละเอียด</th>
-                    <th>วันที่พบ</th>
+                    <th>รายละเอียดเพิ่มเติม</th>
+                    <th>วันที่พบ/หาย</th>
                     <th>สถานะ</th>
                     <th>ติดต่อ</th>
                 </tr>
@@ -117,6 +119,7 @@
                                 -
                             @endif
                         </td>
+                        <td>{{ $item->type === 'found' ? 'พบของ' : 'ของหาย' }}</td>
                         <td>{{ $item->category?->name ?? 'อื่นๆ' }}</td>
                         <td>{{ $item->location }}</td>
                         <td>{{ $item->description }}</td>
