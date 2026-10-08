@@ -2,6 +2,10 @@
 
 @section('title', 'ลืมรหัสผ่าน')
 
+@section('intro')
+    @include('partials.intro')
+@endsection
+
 @section('content')
     <h2><strong>ลืมรหัสผ่าน</strong></h2>
     <p>กรอกอีเมลและชื่อให้ตรงกับบัญชี แล้วตั้งรหัสผ่านใหม่ได้เลย</p>

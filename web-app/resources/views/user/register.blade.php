@@ -2,6 +2,10 @@
 
 @section('title', 'สมัครสมาชิก')
 
+@section('intro')
+    @include('partials.intro')
+@endsection
+
 @section('content')
     <h2><strong>สมัครสมาชิก</strong></h2>
 

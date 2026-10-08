@@ -1,7 +1,8 @@
 <nav>
     <a href="{{ route('home') }}">หน้าแรก</a> /
     <a href="{{ route('search.home') }}">ค้นหา</a> /
-
+    <a href="{{ route('posts.create') }}">แจ้งของหาย</a> /
+    <a href="{{ route('location') }}">จุดรับ-ส่งคืนของ</a> /
     @guest
         <a href="{{ route('login') }}">เข้าสู่ระบบ</a>
     @endguest
@@ -11,10 +12,7 @@
         @if (auth()->user()->role === 'admin')
             <a href="{{ route('admin.index') }}">แอดมิน</a> /
             <a href="{{ route('admin.stats') }}">สถิติ</a> /
-        @else
-            <a href="{{ route('posts.create') }}">แจ้งของหาย</a> /
         @endif
-        <a href="{{ route('location') }}">จุดรับ-ส่งคืนของ</a> /
         <a href="{{ route('profile.edit') }}">โปรไฟล์</a> /
 
         <form method="POST" action="{{ route('logout') }}" style="display: inline;">
