@@ -14,6 +14,12 @@
 
         <input type="hidden" name="searched" value="1">
 
+        <label for="type">ประเภทการแจ้ง:</label><br>
+        <input type="radio" name="type" value="" {{ $type === '' ? 'checked' : '' }}>ทั้งหมด
+        <input type="radio" name="type" value="found" {{ $type === 'found' ? 'checked' : '' }}>พบของ
+        <input type="radio" name="type" value="lost" {{ $type === 'lost' ? 'checked' : '' }}>ของหาย
+        <br><br>
+
         <label for="item_name">ชื่อสิ่งของ: </label><br>
         <input type="text" id="item_name" name="item_name" placeholder="เช่น กระเป๋าตังค์สีน้ำตาล" value="{{ $item_name }}"><br><br>
 
@@ -26,19 +32,7 @@
         </select>
         <br><br>
 
-        <label for="type">ประเภท:</label>
-        <input type="radio" name="type" value="" {{ $type === '' ? 'checked' : '' }}>ทั้งหมด
-        <input type="radio" name="type" value="found" {{ $type === 'found' ? 'checked' : '' }}>พบของ
-        <input type="radio" name="type" value="lost" {{ $type === 'lost' ? 'checked' : '' }}>ของหาย
-        <br><br>
-
-        <label for="status">สถานะ:</label>
-        @foreach ($statuses as $st)
-            <input type="checkbox" name="status" value="{{ $st }}" {{ $status === $st ? 'checked' : '' }}>{{ $st }}
-        @endforeach
-        <br><br>
-
-        <label for="location">สถานที่หาย:</label>
+        <label for="location">สถานที่หาย/สถานที่พบ:</label>
         <br>
         <input type="text" id="location" name="location" list="locationList" placeholder="เช่น อาคารวิทยวิภาส" value="{{ $location }}">
         <!-- <datalist> เป็น element ของ HTML5 ที่ทำ autocomplete ให้กับ <input> -->
@@ -53,6 +47,15 @@
         ตั้งแต่ <input type="date" name="start_date" id="start_date" value="{{ $start_date }}">
         ถึง <input type="date" name="end_date" id="end_date" value="{{ $end_date }}"><br><br>
 
+        <label for="status">สถานะ:</label>
+        <select id="status" name="status">
+            <option value="" {{ $status === '' ? 'selected' : '' }}>-- ทั้งหมด --</option>
+            @foreach ($statuses as $st)
+                <option value="{{ $st }}" {{ $status === $st ? 'selected' : '' }}>{{ $st }}</option>
+            @endforeach
+        </select>
+        <br><br>
+        
         <button type="submit" id="searchBtn" class="btn">ค้นหา</button>
         <a href="{{ route('search.home') }}"><button type="button">ล้างคำค้นหา</button></a>
     </form>
