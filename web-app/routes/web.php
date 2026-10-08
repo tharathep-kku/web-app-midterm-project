@@ -15,8 +15,6 @@ Route::delete('/search/history/{index}', [ItemController::class, 'clearHistoryIt
 Route::middleware('auth')->get('/items/{item}', [ItemController::class, 'show'])->name('item.show');
 Route::get('/return-units/{returnUnit}', [ReturnUnitController::class, 'show'])->name('return-units.show');
 
-Route::post('/posts', [ItemController::class, 'store'])->name('posts.store');
-Route::get('/posts/create', [ItemController::class, 'create'])->name('posts.create');
 
 // จุดรับ-ส่งคืน: ล็อกอินแล้วเข้าได้เลย ไม่ต้องยืนยันอีเมล
 Route::middleware('auth')->group(function () {
@@ -29,7 +27,9 @@ Route::middleware('auth')->group(function () {
     Route::put('/posts/{id}', [UserPostController::class, 'update'])->whereNumber('id')->name('posts.update');
     Route::delete('/posts/{id}', [UserPostController::class, 'destroy'])->whereNumber('id')->name('posts.destroy');
     Route::put('/posts/{id}/evidence', [UserPostController::class, 'submitEvidence'])->whereNumber('id')->name('posts.evidence');
-});
+    Route::post('/posts', [ItemController::class, 'store'])->name('posts.store');
+    Route::get('/posts/create', [ItemController::class, 'create'])->name('posts.create');
+    });
 
 // ส่วนของ User แอดมิน: ต้องล็อกอินด้วยบัญชี role admin เท่านั้น
 Route::middleware(['auth', 'admin'])->group(function () {
