@@ -10,6 +10,8 @@
 
     <h2><strong>ค้นหาของหาย</strong></h2>
 
+    <p>พิมพ์ชื่อสิ่งของ สถานที่ หรือรายละเอียดที่จำได้ เพื่อตามหาของของคุณ</p>
+
     <form id="searchForm" method="GET" action="{{ route('search.home') }}" onsubmit="document.getElementById('loadingMessage').style.display='block'; document.getElementById('searchBtn').disabled=true;">
 
         <input type="hidden" name="searched" value="1">
@@ -55,7 +57,7 @@
             @endforeach
         </select>
         <br><br>
-        
+
         <button type="submit" id="searchBtn" class="btn">ค้นหา</button>
         <a href="{{ route('search.home') }}"><button type="button">ล้างคำค้นหา</button></a>
     </form>
