@@ -55,7 +55,7 @@ class Item extends Model
     // ส่งแล้วก็แก้ไขโพสต์ไม่ได้ด้วย เพื่อไม่ให้ข้อมูลเปลี่ยนระหว่างแอดมินตรวจ
     public function canSubmitEvidence(): bool
     {
-        return ! in_array($this->status, ['รอแอดมินยืนยัน', 'ได้รับคืนแล้ว', 'ได้รับของแล้ว'], true);
+        return ! in_array($this->status, ['รอแอดมินยืนยัน', 'ได้รับคืนแล้ว'], true);
     }
 
     public function canEdit(): bool

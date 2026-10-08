@@ -17,7 +17,7 @@
         <li>โพสต์ทั้งหมด {{ $total_item }} รายการ</li>
         <li>ประกาศพบของ {{ $found_item }} รายการ / ประกาศของหาย {{ $lost_item }} รายการ</li>
         <li>ได้รับคืนแล้ว {{ $returned_item }} รายการ / ยังไม่พบเจ้าของ {{ $waiting_owner }} รายการ / รอแอดมินยืนยัน {{ $waiting_confirm }} รายการ</li>
-        <li>ได้รับของแล้ว {{ $received_item }} รายการ / หลักฐานไม่ถูกต้อง {{ $invalid_evidence }} รายการ</li>
+        <li>หลักฐานไม่ถูกต้อง {{ $invalid_evidence }} รายการ</li>
         <li>อัตราการได้รับคืน {{ number_format($return_rate, 2) }} % ของโพสต์ทั้งหมด</li>
         <li>ช่วงวันที่ของข้อมูล {{ $first_date ? $first_date : '-' }} ถึง {{ $last_date ? $last_date : '-' }}</li>
     </ul>
