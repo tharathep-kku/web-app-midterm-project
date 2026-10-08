@@ -18,7 +18,7 @@
         </ul>
     @endif
 
-    <!-- ส่งไปที่ route register.store ของ Fortify (ใช้ CreateNewUser สร้างบัญชี) -->
+    <!-- ส่งไปที่ route register.store ของ RegisterController -->
     <form method="POST" action="{{ route('register.store') }}">
         @csrf
 
@@ -27,7 +27,10 @@
 
         <label for="email">อีเมล:</label><br>
         <input type="email" id="email" name="email" placeholder="เช่น email@kku.ac.th" value="{{ old('email') }}" required><br><br>
-    
+
+        <label for="phone">เบอร์โทรศัพท์:</label><br>
+        <input type="tel" id="phone" name="phone" placeholder="เช่น 081-234-5678" value="{{ old('phone') }}" maxlength="12" pattern="0[0-9]{2}-?[0-9]{3}-?[0-9]{4}" title="กรอกเบอร์โทร 10 หลัก ขึ้นต้นด้วย 0 เช่น 081-234-5678 หรือ 0812345678" required><br><br>
+
         <label for="password">รหัสผ่าน:</label><br>
         <input type="password" id="password" name="password" placeholder="เช่น KkuReturn26" required><br>
         <span style="color: red;">*<small>อย่างน้อย 8 ตัวอักษร ต้องมีพิมพ์ใหญ่ พิมพ์เล็ก และตัวเลข</small></span><br><br>

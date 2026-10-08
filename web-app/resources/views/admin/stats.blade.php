@@ -9,7 +9,7 @@
 @endsection
 
 @section('content')
-    <p>สถิติของระบบ (ดูโดย {{ $admin->fullname }})</p>
+    <p>สถิติของระบบ (ดูโดย {{ $admin->name }})</p>
 
     <h2><strong>ภาพรวม</strong></h2>
 

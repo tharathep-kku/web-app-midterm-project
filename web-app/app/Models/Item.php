@@ -17,11 +17,11 @@ class Item extends Model
     }
 
     /**
-     * @return BelongsTo<FinderUser, $this>
+     * @return BelongsTo<User, $this>
      */
     public function reporter(): BelongsTo
     {
-        return $this->belongsTo(FinderUser::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**

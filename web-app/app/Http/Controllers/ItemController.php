@@ -199,7 +199,7 @@ class ItemController extends Controller
     {
         $item->load(['category', 'reporter', 'returnUnit']);
 
-        return view('item', compact('item'));
+        return view('user.item', compact('item'));
     }
 
     public function create()
@@ -255,7 +255,7 @@ class ItemController extends Controller
         }
 
         Item::create([
-            'user_id'        => Auth::check() ? Auth::user()->finder_user_id : null, // ผูกโพสต์กับคนที่ล็อกอิน เพื่อให้แก้ไขโพสต์ตัวเองได้
+            'user_id'        => Auth::check() ? Auth::user()->id : null, // ผูกโพสต์กับคนที่ล็อกอิน เพื่อให้แก้ไขโพสต์ตัวเองได้
             'category_id'    => $validated['category'],
             'return_unit_id' => $returnUnitId,
             'deposit_image_url' => $depositImagePath,   

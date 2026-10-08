@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Actions\Fortify\CreateNewUser;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -25,26 +24,17 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
     }
 
     /**
-     * Configure Fortify actions.
-     */
-    private function configureActions(): void
-    {
-        Fortify::createUsersUsing(CreateNewUser::class);
-    }
-
-    /**
      * Configure Fortify views.
+     * (สมัครสมาชิกย้ายไปใช้ RegisterController เอง ไม่ผ่าน Fortify แล้ว)
      */
     private function configureViews(): void
     {
         Fortify::loginView(fn () => view('user.login'));
-        Fortify::registerView(fn () => view('user.register'));
     }
 
     /**

@@ -29,7 +29,7 @@
 
     <h3>ข้อมูลการติดต่อ</h3>
     <ul>
-        <li><b>ผู้แจ้ง:</b> {{ $item->reporter_name ?: ($item->reporter?->fullname ?? 'ไม่ทราบชื่อ') }}</li>
+        <li><b>ผู้แจ้ง:</b> {{ $item->reporter_name ?: ($item->reporter?->name ?? 'ไม่ทราบชื่อ') }}</li>
         <li><b>อีเมลติดต่อกลับ:</b> {{ $item->reporter?->email ?? 'ไม่ได้ระบุอีเมล' }}</li>
         <li><b>เบอร์โทรศัพท์ติดต่อกลับ:</b> {{ $item->reporter_phone ?: ($item->reporter?->phone ?? 'ไม่ได้ระบุเบอร์โทรศัพท์') }}</li>
     </ul>

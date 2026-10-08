@@ -70,7 +70,7 @@
 
         <hr>
         <h3><strong>ข้อมูลติดต่อ</strong></h3>
-        <label for="">ชื่อผู้แจ้ง(ปัจจุบัน): {{ $item->reporter?->fullname ?? 'ไม่ทราบชื่อ' }}</label><br>
+        <label for="">ชื่อผู้แจ้ง(ปัจจุบัน): {{ $item->reporter?->name ?? 'ไม่ทราบชื่อ' }}</label><br>
         <label for="reporterName">ชื่อผู้แจ้ง:</label>
         <input type="text" id="reporterName" name="reporterName" value="{{ old('reporterName', $item->reporter_name) }}"><br><br>
         <label for="">เบอร์โทรติดต่อ(ปัจจุบัน):{{ $item->reporter?->phone ?? 'ไม่ได้ระบุเบอร์โทรศัพท์' }}</label><br>

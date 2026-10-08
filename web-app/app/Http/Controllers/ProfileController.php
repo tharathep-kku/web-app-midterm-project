@@ -19,21 +19,14 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        // โพสต์ของฉัน: แสดงให้ทุก role ที่ผูกกับ finder_users (แอดมินก็โพสต์เองได้เหมือนกัน)
-        $items = collect();
-        $categories = collect();
-        $locations = collect();
-        $statuses = collect();
+        // โพสต์ของฉัน: แสดงให้ทุก role (แอดมินก็โพสต์เองได้เหมือนกัน)
+        $query = Item::with('category')->where('user_id', $user->id);
+        $query = $this->filter($query, $request);
+        $items = $query->orderBy('id', 'DESC')->get();
 
-        if ($user->finder_user_id !== null) {
-            $query = Item::with('category')->where('user_id', $user->finder_user_id);
-            $query = $this->filter($query, $request);
-            $items = $query->orderBy('id', 'DESC')->get();
-
-            $categories = Category::all();
-            $locations = Item::select('location')->distinct()->orderBy('location')->pluck('location');
-            $statuses = Item::select('status')->distinct()->orderBy('status')->pluck('status');
-        }
+        $categories = Category::all();
+        $locations = Item::select('location')->distinct()->orderBy('location')->pluck('location');
+        $statuses = Item::select('status')->distinct()->orderBy('status')->pluck('status');
 
         $type = $request->input('type') ?? '';
         $status = $request->input('status') ?? '';
@@ -105,7 +98,7 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        $user->update($request->validate($this->profileRules($user->id)));
+        $user->update($request->validate($this->profileRules($user->id), $this->profileMessages()));
 
         return back()->with('success', 'บันทึกข้อมูลโปรไฟล์แล้ว');
     }
