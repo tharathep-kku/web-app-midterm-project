@@ -1,22 +1,12 @@
-<!DOCTYPE html>
-<html lang="th">
+@extends('layouts.site')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ค้นหาของหาย - KKU Return</title>
-</head>
+@section('title', 'ค้นหาของหาย')
 
-<body>
-    <h1><strong>KKU Return: lost and found</strong></h1>
-    <p>Welcome to KKU Return ที่จะช่วยคุณตามหาของสำคัญ หรือเจ้าของที่พัดพรากไปเอง</p>
-    <p>ศูนย์รวมแจ้งของหายและแจ้งพบของภายในมหาวิทยาลัยขอนแก่น ปลอดภัย ตรวจสอบได้ ลดความเสี่ยงจากการแอบอ้าง</p>
+@section('intro')
+    @include('partials.intro')
+@endsection
 
-    <ul>
-        <li>มีหลักฐานยืนยันการส่งมอบทุกครั้ง</li>
-    </ul>
-    @include('partials.menu')
-    <hr>
+@section('content')
 
     <h2><strong>ค้นหาของหาย</strong></h2>
 
@@ -145,20 +135,4 @@
     </div>
     @endif
 
-    <br>
-    <hr>
-    <footer>
-        <p>*หมายเหตุ: แพลตฟอร์มนี้เป็นเพียงพื้นที่สาธารณะสำหรับเชื่อมโยงข้อมูลฟรี
-            ไม่มีส่วนเกี่ยวข้องหรือรับประกันความถูกต้องของข้อมูล การส่งมอบสิ่งของ หรือการธุรกรรมใดๆ ระหว่างผู้ใช้งาน</p>
-
-        <strong>ช่องทางติดต่อ</strong>
-        <p>หากคุณมีข้อสงสัยหรือคำถามเกี่ยวกับเว็บไซต์ KKU Return โปรดติดต่อเราผ่านช่องทางดังต่อไปนี้:</p>
-        <ul>
-            <li>อีเมล: kkureturn01@kku.ac.th</li>
-            <li>โทรศัพท์: 012-345-6789</li>
-            <li>Facebook: KKU Return</li>
-        </ul>
-    </footer>
-</body>
-
-</html>
+@endsection

@@ -1,17 +1,15 @@
-<!DOCTYPE html>
-<html lang="th">
+@extends('layouts.site')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ข้อมูลหลังบ้าน - KKU Return</title>
-</head>
+@section('title', 'ข้อมูลหลังบ้าน')
 
-<body>
-    <h1><strong>KKU Return: lost and found</strong></h1>
-    @include('partials.menu')
+@section('note', '*หมายเหตุ: การอนุมัติจะบันทึกชื่อแอดมินและเวลาที่ตรวจสอบไว้ทุกครั้ง เพื่อให้ตรวจสอบย้อนหลังได้')
+
+@section('intro')
+    @include('partials.intro')
+@endsection
+
+@section('content')
     <p>ส่วนของแอดมิน สำหรับอนุมัติโพสต์และดูข้อมูลหลังบ้านทั้งหมด</p>
-    <hr>
 
     @if (session('success'))
         <p><strong>{{ session('success') }}</strong></p>
@@ -39,17 +37,111 @@
     <hr>
 
     @if ($admin)
+        <h2><strong>รายการรอยืนยันการส่งมอบ</strong></h2>
+        <p>รายการที่มีผู้แจ้งว่าส่งมอบของแล้ว รอแอดมินตรวจหลักฐาน</p>
+
+        <table border="1" cellspacing="2" cellpadding="0">
+            <thead>
+                <tr>
+                    <th>รหัส</th>
+                    <th>สิ่งของ</th>
+                    <th>ชื่อผู้แจ้ง</th>
+                    <th>หลักฐาน</th>
+                    <th>สถานะปัจจุบัน</th>
+                    <th>จัดการ</th>
+                </tr>
+            </thead>
+            <tbody align="center">
+                @forelse ($handovers as $handover)
+                    <tr>
+                        <td>{{ $handover->id }}</td>
+                        <td>{{ $handover->title }}</td>
+                        <td>{{ $handover->reporter ? $handover->reporter->fullname : ($handover->reporter_name ?? 'ไม่ทราบชื่อ') }}</td>
+                        <td>
+                            @if ($handover->evidence_url)
+                                <img src="{{ asset($handover->evidence_url) }}" alt="หลักฐานของ {{ $handover->title }}" width="80"><br>
+                            @endif
+                            {{ $handover->evidence_note ? $handover->evidence_note : 'ไม่มีหลักฐานแนบ' }}
+                        </td>
+                        <td>{{ $handover->status }}</td>
+                        <td>
+                            <form method="POST" action="{{ route('admin.handover.confirm', $handover->id) }}"
+                                onsubmit="return confirm('ตรวจสอบหลักฐานแล้ว ต้องการยืนยันว่าได้รับของแล้วใช่หรือไม่?');">
+                                @csrf
+                                @method('PUT')
+                                <button type="submit">ยืนยัน</button>
+                            </form>
+
+                            <form method="POST" action="{{ route('admin.handover.reject', $handover->id) }}"
+                                onsubmit="return confirm('ต้องการปฏิเสธหลักฐานนี้ใช่หรือไม่? (ผู้ใช้ต้องส่งหลักฐานใหม่)');">
+                                @csrf
+                                @method('PUT')
+                                <button type="submit">ปฏิเสธ</button>
+                            </form>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6">ไม่มีรายการรอยืนยันการส่งมอบ</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        <br>
+        <hr>
+
+        <h2><strong>ฐานข้อมูลผู้ใช้งาน</strong></h2>
+        <p style="color: red;">* ข้อมูลส่วนบุคคล (เปิดเผยเฉพาะแอดมิน)</p>
+
+        <table border="1" cellspacing="2" cellpadding="0">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>ชื่อ-นามสกุลจริง</th>
+                    <th>อีเมล</th>
+                    <th>เบอร์โทรศัพท์</th>
+                    <th>วันที่สมัคร</th>
+                    <th>สถานะบัญชี</th>
+                    <th>จัดการ</th>
+                </tr>
+            </thead>
+            <tbody align="center">
+                @forelse ($users as $u)
+                    <tr>
+                        <td>U-{{ str_pad($u->id, 3, '0', STR_PAD_LEFT) }}</td>
+                        <td>{{ $u->finderUser ? $u->finderUser->fullname : $u->name }}</td>
+                        <td>{{ $u->email }}</td>
+                        <td>{{ $u->finderUser ? $u->finderUser->phone : '-' }}</td>
+                        <td>{{ $u->created_at ? $u->created_at->format('d/m/Y') : '-' }}</td>
+                        <td>{{ $u->is_banned ? 'ถูกระงับ' : 'ปกติ' }}</td>
+                        <td>
+                            @if ($u->role === 'admin')
+                                แอดมิน
+                            @else
+                                <form method="POST" action="{{ route('admin.users.ban', $u->id) }}"
+                                    onsubmit="return confirm('{{ $u->is_banned ? 'ปลดแบนบัญชีนี้?' : 'ระงับการใช้งานบัญชีนี้?' }}');">
+                                    @csrf
+                                    @method('PUT')
+                                    <button type="submit">{{ $u->is_banned ? 'ปลดการระงับบัญชี' : 'ระงับบัญชี' }}</button>
+                                </form>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7">ยังไม่มีผู้ใช้งาน</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        <br>
+        <hr>
+
         <h2><strong>ข้อมูลหลังบ้าน: โพสต์ทั้งหมด</strong></h2>
 
         <form method="GET" action="{{ route('admin.index') }}">
-            <label for="approval_status">สถานะอนุมัติ:</label>
-            <select id="approval_status" name="approval_status">
-                <option value="" {{ $approval_status === '' ? 'selected' : '' }}>-- ทั้งหมด --</option>
-                <option value="รออนุมัติ" {{ $approval_status === 'รออนุมัติ' ? 'selected' : '' }}>รออนุมัติ</option>
-                <option value="อนุมัติแล้ว" {{ $approval_status === 'อนุมัติแล้ว' ? 'selected' : '' }}>อนุมัติแล้ว</option>
-                <option value="ไม่อนุมัติ" {{ $approval_status === 'ไม่อนุมัติ' ? 'selected' : '' }}>ไม่อนุมัติ</option>
-            </select>
-
             <label for="type">ประเภท:</label>
             <select id="type" name="type">
                 <option value="" {{ $type === '' ? 'selected' : '' }}>-- ทั้งหมด --</option>
@@ -73,10 +165,10 @@
                     <th>ประเภท</th>
                     <th>หมวดหมู่</th>
                     <th>ผู้โพสต์</th>
-                    <th>สถานที่ / จุดสถานที่</th>
+                    <th>สถานที่</th>
                     <th>วันที่พบ/หาย</th>
                     <th>หลักฐานยืนยัน</th>
-                    <th>สถานะอนุมัติ</th>
+                    <th>สถานะ</th>
                     <th>จัดการ</th>
                 </tr>
             </thead>
@@ -88,7 +180,7 @@
                         <td>{{ $item->type === 'found' ? 'พบของ' : 'ของหาย' }}</td>
                         <td>{{ $item->category_name }}</td>
                         <td>{{ $item->owner_name }}<br>({{ $item->owner_role }})</td>
-                        <td>{{ $item->location }}<br>{{ $item->place_point ? $item->place_point : '-' }}</td>
+                        <td>{{ $item->location }}</td>
                         <td>{{ $item->event_date }}</td>
                         <td>
                             @if ($item->evidence_url)
@@ -96,26 +188,13 @@
                             @endif
                             {{ $item->evidence_note ? $item->evidence_note : 'ไม่มีหลักฐานแนบ' }}
                         </td>
+                        <td>{{ $item->status }}</td>
                         <td>
-                            {{ $item->approval_status }}
-                            @if ($item->reject_reason)
-                                <br>({{ $item->reject_reason }})
-                            @endif
-                        </td>
-                        <td>
-                            <form method="POST" action="{{ route('admin.approve', $item->id) }}"
-                                onsubmit="return confirm('ยืนยันการอนุมัติโพสต์นี้หรือไม่?');">
+                            <form method="POST" action="{{ route('admin.destroy', $item->id) }}"
+                                onsubmit="return confirm('ลบโพสต์นี้ออกจากระบบ?');">
                                 @csrf
-                                @method('PUT')
-                                <button type="submit">อนุมัติ</button>
-                            </form>
-
-                            <form method="POST" action="{{ route('admin.reject', $item->id) }}"
-                                onsubmit="return confirm('ยืนยันการไม่อนุมัติโพสต์นี้หรือไม่?');">
-                                @csrf
-                                @method('PUT')
-                                <input type="text" name="reject_reason" placeholder="เหตุผล" required>
-                                <button type="submit">ไม่อนุมัติ</button>
+                                @method('DELETE')
+                                <button type="submit">ลบโพสต์</button>
                             </form>
                         </td>
                     </tr>
@@ -132,11 +211,4 @@
         </div>
     @endif
 
-    <br>
-    <hr>
-    <footer>
-        <p>*หมายเหตุ: การอนุมัติจะบันทึกชื่อแอดมินและเวลาที่ตรวจสอบไว้ทุกครั้ง เพื่อให้ตรวจสอบย้อนหลังได้</p>
-    </footer>
-</body>
-
-</html>
+@endsection

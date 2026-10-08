@@ -24,8 +24,9 @@
         <label for="name">ชื่อ (ตามที่สมัครไว้):</label><br>
         <input type="text" id="name" name="name" value="{{ old('name') }}" required><br><br>
 
-        <label for="password">รหัสผ่านใหม่:</label><br>
-        <input type="password" id="password" name="password" required><br><br>
+        <label for="password">รหัสผ่านใหม่:</label>
+        <small>อย่างน้อย 8 ตัวอักษร ต้องมีพิมพ์ใหญ่ พิมพ์เล็ก และตัวเลข</small><br>
+        <input type="password" id="password" name="password" placeholder="เช่น KkuReturn26" required><br><br>
 
         <label for="password_confirmation">ยืนยันรหัสผ่านใหม่:</label><br>
         <input type="password" id="password_confirmation" name="password_confirmation" required><br><br>

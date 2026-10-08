@@ -13,7 +13,6 @@
             <a href="{{ route('admin.stats') }}">สถิติ</a> /
         @else
             <a href="{{ route('posts.create') }}">แจ้งของหาย</a> /
-            <a href="{{ route('my-posts.index') }}">โพสต์ของฉัน</a> /
         @endif
         <a href="{{ route('location') }}">จุดรับ-ส่งคืนของ</a> /
         <a href="{{ route('profile.edit') }}">โปรไฟล์</a> /

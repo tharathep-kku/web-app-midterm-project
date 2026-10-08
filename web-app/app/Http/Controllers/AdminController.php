@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Item;
 use App\Models\Category;
 use App\Models\FinderUser;
+use App\Models\User;
 
 class AdminController extends Controller
 {
@@ -33,18 +34,23 @@ class AdminController extends Controller
     {
         $admin = $this->currentAdmin();
 
-        $approval_status = $request->input('approval_status') ?? '';
         $type = $request->input('type') ?? '';
         $keyword = trim($request->input('keyword') ?? '');
 
         $items = collect();
+        $handovers = collect();
+        $users = collect();
 
         if ($admin !== null) {
-            $query = Item::query();
+            $handovers = Item::with('reporter')
+            ->where('status', 'รอแอดมินยืนยัน')
+            ->orderBy('id', 'DESC')
+            ->get();
 
-            if ($approval_status !== '') {
-                $query->where('approval_status', $approval_status);
-            }
+            // ponytail: ไม่แบ่งหน้า ถ้าผู้ใช้เยอะค่อยเปลี่ยนเป็น paginate()
+            $users = User::with('finderUser')->orderBy('id')->get();
+
+            $query = Item::query();
 
             if ($type !== '') {
                 $query->where('type', $type);
@@ -66,47 +72,86 @@ class AdminController extends Controller
             }
         }
 
-        return view('admin.index', compact('admin', 'items', 'approval_status', 'type', 'keyword'));
+        return view('admin.index', compact('admin', 'items', 'handovers', 'users', 'type', 'keyword'));
     }
 
-    public function approve(int $id)
+    // ระงับบัญชี / ปลดแบน (กดซ้ำเพื่อสลับสถานะ) ระงับบัญชีแอดมินไม่ได้
+    public function toggleBan(int $id)
     {
         $admin = $this->currentAdmin();
 
         if ($admin === null) {
-            return redirect()->route('admin.index')->with('error', 'เฉพาะแอดมินเท่านั้นที่อนุมัติได้');
+            return redirect()->route('admin.index')->with('error', 'เฉพาะแอดมินเท่านั้นที่ระงับบัญชีได้');
         }
 
-        $item = Item::findOrFail($id);
-        $item->approval_status = 'อนุมัติแล้ว';
-        $item->reject_reason = null;
-        $item->approved_by = $admin->id;
-        $item->approved_at = now();
-        $item->save();
+        $user = User::findOrFail($id);
 
-        return redirect()->back()->with('success', 'อนุมัติโพสต์ ' . $item->title . ' แล้ว');
+        if ($user->role === 'admin') {
+            return redirect()->back()->with('error', 'ไม่สามารถระงับบัญชีแอดมินได้');
+        }
+
+        $user->is_banned = ! $user->is_banned;
+        $user->save();
+
+        return redirect()->back()->with('success', ($user->is_banned ? 'ระงับบัญชี ' : 'ปลดแบนบัญชี ') . $user->email . ' แล้ว');
     }
 
-    public function reject(Request $request, int $id)
+    // ลบโพสต์ใดก็ได้ออกจากระบบ
+    public function destroy(int $id)
     {
         $admin = $this->currentAdmin();
 
         if ($admin === null) {
-            return redirect()->route('admin.index')->with('error', 'เฉพาะแอดมินเท่านั้นที่ปฏิเสธโพสต์ได้');
+            return redirect()->route('admin.index')->with('error', 'เฉพาะแอดมินเท่านั้นที่ลบโพสต์ได้');
         }
 
-        $validated = $request->validate([
-            'reject_reason' => ['required', 'string', 'max:255'],
-        ]);
+        $item = Item::findOrFail($id);
+        $item->deleteWithFiles();
+
+        return redirect()->back()->with('success', 'ลบโพสต์ ' . $item->title . ' แล้ว');
+    }
+
+    // ยืนยันหลักฐานการส่งมอบ: จุดรับ-ส่งได้รับของแล้ว
+    public function confirmHandover(int $id)
+    {
+        $admin = $this->currentAdmin();
+
+        if ($admin === null) {
+            return redirect()->route('admin.index')->with('error', 'เฉพาะแอดมินเท่านั้นที่ยืนยันการส่งมอบได้');
+        }
 
         $item = Item::findOrFail($id);
-        $item->approval_status = 'ไม่อนุมัติ';
-        $item->reject_reason = $validated['reject_reason'];
-        $item->approved_by = $admin->id;
-        $item->approved_at = now();
+
+        // ยืนยันได้เฉพาะรายการที่รอแอดมินยืนยันอยู่เท่านั้น
+        if ($item->status !== 'รอแอดมินยืนยัน') {
+            return redirect()->back()->with('error', 'รายการ ' . $item->title . ' ไม่ได้อยู่ในสถานะรอยืนยัน');
+        }
+
+        $item->status = 'ได้รับของแล้ว';
         $item->save();
 
-        return redirect()->back()->with('success', 'ปฏิเสธโพสต์ ' . $item->title . ' แล้ว');
+        return redirect()->back()->with('success', 'ยืนยันการส่งมอบ ' . $item->title . ' แล้ว');
+    }
+
+    // ปฏิเสธหลักฐานการส่งมอบ: ให้ผู้ใช้ส่งหลักฐานใหม่
+    public function rejectHandover(int $id)
+    {
+        $admin = $this->currentAdmin();
+
+        if ($admin === null) {
+            return redirect()->route('admin.index')->with('error', 'เฉพาะแอดมินเท่านั้นที่ปฏิเสธการส่งมอบได้');
+        }
+
+        $item = Item::findOrFail($id);
+
+        if ($item->status !== 'รอแอดมินยืนยัน') {
+            return redirect()->back()->with('error', 'รายการ ' . $item->title . ' ไม่ได้อยู่ในสถานะรอยืนยัน');
+        }
+
+        $item->status = 'หลักฐานไม่ถูกต้อง';
+        $item->save();
+
+        return redirect()->back()->with('success', 'ปฏิเสธหลักฐานการส่งมอบ ' . $item->title . ' แล้ว');
     }
 
     // หน้าสถิติต่างๆ ของระบบ
@@ -119,9 +164,6 @@ class AdminController extends Controller
         }
 
         $total_item = Item::count();
-        $wait_item = Item::where('approval_status', 'รออนุมัติ')->count();
-        $pass_item = Item::where('approval_status', 'อนุมัติแล้ว')->count();
-        $reject_item = Item::where('approval_status', 'ไม่อนุมัติ')->count();
 
         $found_item = Item::where('type', 'found')->count();
         $lost_item = Item::where('type', 'lost')->count();
@@ -129,6 +171,8 @@ class AdminController extends Controller
         $returned_item = Item::where('status', 'ได้รับคืนแล้ว')->count();
         $waiting_owner = Item::where('status', 'ยังไม่พบเจ้าของ')->count();
         $waiting_confirm = Item::where('status', 'รอแอดมินยืนยัน')->count();
+        $received_item = Item::where('status', 'ได้รับของแล้ว')->count();
+        $invalid_evidence = Item::where('status', 'หลักฐานไม่ถูกต้อง')->count();
 
         // อัตราการได้รับคืน คิดเป็นเปอร์เซ็นต์ ต้องกันหารด้วยศูนย์ตอนที่ยังไม่มีข้อมูล
         $return_rate = 0;
@@ -167,14 +211,13 @@ class AdminController extends Controller
         return view('admin.stats', compact(
             'admin',
             'total_item',
-            'wait_item',
-            'pass_item',
-            'reject_item',
             'found_item',
             'lost_item',
             'returned_item',
             'waiting_owner',
             'waiting_confirm',
+            'received_item',
+            'invalid_evidence',
             'return_rate',
             'first_date',
             'last_date',

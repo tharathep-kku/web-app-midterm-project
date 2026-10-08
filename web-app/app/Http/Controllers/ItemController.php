@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use App\Models\Item;
 use App\Models\Category;
+use App\Models\ReturnUnit;
 
 class ItemController extends Controller
 {
@@ -205,11 +206,12 @@ class ItemController extends Controller
     {
         $categories = Category::all();
         $locations = Item::select('location')->distinct()->orderBy('location')->pluck('location');
+        $returnUnits = ReturnUnit::orderBy('name')->get();
 
-        return view('user.create', compact('categories', 'locations'));
+        return view('user.create', compact('categories', 'locations', 'returnUnits'));
     }
 
-    public function store(Request $request)
+        public function store(Request $request)
     {
         $validated = $request->validate([
             'postType'     => 'required|in:found,lost',
@@ -221,7 +223,21 @@ class ItemController extends Controller
             'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'reporterName' => 'nullable|string|max:255',
             'phone'        => 'nullable|string|max:20',
+            'deposit'      => 'nullable|in:yes,no',
+            'returnUnit'   => 'required_if:deposit,yes|nullable|exists:return_units,id',
+            'depositImage' => 'required_if:deposit,yes|nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ], [
+            'returnUnit.required_if'   => 'กรุณาเลือกจุดที่ฝากของไว้',
+            'depositImage.required_if' => 'กรุณาแนบรูปตอนฝากของ',
         ]);
+
+        // ฝากของได้เฉพาะประกาศ "พบของ" ที่เลือกว่าฝากไว้แล้ว
+        $returnUnitId = null;
+        $depositImagePath = null;
+        if ($validated['postType'] === 'found' && ($validated['deposit'] ?? 'no') === 'yes') {
+            $returnUnitId = $validated['returnUnit'];
+            $depositImagePath = 'storage/' . $request->file('depositImage')->store('deposits', 'public');
+        }
 
         $imagePath = null;
         if ($request->hasFile('image')) {
@@ -231,6 +247,8 @@ class ItemController extends Controller
         Item::create([
             'user_id'        => Auth::check() ? Auth::user()->finder_user_id : null, // ผูกโพสต์กับคนที่ล็อกอิน เพื่อให้แก้ไขโพสต์ตัวเองได้
             'category_id'    => $validated['category'],
+            'return_unit_id' => $returnUnitId,
+            'deposit_image_url' => $depositImagePath,   
             'type'           => $validated['postType'],
             'title'          => $validated['itemName'],
             'description'    => $validated['description'] ?? null,

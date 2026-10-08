@@ -1,12 +1,19 @@
 @extends('layouts.site')
 
 @section('title', 'โปรไฟล์')
+@section('intro')
+    @include('partials.intro')
+@endsection
 
 @section('content')
     <h2><strong>โปรไฟล์</strong></h2>
 
     @if (session('success'))
         <p><strong>{{ session('success') }}</strong></p>
+    @endif
+
+    @if (session('error'))
+        <p><strong>{{ session('error') }}</strong></p>
     @endif
 
     @if ($errors->any())
@@ -32,6 +39,77 @@
         <button type="submit">บันทึก</button>
     </form>
 
+    {{-- โพสต์ของฉัน แสดงเฉพาะ user ทั่วไป --}}
+    @if ($user->role === 'user')
+        <hr>
+
+        <h3>โพสต์ของฉัน</h3>
+        <table border="1" cellspacing="2" cellpadding="0">
+            <thead>
+                <tr>
+                    <th>ชื่อสิ่งของ</th>
+                    <th>ประเภท</th>
+                    <th>หมวดหมู่</th>
+                    <th>สถานที่</th>
+                    <th>วันที่พบ/หาย</th>
+                    <th>สถานะ</th>
+                    <th>จัดการ</th>
+                    <th>ส่งคืนแล้ว</th>
+                </tr>
+            </thead>
+            <tbody align="center">
+                @forelse ($items as $item)
+                    <tr>
+                        <td>{{ $item->title }}</td>
+                        <td>{{ $item->type === 'found' ? 'พบของ' : 'ของหาย' }}</td>
+                        <td>{{ $item->category ? $item->category->name : 'อื่นๆ' }}</td>
+                        <td>{{ $item->location }}</td>
+                        <td>{{ $item->event_date }}</td>
+                        <td>{{ $item->status }}</td>
+                        <td>
+                            @if ($item->canEdit())
+                                <form method="GET" action="{{ route('posts.edit', $item->id) }}">
+                                    <button>แก้ไข</button>
+                                </form>
+                                <form method="POST" action="{{ route('posts.destroy', $item->id) }}"
+                                    onsubmit="return confirm('ยืนยันการลบโพสต์นี้?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit">ลบ</button>
+                                </form>
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td>
+                            @if ($item->canSubmitEvidence())
+                                @if ($item->status === 'หลักฐานไม่ถูกต้อง')
+                                    <small>หลักฐานเดิมไม่ผ่าน กรุณาส่งใหม่</small><br>
+                                @endif
+                                <form method="POST" action="{{ route('posts.evidence', $item->id) }}" enctype="multipart/form-data">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="file" name="evidence" accept="image/*" required><br>
+                                    <small>jpeg, png, gif, webp, avif ไม่เกิน 2 MB</small><br>
+                                    <input type="text" name="evidence_note" placeholder="หมายเหตุ เช่น ชื่อผู้รับคืน"><br>
+                                    <button type="submit">ยืนยัน</button>
+                                </form>
+                            @elseif ($item->status === 'รอแอดมินยืนยัน')
+                                รอแอดมินตรวจหลักฐาน
+                            @else
+                                ส่งคืนเรียบร้อย
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="8">ยังไม่มีโพสต์ของคุณ</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    @endif
+
     <hr>
 
     <h3>เปลี่ยนรหัสผ่าน</h3>
@@ -42,8 +120,9 @@
         <label for="current_password">รหัสผ่านปัจจุบัน:</label><br>
         <input type="password" id="current_password" name="current_password" required><br><br>
 
-        <label for="password">รหัสผ่านใหม่:</label><br>
-        <input type="password" id="password" name="password" required><br><br>
+        <label for="password">รหัสผ่านใหม่:</label>
+        <small>อย่างน้อย 8 ตัวอักษร ต้องมีพิมพ์ใหญ่ พิมพ์เล็ก และตัวเลข</small><br>
+        <input type="password" id="password" name="password" placeholder="เช่น KkuReturn26" required><br><br>
 
         <label for="password_confirmation">ยืนยันรหัสผ่านใหม่:</label><br>
         <input type="password" id="password_confirmation" name="password_confirmation" required><br><br>
