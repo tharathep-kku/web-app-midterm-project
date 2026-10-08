@@ -2,6 +2,10 @@
 
 @section('title', 'แก้ไขโพสต์')
 
+@section('intro')
+    @include('partials.intro')
+@endsection
+
 @section('content')
     <h2><strong>แก้ไขโพสต์</strong></h2>
 

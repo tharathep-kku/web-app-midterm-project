@@ -14,12 +14,8 @@ Route::delete('/search/history', [ItemController::class, 'clearHistory'])->name(
 Route::delete('/search/history/{index}', [ItemController::class, 'clearHistoryItem'])->whereNumber('index')->name('search.history.clear-one');
 Route::middleware('auth')->get('/items/{item}', [ItemController::class, 'show'])->name('item.show');
 Route::get('/return-units/{returnUnit}', [ReturnUnitController::class, 'show'])->name('return-units.show');
+Route::get('location', [ReturnUnitController::class, 'index'])->name('location');
 
-
-// จุดรับ-ส่งคืน: ล็อกอินแล้วเข้าได้เลย ไม่ต้องยืนยันอีเมล
-Route::middleware('auth')->group(function () {
-    Route::get('location', [ReturnUnitController::class, 'index'])->name('location');
-});
 
 # เพิ่มใหม่
 Route::middleware('auth')->group(function () {
