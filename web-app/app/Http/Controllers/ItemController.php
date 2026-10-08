@@ -213,6 +213,15 @@ class ItemController extends Controller
 
         public function store(Request $request)
     {
+            
+        foreach (['image' => 'รูปสิ่งของ', 'depositImage' => 'รูปตอนฝากของ'] as $field => $label) {
+            $file = $request->file($field);
+            if ($file !== null && ! $file->isValid()) {
+                return back()->withInput()->withErrors([
+                    $field => 'อัปโหลด' . $label . 'ไม่สำเร็จ: ' . $file->getErrorMessage(),
+                ]);
+            }
+        }
         $validated = $request->validate([
             'postType'     => 'required|in:found,lost',
             'itemName'     => 'required|string|max:255',
@@ -255,7 +264,7 @@ class ItemController extends Controller
             'location'       => $validated['location'],
             'event_date'     => $validated['date'],
             'image_url'      => $imagePath,
-            'status'         => $validated['postType'] === 'found' ? 'พบแล้ว' : 'หาย',
+            'status'         => 'ยังไม่พบเจ้าของ',
             'reporter_name'  => $validated['reporterName'] ?? null,
             'reporter_phone' => $validated['phone'] ?? null,
         ]);

@@ -38,7 +38,7 @@
 
     @if ($admin)
         <h2><strong>รายการรอยืนยันการส่งมอบ</strong></h2>
-        <p>รายการที่มีผู้แจ้งว่าส่งมอบของแล้ว รอแอดมินตรวจหลักฐาน</p>
+        <p style="color: red;">*รายการที่มีผู้แจ้งว่าส่งมอบของแล้ว รอแอดมินตรวจสอบหลักฐาน</p>
 
         <table border="1" cellspacing="2" cellpadding="0">
             <thead>
@@ -69,7 +69,7 @@
                                 onsubmit="return confirm('ตรวจสอบหลักฐานแล้ว ต้องการยืนยันว่าได้รับของแล้วใช่หรือไม่?');">
                                 @csrf
                                 @method('PUT')
-                                <button type="submit">ยืนยัน</button>
+                                <button type="submit">อนุมัติ</button>
                             </form>
 
                             <form method="POST" action="{{ route('admin.handover.reject', $handover->id) }}"
@@ -139,7 +139,7 @@
         <br>
         <hr>
 
-        <h2><strong>ข้อมูลหลังบ้าน: โพสต์ทั้งหมด</strong></h2>
+        <h2><strong>โพสต์ทั้งหมด</strong></h2>
 
         <form method="GET" action="{{ route('admin.index') }}">
             <label for="type">ประเภท:</label>
@@ -149,10 +149,46 @@
                 <option value="lost" {{ $type === 'lost' ? 'selected' : '' }}>ของหาย</option>
             </select>
 
+            <label for="status">สถานะ:</label>
+            <select id="status" name="status">
+                <option value="" {{ $status === '' ? 'selected' : '' }}>-- ทั้งหมด --</option>
+                @foreach ($statuses as $st)
+                    <option value="{{ $st }}" {{ $status === $st ? 'selected' : '' }}>{{ $st }}</option>
+                @endforeach
+            </select>
+
+            <label for="category">หมวดหมู่:</label>
+            <select id="category" name="category">
+                <option value="" {{ $category === '' ? 'selected' : '' }}>-- ทั้งหมด --</option>
+                @foreach ($categories as $cat)
+                    <option value="{{ $cat->id }}" {{ (string) $category === (string) $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                @endforeach
+            </select>
+            <br><br>
+
             <label for="keyword">ชื่อสิ่งของ:</label>
             <input type="text" id="keyword" name="keyword" value="{{ $keyword }}">
 
+            <label for="location">สถานที่:</label>
+            <input type="text" id="location" name="location" list="adminLocationList" value="{{ $location }}">
+            <datalist id="adminLocationList">
+                @foreach ($locations as $loc)
+                    <option value="{{ $loc }}">
+                @endforeach
+            </datalist>
+
+            <label for="reporter">ชื่อผู้โพสต์:</label>
+            <input type="text" id="reporter" name="reporter" value="{{ $reporter }}">
+            <br><br>
+
+            <label for="start_date">วันที่พบ/หาย ตั้งแต่:</label>
+            <input type="date" id="start_date" name="start_date" value="{{ $start_date }}">
+
+            <label for="end_date">ถึง:</label>
+            <input type="date" id="end_date" name="end_date" value="{{ $end_date }}">
+
             <button type="submit">กรองข้อมูล</button>
+            <a href="{{ route('admin.index') }}"><button type="button">ล้างตัวกรอง</button></a>
         </form>
 
         <br>
@@ -179,7 +215,7 @@
                         <td>{{ $item->title }}</td>
                         <td>{{ $item->type === 'found' ? 'พบของ' : 'ของหาย' }}</td>
                         <td>{{ $item->category_name }}</td>
-                        <td>{{ $item->owner_name }}<br>({{ $item->owner_role }})</td>
+                        <td>{{ $item->owner_name }}</td>
                         <td>{{ $item->location }}</td>
                         <td>{{ $item->event_date }}</td>
                         <td>

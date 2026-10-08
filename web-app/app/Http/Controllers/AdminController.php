@@ -29,17 +29,26 @@ class AdminController extends Controller
         return $user;
     }
 
-    // หน้าข้อมูลหลังบ้าน ดูโพสต์ทั้งหมดและกรองตามสถานะได้
+    // ดูโพสต์ทั้งหมดและกรองตามสถานะได้
     public function index(Request $request)
     {
         $admin = $this->currentAdmin();
 
         $type = $request->input('type') ?? '';
         $keyword = trim($request->input('keyword') ?? '');
+        $status = $request->input('status') ?? '';
+        $category = $request->input('category') ?? '';
+        $location = trim($request->input('location') ?? '');
+        $reporter = trim($request->input('reporter') ?? '');
+        $start_date = $request->input('start_date') ?? '';
+        $end_date = $request->input('end_date') ?? '';
 
         $items = collect();
         $handovers = collect();
         $users = collect();
+        $categories = collect();
+        $locations = collect();
+        $statuses = collect();
 
         if ($admin !== null) {
             $handovers = Item::with('reporter')
@@ -60,6 +69,31 @@ class AdminController extends Controller
                 $query->where('title', 'like', '%' . $keyword . '%');
             }
 
+            if ($status !== '') {
+                $query->where('status', $status);
+            }
+
+            if ($category !== '') {
+                $query->where('category_id', $category);
+            }
+
+            if ($location !== '') {
+                $query->where('location', 'like', '%' . $location . '%');
+            }
+
+            if ($reporter !== '') {
+                $ownerIds = FinderUser::where('fullname', 'like', '%' . $reporter . '%')->pluck('id');
+                $query->whereIn('user_id', $ownerIds);
+            }
+
+            if ($start_date !== '') {
+                $query->where('event_date', '>=', $start_date);
+            }
+
+            if ($end_date !== '') {
+                $query->where('event_date', '<=', $end_date);
+            }
+
             $items = $query->orderBy('id', 'DESC')->paginate(10)->withQueryString();
 
             foreach ($items as $item) {
@@ -70,9 +104,29 @@ class AdminController extends Controller
                 $item->owner_name = $owner ? $owner->fullname : 'ไม่ทราบชื่อ';
                 $item->owner_role = $owner ? $owner->role : '-';
             }
+
+            $categories = Category::all();
+            $locations = Item::select('location')->distinct()->orderBy('location')->pluck('location');
+            $statuses = Item::select('status')->distinct()->orderBy('status')->pluck('status');
         }
 
-        return view('admin.index', compact('admin', 'items', 'handovers', 'users', 'type', 'keyword'));
+        return view('admin.index', compact(
+            'admin',
+            'items',
+            'handovers',
+            'users',
+            'type',
+            'keyword',
+            'status',
+            'category',
+            'location',
+            'reporter',
+            'start_date',
+            'end_date',
+            'categories',
+            'locations',
+            'statuses'
+        ));
     }
 
     // ระงับบัญชี / ปลดแบน (กดซ้ำเพื่อสลับสถานะ) ระงับบัญชีแอดมินไม่ได้
@@ -127,7 +181,7 @@ class AdminController extends Controller
             return redirect()->back()->with('error', 'รายการ ' . $item->title . ' ไม่ได้อยู่ในสถานะรอยืนยัน');
         }
 
-        $item->status = 'ได้รับของแล้ว';
+        $item->status = 'ได้รับคืนแล้ว';
         $item->save();
 
         return redirect()->back()->with('success', 'ยืนยันการส่งมอบ ' . $item->title . ' แล้ว');
@@ -171,7 +225,6 @@ class AdminController extends Controller
         $returned_item = Item::where('status', 'ได้รับคืนแล้ว')->count();
         $waiting_owner = Item::where('status', 'ยังไม่พบเจ้าของ')->count();
         $waiting_confirm = Item::where('status', 'รอแอดมินยืนยัน')->count();
-        $received_item = Item::where('status', 'ได้รับของแล้ว')->count();
         $invalid_evidence = Item::where('status', 'หลักฐานไม่ถูกต้อง')->count();
 
         // อัตราการได้รับคืน คิดเป็นเปอร์เซ็นต์ ต้องกันหารด้วยศูนย์ตอนที่ยังไม่มีข้อมูล
@@ -216,7 +269,6 @@ class AdminController extends Controller
             'returned_item',
             'waiting_owner',
             'waiting_confirm',
-            'received_item',
             'invalid_evidence',
             'return_rate',
             'first_date',
