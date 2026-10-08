@@ -46,7 +46,4 @@
         <a href="{{ route('password.request') }}">ลืมรหัสผ่าน</a>
     </p>
 
-    <br>
-    <hr>
-
 @endsection
