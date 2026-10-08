@@ -1,7 +1,6 @@
 @extends('layouts.site')
 
 @section('title', 'แจ้งของหาย')
-
 @section('intro')
     @include('partials.intro')
 @endsection
@@ -10,8 +9,69 @@
     <h2><strong>แจ้งของหาย / แจ้งพบของ</strong></h2>
     <p>กรอกข้อมูลให้ละเอียดที่สุด เพื่อให้เจ้าของหรือผู้ที่เก็บได้ค้นหาเจอได้ง่าย</p>
 
+    <dialog id="kkuDialog" style="max-width: 420px; width: 90%; max-height: 90vh; overflow: auto; border: 1px solid #999; border-radius: 8px; padding: 0;">
+        <div style="padding: 10px 16px; background: #f0f0f0; border-bottom: 1px solid #ccc;">
+            <strong>KKU Return</strong>
+        </div>
+        <div id="kkuDialogMessage" style="padding: 16px; white-space: pre-line;"></div>
+        <!-- รูปที่เลือกไว้ (แสดงเฉพาะตอนยืนยันข้อมูล) -->
+        <div id="kkuDialogImages" style="padding: 0 16px 16px;"></div>
+        <div style="padding: 10px 16px; text-align: right; border-top: 1px solid #ccc;">
+            <button type="button" id="kkuDialogCancel">ยกเลิก</button>
+            <button type="button" id="kkuDialogOk">ตกลง</button>
+        </div>
+    </dialog>
+
+    <script>
+        // images = [{ label: 'ชื่อรูป', src: 'ที่อยู่รูป' }, ...] (ไม่ส่งมาก็ได้)
+        function kkuDialog(message, showConfirm, images) {
+            const dialog = document.getElementById('kkuDialog');
+            const okButton = document.getElementById('kkuDialogOk');
+            const cancelButton = document.getElementById('kkuDialogCancel');
+            const imageBox = document.getElementById('kkuDialogImages');
+
+            document.getElementById('kkuDialogMessage').textContent = message;
+
+            imageBox.innerHTML = '';
+            (images || []).forEach(function (image) {
+                const label = document.createElement('div');
+                label.textContent = image.label;
+
+                const img = document.createElement('img');
+                img.src = image.src;
+                img.alt = image.label;
+                img.style.cssText = 'max-width: 100%; max-height: 180px; margin: 4px 0 10px; border: 1px solid #ccc;';
+
+                imageBox.appendChild(label);
+                imageBox.appendChild(img);
+            });
+            cancelButton.style.display = showConfirm ? 'inline-block' : 'none';
+
+            return new Promise(function (resolve) {
+                function close(result) {
+                    okButton.onclick = null;
+                    cancelButton.onclick = null;
+                    dialog.oncancel = null;
+                    dialog.close();
+                    resolve(result);
+                }
+
+                okButton.onclick = function () { close(true); };
+                cancelButton.onclick = function () { close(false); };
+                dialog.oncancel = function (event) { event.preventDefault(); close(false); }; // กด Esc = ยกเลิก
+
+                dialog.showModal();
+                okButton.focus();
+            });
+        }
+    </script>
+
     @if (session('success'))
-        <p><strong>{{ session('success') }}</strong></p>
+        <script>
+            kkuDialog(@json(session('success')), false).then(function () {
+                window.location.href = @json(route('home'));
+            });
+        </script>
     @endif
 
     @if ($errors->any())
@@ -23,8 +83,7 @@
         </ul>
     @endif
 
-    <!-- ชื่อ field ต้องตรงกับที่ ItemController@store ตรวจ -->
-    <form method="POST" action="{{ route('posts.store') }}" enctype="multipart/form-data">
+    <form id="postForm" method="POST" action="{{ route('posts.store') }}" enctype="multipart/form-data">
         @csrf
 
         <label>ประเภทการแจ้ง: <span style="color: red;">*</span></label><br>
@@ -69,7 +128,6 @@
         <img id="imagePreview" alt="ตัวอย่างรูปสิ่งของ" style="display: none; max-width: 250px; max-height: 250px; margin-top: 8px; border: 1px solid #ccc;">
         <br><br>
 
-        <!-- ฝากของ: แสดงเฉพาะตอนเลือก "พบของ" -->
         <div id="depositSection">
             <label>ฝากของไว้ที่จุดรับ-ส่งคืนหรือไม่: <span style="color: red;">*</span></label><br>
             <input type="radio" id="depositNo" name="deposit" value="no" @checked(old('deposit', 'no') === 'no')>
@@ -95,7 +153,6 @@
                 <br>
                 <small>ถ่ายรูปของคู่กับป้ายหรือเคาน์เตอร์ของจุดที่ฝาก เพื่อยืนยันว่าฝากไว้ที่นั่นจริง</small>
                 <br>
-                <!-- รูปตัวอย่างตอนฝากของ -->
                 <img id="depositImagePreview" alt="ตัวอย่างรูปตอนฝากของ" style="display: none; max-width: 250px; max-height: 250px; margin-top: 8px; border: 1px solid #ccc;">
                 <br><br>
             </div>
@@ -115,7 +172,6 @@
     </form>
 
     <script>
-        // 1) แสดงรูปตัวอย่างทันทีที่เลือกไฟล์ (ใช้ได้ทั้งรูปสิ่งของและรูปตอนฝากของ)
         function setupPreview(inputId, previewId) {
             const input = document.getElementById(inputId);
             const preview = document.getElementById(previewId);
@@ -125,6 +181,15 @@
 
                 if (preview.src) {
                     URL.revokeObjectURL(preview.src);
+                }
+
+                if (file && file.size > 2 * 1024 * 1024) {
+                    const sizeMb = (file.size / 1024 / 1024).toFixed(2);
+                    kkuDialog('ไฟล์ "' + file.name + '" มีขนาด ' + sizeMb + ' MB\nกรุณาเลือกรูปที่ไม่เกิน 2 MB', false);
+                    input.value = '';
+                    preview.removeAttribute('src');
+                    preview.style.display = 'none';
+                    return;
                 }
 
                 if (file && file.type.startsWith('image/')) {
@@ -140,7 +205,6 @@
         setupPreview('image', 'imagePreview');
         setupPreview('depositImage', 'depositImagePreview');
 
-        // 2) ฝากของ: โชว์ส่วนนี้เฉพาะ "พบของ" และบังคับเลือกจุด + แนบรูปเมื่อเลือก "ฝากไว้แล้ว"
         const postTypeFound = document.getElementById('postTypeFound');
         const depositYes = document.getElementById('depositYes');
         const depositSection = document.getElementById('depositSection');
@@ -157,7 +221,6 @@
             returnUnitSelect.required = isDeposit;
             depositImageInput.required = isDeposit;
 
-            // ช่องที่ซ่อนอยู่จะถูก disabled เพื่อไม่ให้ส่งค่าค้างไปกับฟอร์ม
             document.querySelectorAll('input[name="deposit"]').forEach(function (radio) {
                 radio.disabled = !isFound;
             });
@@ -170,5 +233,66 @@
         });
 
         updateDeposit();
+
+        const postForm = document.getElementById('postForm');
+
+        postForm.addEventListener('submit', function (event) {
+            event.preventDefault(); 
+
+            const field = (id) => document.getElementById(id).value.trim() || '-';
+            const selectedText = (id) => {
+                const select = document.getElementById(id);
+                return select.value ? select.options[select.selectedIndex].text : '-';
+            };
+            const fileName = (id) => {
+                const input = document.getElementById(id);
+                return input.files.length > 0 ? input.files[0].name : '-';
+            };
+
+            const isFound = postTypeFound.checked;
+            const lines = [
+                'กรุณาตรวจสอบข้อมูลก่อนส่ง',
+                '',
+                'ประเภทการแจ้ง: ' + (isFound ? 'พบของ' : 'ของหาย'),
+                'ชื่อสิ่งของ: ' + field('itemName'),
+                'หมวดหมู่: ' + selectedText('category'),
+                'สถานที่: ' + field('location'),
+                'วันที่: ' + field('date'),
+                'รายละเอียด: ' + field('description'),
+                'รูปสิ่งของ: ' + fileName('image'),
+            ];
+
+            if (isFound) {
+                if (depositYes.checked) {
+                    lines.push('ฝากของไว้ที่: ' + selectedText('returnUnit'));
+                    lines.push('รูปตอนฝากของ: ' + fileName('depositImage'));
+                } else {
+                    lines.push('ฝากของ: ไม่ได้ฝาก (เก็บไว้กับตัวเอง)');
+                }
+            }
+
+            lines.push('ชื่อผู้แจ้ง: ' + field('reporterName'));
+            lines.push('เบอร์โทรติดต่อ: ' + field('phone'));
+            lines.push('');
+            lines.push('ยืนยันการส่งข้อมูลหรือไม่?');
+
+            // รูปที่เลือกไว้ ใช้รูปตัวอย่างที่แสดงอยู่ในฟอร์มแล้ว
+            const images = [];
+            const imagePreview = document.getElementById('imagePreview');
+            const depositImagePreview = document.getElementById('depositImagePreview');
+
+            if (imagePreview.getAttribute('src')) {
+                images.push({ label: 'รูปสิ่งของ:', src: imagePreview.src });
+            }
+            if (isFound && depositYes.checked && depositImagePreview.getAttribute('src')) {
+                images.push({ label: 'รูปตอนฝากของ:', src: depositImagePreview.src });
+            }
+
+            kkuDialog(lines.join('\n'), true, images).then(function (confirmed) {
+                if (confirmed) {
+                    postForm.submit();
+                }
+            });
+        });
     </script>
 @endsection
