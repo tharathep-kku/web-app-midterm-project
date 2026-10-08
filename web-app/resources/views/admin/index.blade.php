@@ -61,7 +61,15 @@
                             @if ($handover->evidence_url)
                                 <img src="{{ asset($handover->evidence_url) }}" alt="หลักฐานของ {{ $handover->title }}" width="80"><br>
                             @endif
-                            {{ $handover->evidence_note ? $handover->evidence_note : 'ไม่มีหลักฐานแนบ' }}
+
+                            @if ($handover->evidence_note)
+                                {{ $handover->evidence_note }}
+                            @endif
+
+                            {{-- ไม่มีทั้งรูปและหมายเหตุ ถึงจะถือว่าไม่มีหลักฐาน --}}
+                            @if (! $handover->evidence_url && ! $handover->evidence_note)
+                                ไม่มีหลักฐานแนบ
+                            @endif
                         </td>
                         <td>{{ $handover->status }}</td>
                         <td>
@@ -222,7 +230,15 @@
                             @if ($item->evidence_url)
                                 <img src="{{ asset($item->evidence_url) }}" alt="หลักฐานของ {{ $item->title }}" width="80"><br>
                             @endif
-                            {{ $item->evidence_note ? $item->evidence_note : 'ไม่มีหลักฐานแนบ' }}
+
+                            @if ($item->evidence_note)
+                                {{ $item->evidence_note }}
+                            @endif
+
+                            {{-- ไม่มีทั้งรูปและหมายเหตุ ถึงจะถือว่าไม่มีหลักฐาน --}}
+                            @if (! $item->evidence_url && ! $item->evidence_note)
+                                ไม่มีหลักฐานแนบ
+                            @endif
                         </td>
                         <td>{{ $item->status }}</td>
                         <td>
