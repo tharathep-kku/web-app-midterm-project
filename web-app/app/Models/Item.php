@@ -34,6 +34,8 @@ class Item extends Model
     protected $fillable = [
         'user_id',
         'category_id',
+        'return_unit_id',
+        'deposit_image_url',
         'type',
         'title',
         'description',

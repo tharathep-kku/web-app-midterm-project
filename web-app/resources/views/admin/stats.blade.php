@@ -1,17 +1,15 @@
-<!DOCTYPE html>
-<html lang="th">
+@extends('layouts.site')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>สถิติ - KKU Return</title>
-</head>
+@section('title', 'สถิติ')
 
-<body>
-    <h1><strong>KKU Return: lost and found</strong></h1>
-    @include('partials.menu')
+@section('note', '*หมายเหตุ: ตัวเลขทั้งหมดคำนวณจากข้อมูลในฐานข้อมูล ณ เวลาที่เปิดหน้านี้')
+
+@section('intro')
+    @include('partials.intro')
+@endsection
+
+@section('content')
     <p>สถิติของระบบ (ดูโดย {{ $admin->fullname }})</p>
-    <hr>
 
     <h2><strong>ภาพรวม</strong></h2>
 
@@ -104,11 +102,4 @@
         <li>แอดมิน {{ $admin_user }} คน</li>
     </ul>
 
-    <br>
-    <hr>
-    <footer>
-        <p>*หมายเหตุ: ตัวเลขทั้งหมดคำนวณจากข้อมูลในฐานข้อมูล ณ เวลาที่เปิดหน้านี้</p>
-    </footer>
-</body>
-
-</html>
+@endsection

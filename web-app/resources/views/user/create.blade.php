@@ -1,18 +1,12 @@
-<!DOCTYPE html>
-<html lang="th">
+@extends('layouts.site')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แจ้งของหาย - KKU Return</title>
-</head>
+@section('title', 'แจ้งของหาย')
 
-<body>
-    <h1><strong>KKU Return: lost and found</strong></h1>
-    @include('partials.menu')
+@section('intro')
+    @include('partials.intro')
+@endsection
 
-    <hr>
-
+@section('content')
     <h2><strong>แจ้งของหาย / แจ้งพบของ</strong></h2>
     <p>กรอกข้อมูลให้ละเอียดที่สุด เพื่อให้เจ้าของหรือผู้ที่เก็บได้ค้นหาเจอได้ง่าย</p>
 
@@ -70,7 +64,42 @@
 
         <label for="image">รูปสิ่งของ (jpeg, png, jpg, gif ไม่เกิน 2 MB):</label><br>
         <input type="file" id="image" name="image" accept="image/*">
+        <br>
+        <!-- รูปตัวอย่าง: แสดงทันทีที่เลือกไฟล์ -->
+        <img id="imagePreview" alt="ตัวอย่างรูปสิ่งของ" style="display: none; max-width: 250px; max-height: 250px; margin-top: 8px; border: 1px solid #ccc;">
         <br><br>
+
+        <!-- ฝากของ: แสดงเฉพาะตอนเลือก "พบของ" -->
+        <div id="depositSection">
+            <label>ฝากของไว้ที่จุดรับ-ส่งคืนหรือไม่: <span style="color: red;">*</span></label><br>
+            <input type="radio" id="depositNo" name="deposit" value="no" @checked(old('deposit', 'no') === 'no')>
+            <label for="depositNo">ไม่ได้ฝาก (เก็บไว้กับตัวเอง)</label>
+            <input type="radio" id="depositYes" name="deposit" value="yes" @checked(old('deposit') === 'yes')>
+            <label for="depositYes">ฝากไว้แล้ว</label>
+            <br><br>
+
+            <div id="returnUnitBox">
+                <label for="returnUnit">ฝากไว้ที่: <span style="color: red;">*</span></label>
+                <select id="returnUnit" name="returnUnit">
+                    <option value="">-- เลือกจุดรับ-ส่งคืน --</option>
+                    @foreach ($returnUnits as $unit)
+                        <option value="{{ $unit->id }}" @selected((string) old('returnUnit') === (string) $unit->id)>{{ $unit->name }}</option>
+                    @endforeach
+                </select>
+                <br>
+                <small>ดูตำแหน่งจุดรับ-ส่งคืนได้ที่เมนู "จุดรับ-ส่งคืนของ"</small>
+                <br><br>
+
+                <label for="depositImage">รูปตอนฝากของ (jpeg, png, jpg, gif ไม่เกิน 2 MB): <span style="color: red;">*</span></label><br>
+                <input type="file" id="depositImage" name="depositImage" accept="image/*">
+                <br>
+                <small>ถ่ายรูปของคู่กับป้ายหรือเคาน์เตอร์ของจุดที่ฝาก เพื่อยืนยันว่าฝากไว้ที่นั่นจริง</small>
+                <br>
+                <!-- รูปตัวอย่างตอนฝากของ -->
+                <img id="depositImagePreview" alt="ตัวอย่างรูปตอนฝากของ" style="display: none; max-width: 250px; max-height: 250px; margin-top: 8px; border: 1px solid #ccc;">
+                <br><br>
+            </div>
+        </div>
 
         <hr>
         <h3><strong>ข้อมูลติดต่อ</strong></h3>
@@ -85,22 +114,61 @@
         <a href="{{ route('home') }}"><button type="button">ยกเลิก</button></a>
     </form>
 
-    <br>
-    <hr>
+    <script>
+        // 1) แสดงรูปตัวอย่างทันทีที่เลือกไฟล์ (ใช้ได้ทั้งรูปสิ่งของและรูปตอนฝากของ)
+        function setupPreview(inputId, previewId) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
 
-    <footer>
-        <p>*หมายเหตุ: แพลตฟอร์มนี้เป็นเพียงพื้นที่สาธารณะสำหรับเชื่อมโยงข้อมูลฟรี
-            ไม่มีส่วนเกี่ยวข้องหรือรับประกันความถูกต้องของข้อมูล การส่งมอบสิ่งของ
-            หรือการธุรกรรมใดๆ ระหว่างผู้ใช้งาน</p>
+            input.addEventListener('change', function () {
+                const file = input.files[0];
 
-        <strong>ช่องทางติดต่อ</strong>
-        <ul>
-            <li>อีเมล: kkureturn01@kku.ac.th</li>
-            <li>โทรศัพท์: 012-345-6789</li>
-            <li>Facebook: KKU Return</li>
-        </ul>
-    </footer>
+                if (preview.src) {
+                    URL.revokeObjectURL(preview.src);
+                }
 
-</body>
+                if (file && file.type.startsWith('image/')) {
+                    preview.src = URL.createObjectURL(file);
+                    preview.style.display = 'block';
+                } else {
+                    preview.removeAttribute('src');
+                    preview.style.display = 'none';
+                }
+            });
+        }
 
-</html>
+        setupPreview('image', 'imagePreview');
+        setupPreview('depositImage', 'depositImagePreview');
+
+        // 2) ฝากของ: โชว์ส่วนนี้เฉพาะ "พบของ" และบังคับเลือกจุด + แนบรูปเมื่อเลือก "ฝากไว้แล้ว"
+        const postTypeFound = document.getElementById('postTypeFound');
+        const depositYes = document.getElementById('depositYes');
+        const depositSection = document.getElementById('depositSection');
+        const returnUnitBox = document.getElementById('returnUnitBox');
+        const returnUnitSelect = document.getElementById('returnUnit');
+        const depositImageInput = document.getElementById('depositImage');
+
+        function updateDeposit() {
+            const isFound = postTypeFound.checked;
+            const isDeposit = isFound && depositYes.checked;
+
+            depositSection.style.display = isFound ? 'block' : 'none';
+            returnUnitBox.style.display = isDeposit ? 'block' : 'none';
+            returnUnitSelect.required = isDeposit;
+            depositImageInput.required = isDeposit;
+
+            // ช่องที่ซ่อนอยู่จะถูก disabled เพื่อไม่ให้ส่งค่าค้างไปกับฟอร์ม
+            document.querySelectorAll('input[name="deposit"]').forEach(function (radio) {
+                radio.disabled = !isFound;
+            });
+            returnUnitSelect.disabled = !isDeposit;
+            depositImageInput.disabled = !isDeposit;
+        }
+
+        document.querySelectorAll('input[name="postType"], input[name="deposit"]').forEach(function (radio) {
+            radio.addEventListener('change', updateDeposit);
+        });
+
+        updateDeposit();
+    </script>
+@endsection
