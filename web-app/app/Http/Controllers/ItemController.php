@@ -31,9 +31,6 @@ class ItemController extends Controller
             ->orWhere('returned_date', '>', $sevenDaysAgo);
         });
 
-        // แสดงเฉพาะโพสต์ที่แอดมินอนุมัติแล้ว
-        $query->where('approval_status', 'อนุมัติแล้ว');
-
         if ($from !== '') {
             $query->where('event_date', '>=', $from);
         }
@@ -119,8 +116,6 @@ class ItemController extends Controller
         if ($searched) {
             $query = Item::query();
 
-            $query->where('approval_status', 'อนุมัติแล้ว');
-
             if ($item_name !== '') {
                 $query->where('title', 'like', '%' . $item_name . '%');
             }
@@ -205,13 +200,8 @@ class ItemController extends Controller
         return redirect()->route('search.home');
     }
 
-    public function show(Item $item)
+    public function show(Item $item): View
     {
-        // โพสต์ที่ยังไม่ได้รับการอนุมัติ ห้ามเปิดดูผ่าน URL ตรง ๆ
-        if ($item->approval_status !== 'อนุมัติแล้ว') {
-            return redirect()->route('home');
-        }
-
         $item->load(['category', 'reporter', 'returnUnit']);
 
         return view('item', compact('item'));

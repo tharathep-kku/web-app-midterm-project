@@ -53,8 +53,8 @@
                     <th>สถานที่</th>
                     <th>วันที่พบ/หาย</th>
                     <th>สถานะ</th>
-                    <th>สถานะอนุมัติ</th>
                     <th>จัดการ</th>
+                    <th>ส่งคืนแล้ว</th>
                 </tr>
             </thead>
             <tbody align="center">
@@ -66,8 +66,40 @@
                         <td>{{ $item->location }}</td>
                         <td>{{ $item->event_date }}</td>
                         <td>{{ $item->status }}</td>
-                        <td>{{ $item->approval_status }}</td>
-                        <td><a href="{{ route('posts.edit', $item->id) }}">แก้ไข</a></td>
+                        <td>
+                            @if ($item->canEdit())
+                                <form method="GET" action="{{ route('posts.edit', $item->id) }}">
+                                    <button>แก้ไข</button>
+                                </form>
+                                <form method="POST" action="{{ route('posts.destroy', $item->id) }}"
+                                    onsubmit="return confirm('ยืนยันการลบโพสต์นี้?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit">ลบ</button>
+                                </form>
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td>
+                            @if ($item->canSubmitEvidence())
+                                @if ($item->status === 'หลักฐานไม่ถูกต้อง')
+                                    <small>หลักฐานเดิมไม่ผ่าน กรุณาส่งใหม่</small><br>
+                                @endif
+                                <form method="POST" action="{{ route('posts.evidence', $item->id) }}" enctype="multipart/form-data">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="file" name="evidence" accept="image/*" required><br>
+                                    <small>jpeg, png, gif, webp, avif ไม่เกิน 2 MB</small><br>
+                                    <input type="text" name="evidence_note" placeholder="หมายเหตุ เช่น ชื่อผู้รับคืน"><br>
+                                    <button type="submit">ยืนยัน</button>
+                                </form>
+                            @elseif ($item->status === 'รอแอดมินยืนยัน')
+                                รอแอดมินตรวจหลักฐาน
+                            @else
+                                ส่งคืนเรียบร้อย
+                            @endif
+                        </td>
                     </tr>
                 @empty
                     <tr>

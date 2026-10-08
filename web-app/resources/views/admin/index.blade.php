@@ -94,14 +94,6 @@
         <h2><strong>ข้อมูลหลังบ้าน: โพสต์ทั้งหมด</strong></h2>
 
         <form method="GET" action="{{ route('admin.index') }}">
-            <label for="approval_status">สถานะอนุมัติ:</label>
-            <select id="approval_status" name="approval_status">
-                <option value="" {{ $approval_status === '' ? 'selected' : '' }}>-- ทั้งหมด --</option>
-                <option value="รออนุมัติ" {{ $approval_status === 'รออนุมัติ' ? 'selected' : '' }}>รออนุมัติ</option>
-                <option value="อนุมัติแล้ว" {{ $approval_status === 'อนุมัติแล้ว' ? 'selected' : '' }}>อนุมัติแล้ว</option>
-                <option value="ไม่อนุมัติ" {{ $approval_status === 'ไม่อนุมัติ' ? 'selected' : '' }}>ไม่อนุมัติ</option>
-            </select>
-
             <label for="type">ประเภท:</label>
             <select id="type" name="type">
                 <option value="" {{ $type === '' ? 'selected' : '' }}>-- ทั้งหมด --</option>
@@ -128,7 +120,7 @@
                     <th>สถานที่ / จุดสถานที่</th>
                     <th>วันที่พบ/หาย</th>
                     <th>หลักฐานยืนยัน</th>
-                    <th>สถานะอนุมัติ</th>
+                    <th>สถานะ</th>
                     <th>จัดการ</th>
                 </tr>
             </thead>
@@ -148,33 +140,15 @@
                             @endif
                             {{ $item->evidence_note ? $item->evidence_note : 'ไม่มีหลักฐานแนบ' }}
                         </td>
+                        <td>{{ $item->status }}</td>
                         <td>
-                            {{ $item->approval_status }}
-                            @if ($item->reject_reason)
-                                <br>({{ $item->reject_reason }})
-                            @endif
+                            <form method="POST" action="{{ route('admin.destroy', $item->id) }}"
+                                onsubmit="return confirm('ลบโพสต์นี้ออกจากระบบ?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit">ลบโพสต์</button>
+                            </form>
                         </td>
-                        <td>
-                        {{-- แสดงปุ่มเฉพาะโพสต์ที่ยังไม่ได้ตรวจ ตรวจแล้วกดซ้ำไม่ได้ --}}
-                        @if ($item->approval_status === 'รออนุมัติ')
-                            <form method="POST" action="{{ route('admin.approve', $item->id) }}"
-                                onsubmit="return confirm('ยืนยันการอนุมัติโพสต์นี้หรือไม่?');">
-                                @csrf
-                                @method('PUT')
-                                <button type="submit">อนุมัติ</button>
-                            </form>
-
-                            <form method="POST" action="{{ route('admin.reject', $item->id) }}"
-                                onsubmit="return confirm('ยืนยันการไม่อนุมัติโพสต์นี้หรือไม่?');">
-                                @csrf
-                                @method('PUT')
-                                <input type="text" name="reject_reason" placeholder="เหตุผล" required>
-                                <button type="submit">ไม่อนุมัติ</button>
-                            </form>
-                        @else
-                            ดำเนินการเรียบร้อย
-                        @endif
-                    </td>
                     </tr>
                 @empty
                     <tr>

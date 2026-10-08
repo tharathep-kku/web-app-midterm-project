@@ -7,8 +7,7 @@ use App\Http\Controllers\AdminController;
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
     Route::get('/admin/stats', [AdminController::class, 'stats'])->name('admin.stats');
-    Route::put('/admin/{iid}/approve', [AdminController::class, 'approve'])->whereNumber('iid')->name('admin.approve');
-    Route::put('/admin/{iid}/reject', [AdminController::class, 'reject'])->whereNumber('iid')->name('admin.reject');
+    Route::delete('/admin/{iid}', [AdminController::class, 'destroy'])->whereNumber('iid')->name('admin.destroy');
     Route::put('/admin/{iid}/handover/confirm', [AdminController::class, 'confirmHandover'])->whereNumber('iid')->name('admin.handover.confirm');
     Route::put('/admin/{iid}/handover/reject', [AdminController::class, 'rejectHandover'])->whereNumber('iid')->name('admin.handover.reject');
 });
