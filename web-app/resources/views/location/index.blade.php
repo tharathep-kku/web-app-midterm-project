@@ -2,6 +2,10 @@
 
 @section('title', 'จุดรับ-ส่งคืนของ')
 
+@section('intro')
+    @include('partials.intro')
+@endsection
+
 @section('content')
     <h2><strong>จุดรับ-ส่งคืนของภายในมข.</strong></h2>
     <p>แต่ละหมุดคือจุดรับ-ส่งคืนของหาย กดที่หมุดหรือรายการด้านล่างเพื่อดูของที่อยู่ที่จุดนั้น</p>

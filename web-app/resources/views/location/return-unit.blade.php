@@ -1,17 +1,8 @@
-<!DOCTYPE html>
-<html lang="th">
+@extends('layouts.site')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $returnUnit->name }} - KKU Return</title>
-</head>
+@section('title', $returnUnit->name)
 
-<body>
-    <h1><strong>KKU Return: lost and found</strong></h1>
-
-    @include('partials.menu')
-    <hr>
+@section('content')
 
     <h2><strong>{{ $returnUnit->name }}</strong></h2>
     <p>{{ $returnUnit->description }}</p>
@@ -73,12 +64,4 @@
     <br>
     <a href="{{ route('location') }}"><button type="button">กลับไปหน้าจุดรับ-ส่งคืนของ</button></a>
 
-    <br>
-    <hr>
-    <footer>
-        <p>*หมายเหตุ: แพลตฟอร์มนี้เป็นเพียงพื้นที่สาธารณะสำหรับเชื่อมโยงข้อมูลฟรี
-            ไม่มีส่วนเกี่ยวข้องหรือรับประกันความถูกต้องของข้อมูล การส่งมอบสิ่งของ หรือการธุรกรรมใดๆ ระหว่างผู้ใช้งาน</p>
-    </footer>
-</body>
-
-</html>
+@endsection
