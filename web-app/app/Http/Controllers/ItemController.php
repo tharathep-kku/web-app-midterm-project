@@ -85,16 +85,11 @@ class ItemController extends Controller
         return view('archive', compact('items'));
     }
 
-    // ตาราง home/archive ใช้ category_name กับ days_left
+    // ตาราง home/archive ใช้ category_name
     private function addNames($items): void
     {
         foreach ($items as $item) {
-            $item->category_name = $item->category->name ?? 'อื่นๆ';  
-            $item->days_left = 0;// กำหนดค่าเริ่มต้นเป็น 0
-            if ($item->status === 'ได้รับคืนแล้ว' && !empty($item->returned_date)) {
-                $archiveTime = strtotime($item->returned_date . ' +' . self::ARCHIVE_DAYS . ' days');
-                $item->days_left = ceil(($archiveTime - time()) / 86400);
-            }
+            $item->category_name = $item->category->name ?? 'อื่นๆ';
         }
     }
 

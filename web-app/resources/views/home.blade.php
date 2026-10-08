@@ -58,6 +58,7 @@
             ถึง
             {{ $to !== '' ? date('d/m/Y', strtotime($to)) : 'ปัจจุบัน' }}
         @endif
+        : สำหรับของที่ได้รับการคืนแล้วจะถูกเก็บเข้าคลังภายใน 7 วันหลังจากเจ้าของได้รับคืน
     </p>
 
     <!-- ---------- ตาราง ---------- -->
@@ -89,12 +90,7 @@
                     <td>{{ $item->location }}</td>
                     <td>{{ $item->description }}</td>
                     <td>{{ $item->event_date }}</td>
-                    <td>
-                        {{ $item->status }}
-                        @if ($item->days_left > 0)
-                            <br><small>เก็บเข้าคลังในอีก {{ $item->days_left }} วัน</small>
-                        @endif
-                    </td>
+                    <td>{{ $item->status }}</td>
                     <td>
                         <a href="{{ route('item.show', $item->id) }}"><button type="button">More</button></a>
                     </td>
