@@ -1,17 +1,15 @@
-<!DOCTYPE html>
-<html lang="th">
+@extends('layouts.site')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ข้อมูลหลังบ้าน - KKU Return</title>
-</head>
+@section('title', 'ข้อมูลหลังบ้าน')
 
-<body>
-    <h1><strong>KKU Return: lost and found</strong></h1>
-    @include('partials.menu')
-    <p>ส่วนของแอดมิน สำหรับตรวจหลักฐานการส่งมอบและดูข้อมูลหลังบ้านทั้งหมด</p>
-    <hr>
+@section('note', '*หมายเหตุ: การอนุมัติจะบันทึกชื่อแอดมินและเวลาที่ตรวจสอบไว้ทุกครั้ง เพื่อให้ตรวจสอบย้อนหลังได้')
+
+@section('intro')
+    @include('partials.intro')
+@endsection
+
+@section('content')
+    <p>ส่วนของแอดมิน สำหรับอนุมัติโพสต์และดูข้อมูลหลังบ้านทั้งหมด</p>
 
     @if (session('success'))
         <p><strong>{{ session('success') }}</strong></p>
@@ -165,11 +163,4 @@
         </div>
     @endif
 
-    <br>
-    <hr>
-    <footer>
-        <p>*หมายเหตุ: ข้อมูลส่วนบุคคลในหน้านี้เปิดเผยเฉพาะแอดมิน</p>
-    </footer>
-</body>
-
-</html>
+@endsection

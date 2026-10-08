@@ -1,6 +1,9 @@
 @extends('layouts.site')
 
 @section('title', 'โปรไฟล์')
+@section('intro')
+    @include('partials.intro')
+@endsection
 
 @section('content')
     <h2><strong>โปรไฟล์</strong></h2>
