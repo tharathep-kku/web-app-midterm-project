@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Foundation\Console\ServeCommand;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
@@ -21,9 +22,12 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
+        public function boot(): void
     {
         $this->configureDefaults();
+        
+        ServeCommand::$passthroughVariables[] = 'TEMP';
+        ServeCommand::$passthroughVariables[] = 'TMP';
     }
 
     /**
