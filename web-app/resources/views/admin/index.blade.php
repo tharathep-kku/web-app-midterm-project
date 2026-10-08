@@ -38,7 +38,7 @@
 
     @if ($admin)
         <h2><strong>รายการรอยืนยันการส่งมอบ</strong></h2>
-        <p>รายการที่มีผู้แจ้งว่าส่งมอบของแล้ว รอแอดมินตรวจหลักฐาน</p>
+        <p style="color: red;">*รายการที่มีผู้แจ้งว่าส่งมอบของแล้ว รอแอดมินตรวจสอบหลักฐาน</p>
 
         <table border="1" cellspacing="2" cellpadding="0">
             <thead>
@@ -69,7 +69,7 @@
                                 onsubmit="return confirm('ตรวจสอบหลักฐานแล้ว ต้องการยืนยันว่าได้รับของแล้วใช่หรือไม่?');">
                                 @csrf
                                 @method('PUT')
-                                <button type="submit">ยืนยัน</button>
+                                <button type="submit">อนุมัติ</button>
                             </form>
 
                             <form method="POST" action="{{ route('admin.handover.reject', $handover->id) }}"
@@ -179,7 +179,7 @@
                         <td>{{ $item->title }}</td>
                         <td>{{ $item->type === 'found' ? 'พบของ' : 'ของหาย' }}</td>
                         <td>{{ $item->category_name }}</td>
-                        <td>{{ $item->owner_name }}<br>({{ $item->owner_role }})</td>
+                        <td>{{ $item->owner_name }}</td>
                         <td>{{ $item->location }}</td>
                         <td>{{ $item->event_date }}</td>
                         <td>

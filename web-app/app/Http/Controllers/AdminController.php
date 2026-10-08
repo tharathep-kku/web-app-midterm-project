@@ -127,7 +127,7 @@ class AdminController extends Controller
             return redirect()->back()->with('error', 'รายการ ' . $item->title . ' ไม่ได้อยู่ในสถานะรอยืนยัน');
         }
 
-        $item->status = 'ได้รับของแล้ว';
+        $item->status = 'ได้รับคืนแล้ว';
         $item->save();
 
         return redirect()->back()->with('success', 'ยืนยันการส่งมอบ ' . $item->title . ' แล้ว');
@@ -171,7 +171,6 @@ class AdminController extends Controller
         $returned_item = Item::where('status', 'ได้รับคืนแล้ว')->count();
         $waiting_owner = Item::where('status', 'ยังไม่พบเจ้าของ')->count();
         $waiting_confirm = Item::where('status', 'รอแอดมินยืนยัน')->count();
-        $received_item = Item::where('status', 'ได้รับของแล้ว')->count();
         $invalid_evidence = Item::where('status', 'หลักฐานไม่ถูกต้อง')->count();
 
         // อัตราการได้รับคืน คิดเป็นเปอร์เซ็นต์ ต้องกันหารด้วยศูนย์ตอนที่ยังไม่มีข้อมูล
@@ -216,7 +215,6 @@ class AdminController extends Controller
             'returned_item',
             'waiting_owner',
             'waiting_confirm',
-            'received_item',
             'invalid_evidence',
             'return_rate',
             'first_date',
