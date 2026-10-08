@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Item;
 use App\Models\Category;
 use App\Models\FinderUser;
+use App\Models\User;
 
 class AdminController extends Controller
 {
@@ -38,12 +39,16 @@ class AdminController extends Controller
 
         $items = collect();
         $handovers = collect();
+        $users = collect();
 
         if ($admin !== null) {
             $handovers = Item::with('reporter')
             ->where('status', 'รอแอดมินยืนยัน')
             ->orderBy('id', 'DESC')
             ->get();
+
+            // ponytail: ไม่แบ่งหน้า ถ้าผู้ใช้เยอะค่อยเปลี่ยนเป็น paginate()
+            $users = User::with('finderUser')->orderBy('id')->get();
 
             $query = Item::query();
 
@@ -67,7 +72,28 @@ class AdminController extends Controller
             }
         }
 
-        return view('admin.index', compact('admin', 'items', 'handovers', 'type', 'keyword'));
+        return view('admin.index', compact('admin', 'items', 'handovers', 'users', 'type', 'keyword'));
+    }
+
+    // ระงับบัญชี / ปลดแบน (กดซ้ำเพื่อสลับสถานะ) ระงับบัญชีแอดมินไม่ได้
+    public function toggleBan(int $id)
+    {
+        $admin = $this->currentAdmin();
+
+        if ($admin === null) {
+            return redirect()->route('admin.index')->with('error', 'เฉพาะแอดมินเท่านั้นที่ระงับบัญชีได้');
+        }
+
+        $user = User::findOrFail($id);
+
+        if ($user->role === 'admin') {
+            return redirect()->back()->with('error', 'ไม่สามารถระงับบัญชีแอดมินได้');
+        }
+
+        $user->is_banned = ! $user->is_banned;
+        $user->save();
+
+        return redirect()->back()->with('success', ($user->is_banned ? 'ระงับบัญชี ' : 'ปลดแบนบัญชี ') . $user->email . ' แล้ว');
     }
 
     // ลบโพสต์ใดก็ได้ออกจากระบบ

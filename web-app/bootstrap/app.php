@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureUserIsAdmin;
+use App\Http\Middleware\EnsureUserIsNotBanned;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
         ]);
+
+        // บัญชีที่ถูกแอดมินระงับ ใช้งานหน้าไหนไม่ได้เลย
+        $middleware->web(append: [EnsureUserIsNotBanned::class]);
 
         // ถ้าล็อกอินอยู่แล้วแต่เปิดหน้า login ซ้ำ ให้กลับไปหน้าแรกของเว็บ
         $middleware->redirectUsersTo('/');

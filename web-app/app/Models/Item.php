@@ -40,20 +40,13 @@ class Item extends Model
         'type',
         'title',
         'description',
-        'color',
-        'brand',
         'location',
         'event_date',
         'image_url',
         'status',
         'returned_date',
-        'place_point',
         'evidence_url',
         'evidence_note',
-        'approval_status',
-        'reject_reason',
-        'approved_by',
-        'approved_at',
         'reporter_name',
         'reporter_phone',
     ];
@@ -73,7 +66,7 @@ class Item extends Model
     // ลบโพสต์พร้อมไฟล์ที่ผู้ใช้อัปโหลด (เฉพาะไฟล์ใน storage/ รูปตัวอย่างใน images/ ใช้ร่วมกันห้ามลบ)
     public function deleteWithFiles(): void
     {
-        foreach ([$this->image_url, $this->evidence_url] as $path) {
+        foreach ([$this->image_url, $this->evidence_url, $this->deposit_image_url] as $path) {
             if ($path && str_starts_with($path, 'storage/')) {
                 Storage::disk('public')->delete(substr($path, strlen('storage/')));
             }

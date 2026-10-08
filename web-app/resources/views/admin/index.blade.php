@@ -91,6 +91,54 @@
         <br>
         <hr>
 
+        <h2><strong>ฐานข้อมูลผู้ใช้งาน</strong></h2>
+        <p style="color: red;">* ข้อมูลส่วนบุคคล (เปิดเผยเฉพาะแอดมิน)</p>
+
+        <table border="1" cellspacing="2" cellpadding="0">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>ชื่อ-นามสกุลจริง</th>
+                    <th>อีเมล</th>
+                    <th>เบอร์โทรศัพท์</th>
+                    <th>วันที่สมัคร</th>
+                    <th>สถานะบัญชี</th>
+                    <th>จัดการ</th>
+                </tr>
+            </thead>
+            <tbody align="center">
+                @forelse ($users as $u)
+                    <tr>
+                        <td>U-{{ str_pad($u->id, 3, '0', STR_PAD_LEFT) }}</td>
+                        <td>{{ $u->finderUser ? $u->finderUser->fullname : $u->name }}</td>
+                        <td>{{ $u->email }}</td>
+                        <td>{{ $u->finderUser ? $u->finderUser->phone : '-' }}</td>
+                        <td>{{ $u->created_at ? $u->created_at->format('d/m/Y') : '-' }}</td>
+                        <td>{{ $u->is_banned ? 'ถูกระงับ' : 'ปกติ' }}</td>
+                        <td>
+                            @if ($u->role === 'admin')
+                                แอดมิน
+                            @else
+                                <form method="POST" action="{{ route('admin.users.ban', $u->id) }}"
+                                    onsubmit="return confirm('{{ $u->is_banned ? 'ปลดแบนบัญชีนี้?' : 'ระงับการใช้งานบัญชีนี้?' }}');">
+                                    @csrf
+                                    @method('PUT')
+                                    <button type="submit">{{ $u->is_banned ? 'ปลดการระงับบัญชี' : 'ระงับบัญชี' }}</button>
+                                </form>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7">ยังไม่มีผู้ใช้งาน</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        <br>
+        <hr>
+
         <h2><strong>ข้อมูลหลังบ้าน: โพสต์ทั้งหมด</strong></h2>
 
         <form method="GET" action="{{ route('admin.index') }}">
@@ -117,7 +165,7 @@
                     <th>ประเภท</th>
                     <th>หมวดหมู่</th>
                     <th>ผู้โพสต์</th>
-                    <th>สถานที่ / จุดสถานที่</th>
+                    <th>สถานที่</th>
                     <th>วันที่พบ/หาย</th>
                     <th>หลักฐานยืนยัน</th>
                     <th>สถานะ</th>
@@ -132,7 +180,7 @@
                         <td>{{ $item->type === 'found' ? 'พบของ' : 'ของหาย' }}</td>
                         <td>{{ $item->category_name }}</td>
                         <td>{{ $item->owner_name }}<br>({{ $item->owner_role }})</td>
-                        <td>{{ $item->location }}<br>{{ $item->place_point ? $item->place_point : '-' }}</td>
+                        <td>{{ $item->location }}</td>
                         <td>{{ $item->event_date }}</td>
                         <td>
                             @if ($item->evidence_url)
