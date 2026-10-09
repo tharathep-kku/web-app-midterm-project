@@ -29,7 +29,7 @@
         <input type="email" id="email" name="email" placeholder="เช่น email@kku.ac.th" value="{{ old('email') }}" required><br><br>
 
         <label for="phone">เบอร์โทรศัพท์:</label><br>
-        <input type="tel" id="phone" name="phone" placeholder="เช่น 081-234-5678" value="{{ old('phone') }}" maxlength="12" pattern="0[0-9]{2}-?[0-9]{3}-?[0-9]{4}" title="กรอกเบอร์โทร 10 หลัก ขึ้นต้นด้วย 0 เช่น 081-234-5678 หรือ 0812345678" required><br><br>
+        <input type="tel" id="phone" name="phone" placeholder="เช่น 081-234-5678" value="{{ old('phone') }}" maxlength="12" pattern="0[0-9]{2}-?[0-9]{3}-?[0-9]{4}" required><br><br>
 
         <label for="password">รหัสผ่าน:</label><br>
         <input type="password" id="password" name="password" placeholder="เช่น KkuReturn26" required><br>
