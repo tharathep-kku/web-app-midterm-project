@@ -14,7 +14,8 @@
 
     <p>พบ {{ $items->total() }} รายการ</p>
 
-    <table border="1" cellspacing="2" cellpadding="0">
+    <div class="table-responsive">
+    <table class="table table-hover align-middle table-kku">
         <thead>
             <tr>
                 <th>สิ่งของ</th>
@@ -31,7 +32,7 @@
         <tbody align="center">
             @forelse ($items as $item)
                 <tr>
-                    <td>{{ $item->title }}</td>
+                    <td class="text-start">{{ $item->title }}</td>
                     <td>
                         @if ($item->image_url)
                             <img src="{{ asset($item->image_url) }}" alt="{{ $item->title }}" width="100">
@@ -40,13 +41,13 @@
                         @endif
                     </td>
                     <td>{{ $item->category_name }}</td>
-                    <td>{{ $item->location }}</td>
-                    <td>{{ $item->description }}</td>
+                    <td class="text-start">{{ $item->location }}</td>
+                    <td class="text-start">{{ $item->description }}</td>
                     <td>{{ $item->event_date }}</td>
                     <td>{{ $item->returned_date }}</td>
                     <td>{{ $item->status }}</td>
                     <td>
-                        <a href="{{ route('item.show', $item->id) }}"><button type="button">More</button></a>
+                        <a href="{{ route('item.show', $item->id) }}"><button type="button" class="btn btn-sm btn-outline-primary">More</button></a>
                     </td>
                 </tr>
             @empty
@@ -59,11 +60,12 @@
             @endforelse
         </tbody>
     </table>
+    </div>
 
     <div>
         {{ $items->links('partials.pagination') }}
     </div>
 
     <br>
-    <p><a href="{{ route('home') }}"><button type="button">กลับหน้าแรก</button></a></p>
+        <p><a href="{{ route('home') }}"><button type="button" class="btn btn-outline-primary">กลับหน้าแรก</button></a></p>
 @endsection
